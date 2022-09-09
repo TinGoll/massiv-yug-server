@@ -14,7 +14,7 @@ export class Color {
   converters: ColorConverter[] = [];
   currentConverter: ColorConverter | null = null;
   name: string;
-  colorType: string;
+  colorType: ColorType;
 
   constructor(name: string, colorType: ColorType) {
     this.name = name;

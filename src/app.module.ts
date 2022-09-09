@@ -2,12 +2,13 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { GraphQLModule } from '@nestjs/graphql';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { UsersModule } from './users/users.module';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { EngineModule } from './engine/engine.module';
 
 import { ServeStaticModule } from '@nestjs/serve-static';
 import path, { join } from 'path';
+import { SocketModule } from './modules/socket/socket.module';
+import { RepositoryModule } from './modules/repository/repository.module';
 
 
 @Module({
@@ -18,7 +19,7 @@ import path, { join } from 'path';
     }),
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', '..', 'client', 'build'),
-      exclude: ['/api*'],
+      exclude: ['/api*', '/graphql'],
     }),
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
@@ -38,13 +39,15 @@ import path, { join } from 'path';
         port: config.get<number>('TYPEORM_PORT'),
         entities: [__dirname + 'dist/**/*.entity{.ts,.js}'],
         migrations: [__dirname + 'src/migrations/*{.js,.ts}'],
+        migrationsTableName: 'migrations',
         synchronize: true,
         autoLoadEntities: true,
         logging: ['error', 'query'], //'query',
       }),
     }),
-    UsersModule,
     EngineModule,
+    SocketModule,
+    RepositoryModule,
   ],
   controllers: [],
   providers: [],

@@ -5,13 +5,12 @@ import { ToolsService } from './services/tools/tools.service';
 import { ColorEditorService } from './services/list-editor/color-editor/color-editor.service';
 import { ProfileEditorService } from './services/list-editor/profile-editor/profile-editor.service';
 import { WorkEditorService } from './services/list-editor/work-editor/work-editor.service';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { WorkEntity } from './core/models/work/entities/work.entity';
+import { EcsModule } from './ecs/ecs.module';
+
+
 
 @Module({
-  imports: [TypeOrmModule.forFeature([
-    WorkEntity
-  ])],
+  imports: [EcsModule],
   providers: [
     SocketGateway,
     ListEditorService,

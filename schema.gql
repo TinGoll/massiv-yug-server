@@ -2,6 +2,39 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type ColerEntity {
+  createdAt: DateTime!
+  id: ID!
+  name: String!
+  updatedAt: DateTime!
+  value: Float!
+}
+
+type ColorEntity {
+  colorType: String!
+  createdAt: DateTime!
+  currentConverterId: ID!
+  id: ID!
+  name: String!
+  updatedAt: DateTime!
+}
+
+type ConverterEntity {
+  converterGloss: String!
+  createdAt: DateTime!
+  id: ID!
+  name: String!
+  transparency: String!
+  typeConverter: String!
+  updatedAt: DateTime!
+  value: Float!
+}
+
+input CreateColerInput {
+  name: String!
+  value: Float
+}
+
 input CreateUserInput {
   lastName: String
   name: String!
@@ -14,14 +47,25 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 scalar DateTime
 
 type Mutation {
+  createColor(createColor: CreateColerInput!): ColerEntity!
   createUser(createUser: CreateUserInput!): UserEntity!
+  removeColor(id: Float!): Float!
   removeUser(id: Float!): Float!
+  updateColor(updateColor: UpdateColerInput!): ColerEntity!
   updateUser(updateUser: UpdateUserInput!): UserEntity!
 }
 
 type Query {
+  getAllColors: [ColerEntity!]!
   getAllUsers: [UserEntity!]!
+  getOneColor(id: Float!): ColerEntity!
   getOneUser(id: Float!): UserEntity!
+}
+
+input UpdateColerInput {
+  id: ID!
+  name: String
+  value: Float
 }
 
 input UpdateUserInput {

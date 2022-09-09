@@ -4,7 +4,7 @@
 //     value: number;
 //   }
 
-import { ColorConverterGloss, ConverterTransparency, TypeColorConverter } from "src/engine/core/@types/color-types";
+import { ColorConverterGloss, ColorType, ConverterTransparency, TypeColorConverter } from "src/engine/core/@types/color-types";
 
 //   export interface Converter {
 //     value: number;
@@ -27,7 +27,7 @@ export interface ColorDto {
   converters: ColorConverterDto[];
   currentConverter?: any;
   name: string;
-  colorType: string;
+  colorType: ColorType;
 }
 
 export interface ColorConverterDto {

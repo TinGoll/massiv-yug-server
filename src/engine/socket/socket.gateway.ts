@@ -18,6 +18,7 @@ import { ClientToServerEvents } from '../core/interfaces/client-to-server-events
 import { ServerToClientEvents } from '../core/interfaces/server-to-client-events';
 import { ToolsService } from '../services/tools/tools.service';
 
+
 @WebSocketGateway({
   transports: ['websocket', 'polling', 'flashsocket'],
   cors: {
@@ -33,7 +34,9 @@ export class SocketGateway
   private logger: Logger = new Logger('SocketGateway');
 
   /************************************************************* */
-  constructor(private readonly toolsService: ToolsService) {}
+  constructor(
+    private readonly toolsService: ToolsService,
+  ) {}
   /************************************************************* */
 
   afterInit(server: Server) {}
@@ -71,14 +74,14 @@ export class SocketGateway
 
   /************************************************************* */
   /** Редактор списков */
- 
+
   @SubscribeMessage('listEditor')
   handleListEditor(
     client: Socket,
     payload: ListEditor,
   ): WsResponse<InitializingClientTools> {
     this.logger.log(JSON.stringify(payload, null, 2));
-    this. toolsService.getListEditorService().act(payload);
+    this.toolsService.getListEditorService().act(payload);
 
     const tools = this.toolsService.getTools();
     client.broadcast.emit('tools', tools);
