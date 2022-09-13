@@ -11,7 +11,7 @@ const mokWork: WorkDto = {
   cost: 0,
   norm: 10,
   dateBeginning: new Date(),
-  dateEnd: new Date(Date.now() + (1 * 24 * 60 * 60 * 1000)),
+  dateEnd: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000),
 };
 
 @Injectable()

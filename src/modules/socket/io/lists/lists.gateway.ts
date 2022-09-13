@@ -9,37 +9,44 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { Logger } from '@nestjs/common';
-import {
-  InitializingClientState,
-  InitializingClientTools,
-} from '../core/interfaces/dtos/server-dtos/init-state-dto';
-import { ListEditor } from '../core/interfaces/dtos/client-dtos/edit-list-dto';
-import { ClientToServerEvents } from '../core/interfaces/client-to-server-events';
-import { ServerToClientEvents } from '../core/interfaces/server-to-client-events';
-import { ToolsService } from '../services/tools/tools.service';
+import { GatewayServerListsListenEvents } from './events/list.server.listen.events';
+import { GatewayServerListsEmitEvents } from './events/list.server.emit.even';
+import { GatewayClientListsEmitEvents } from './events/list.client.emit.even';
+import { GatewayClientListsListenEvents } from './events/list.client.listen.events';
+import { ListEditor } from 'src/engine/core/interfaces/dtos/client-dtos/edit-list-dto';
+import { InitializingClientState, InitializingClientTools } from 'src/engine/core/interfaces/dtos/server-dtos/init-state-dto';
+import { ToolsService } from 'src/modules/list-editor/services/tools/tools.service';
 
+type ClientIo = Socket<
+  GatewayClientListsListenEvents,
+  GatewayClientListsEmitEvents
+>;
+type ServerIo = Server<
+  GatewayServerListsListenEvents,
+  GatewayServerListsEmitEvents,
+  GatewayServerListsListenEvents
+>;
 
 @WebSocketGateway({
+  namespace: 'lists',
   transports: ['websocket', 'polling', 'flashsocket'],
   cors: {
     origin: '*',
   },
 })
-export class SocketGateway
+export class ListsGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {
   @WebSocketServer()
-  server: Server;
+  server: ServerIo;
 
   private logger: Logger = new Logger('SocketGateway');
 
   /************************************************************* */
-  constructor(
-    private readonly toolsService: ToolsService,
-  ) {}
+  constructor(private readonly toolsService: ToolsService) {}
   /************************************************************* */
 
-  afterInit(server: Server) {}
+  afterInit(server: ServerIo) {}
 
   getInitializingState(): InitializingClientState {
     const initState: InitializingClientState = {
@@ -48,23 +55,18 @@ export class SocketGateway
     return initState;
   }
 
-  handleConnection(
-    client: Socket<
-      ServerToClientEvents,
-      ServerToClientEvents,
-      ClientToServerEvents
-    >,
-    ...args: string[]
-  ): void {
+  handleConnection(client: ClientIo, ...args: string[]): void {
     this.logger.log(`Клиент: ${client.id} подключился`);
+
     client.emit('init', this.getInitializingState());
+    
     client.broadcast.emit('log', {
       ts: Date.now(),
       msg: `Клиент: ${client.id} подключился.`,
     });
   }
 
-  handleDisconnect(client: Socket) {
+  handleDisconnect(client: ClientIo) {
     this.logger.log(`Клиент: ${client.id} отключился`);
     client.broadcast.emit('log', {
       ts: Date.now(),
@@ -77,7 +79,7 @@ export class SocketGateway
 
   @SubscribeMessage('listEditor')
   handleListEditor(
-    client: Socket,
+    client: ClientIo,
     payload: ListEditor,
   ): WsResponse<InitializingClientTools> {
     this.logger.log(JSON.stringify(payload, null, 2));

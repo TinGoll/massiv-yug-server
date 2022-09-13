@@ -9,6 +9,8 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 import path, { join } from 'path';
 import { SocketModule } from './modules/socket/socket.module';
 import { RepositoryModule } from './modules/repository/repository.module';
+import { ListEditorModule } from './modules/list-editor/list-editor.module';
+
 
 
 @Module({
@@ -42,12 +44,13 @@ import { RepositoryModule } from './modules/repository/repository.module';
         migrationsTableName: 'migrations',
         synchronize: true,
         autoLoadEntities: true,
-        logging: ['error', 'query'], //'query',
+        logging: ['error', ], //'query',
       }),
     }),
     EngineModule,
     SocketModule,
     RepositoryModule,
+    ListEditorModule,
   ],
   controllers: [],
   providers: [],

@@ -5,16 +5,17 @@ import { ProfileDto } from 'src/engine/core/interfaces/dtos/model-dtos/profile-d
 import { Profile } from 'src/engine/core/models/profile/Profile';
 
 const mokProfile: ProfileDto = {
-  name: "Пётр",
+  name: 'Пётр',
   profileWidth: 80,
-  depth:  20,
-  assemblyAngle:  90,
-  grooveThickness:  5,
-  grooveDepth:  10,
-  chamferSize:  12,
-  tenonSize:  15,
-  bottomShelfThickness:  20,
-}
+  depth: 20,
+  assemblyAngle: 90,
+  grooveThickness: 5,
+  grooveDepth: 10,
+  chamferSize: 12,
+  tenonSize: 15,
+  bottomShelfThickness: 20,
+};
+
 
 @Injectable()
 export class ProfileEditorService {

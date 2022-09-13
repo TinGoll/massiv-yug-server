@@ -1,17 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { WsException } from '@nestjs/websockets';
 import { ColorType } from 'src/engine/core/@types/color-types';
-import {
-  ListEditor,
-  ColorListEditor,
-} from 'src/engine/core/interfaces/dtos/client-dtos/edit-list-dto';
-import {
-  ColorColerDto,
-  ColorConverterDto,
-  ColorDto,
-} from 'src/engine/core/interfaces/dtos/model-dtos/color-dto';
-import { Color, ColorColer, ColorConverter } from 'src/engine/core/models/color/Color';
-
+import { ListEditor, ColorListEditor } from 'src/engine/core/interfaces/dtos/client-dtos/edit-list-dto';
+import { ColorDto, ColorConverterDto, ColorColerDto } from 'src/engine/core/interfaces/dtos/model-dtos/color-dto';
+import { Color, ColorConverter, ColorColer } from 'src/engine/core/models/color/Color';
 
 @Injectable()
 export class ColorEditorService {
@@ -30,14 +22,14 @@ export class ColorEditorService {
     ) {
       const args = (<ColorListEditor<'add_new_converter'>>msg).arguments;
       if (!args) return;
-        this.findColor(args.colorName)
-          ?.addConverter(
-            args.converterName,
-            args.typeConverter,
-            args.transparency,
-            args.converterGloss,
-          )
-          .setValue(args.value || 0);
+      this.findColor(args.colorName)
+        ?.addConverter(
+          args.converterName,
+          args.typeConverter,
+          args.transparency,
+          args.converterGloss,
+        )
+        .setValue(args.value || 0);
     }
     if ((<ColorListEditor<'add_new_coler'>>msg).operation === 'add_new_coler') {
       const args = (<ColorListEditor<'add_new_coler'>>msg).arguments;
@@ -69,7 +61,11 @@ export class ColorEditorService {
     }
   }
 
-  addColor(colorName: string, colorType: ColorType, dto?: Partial<ColorDto>): Color {
+  addColor(
+    colorName: string,
+    colorType: ColorType,
+    dto?: Partial<ColorDto>,
+  ): Color {
     const candidate = this.findColor(colorName);
     if (candidate)
       throw new WsException(
@@ -146,7 +142,7 @@ export class ColorEditorService {
     );
   }
 
-  getList(): Color [] {
+  getList(): Color[] {
     return this.colorList;
   }
 }
