@@ -19,7 +19,7 @@ export class ColerService {
     return await this.colerRepository.save({ ...createColorInput });
   }
 
-  async getOnColer(id: number): Promise<ColerEntity> {
+  async getOneColer(id: number): Promise<ColerEntity> {
     return await this.colerRepository.findOne({ where: { id } });
   }
 
@@ -39,7 +39,6 @@ export class ColerService {
         ...updateColerInput,
       },
     );
-    return this.getOnColer(updateColerInput.id);
+    return this.getOneColer(updateColerInput.id);
   }
-
 }

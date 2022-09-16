@@ -16,7 +16,6 @@ export class EngineProvider {
   engine: Engine;
   constructor() {
     this.engine = Engine.create();
-    console.log('Подключен модуль Engine/ECS');
     this.define();
     this.start();
   }

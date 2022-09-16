@@ -13,7 +13,7 @@ export class ConverterService {
   ) {}
 
   async crate(
-   createConverterInput: CreateConverterInput,
+    createConverterInput: CreateConverterInput,
   ): Promise<ConverterEntity> {
     return await this.converterRepository.save({ ...createConverterInput });
   }
@@ -41,5 +41,10 @@ export class ConverterService {
       },
     );
     return this.getOne(updateConverterInput.id);
+  }
+
+  async save(converter: ConverterEntity): Promise<ConverterEntity> {
+    await this.converterRepository.save(converter);
+    return await this.getOne(converter.id);
   }
 }

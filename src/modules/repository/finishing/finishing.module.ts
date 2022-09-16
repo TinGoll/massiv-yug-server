@@ -22,5 +22,13 @@ import { ConverterEntity } from './entities/converter.entity';
     ConverterResolver,
     ColerResolver,
   ],
+  exports: [
+    ColorService,
+    ConverterService,
+    ColerService,
+    ColorResolver,
+    ConverterResolver,
+    ColerResolver,
+  ],
 })
 export class FinishingModule {}

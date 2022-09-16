@@ -12,6 +12,14 @@ export class UserService {
     private readonly userRepository: Repository<UserEntity>,
   ) {}
 
+  async findByLogin(userName: string): Promise<UserEntity | null> {
+    return await this.userRepository.findOne({
+      where: {
+        userName,
+      },
+    });
+  }
+
   async createUser(createInputUser: CreateUserInput): Promise<UserEntity> {
     return await this.userRepository.save({ ...createInputUser });
   }

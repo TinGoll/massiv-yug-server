@@ -8,6 +8,14 @@ import { DbEngineEntityModule } from './db-engine-entity/db-engine-entity.module
 
 
 @Module({
-  imports: [UserModule, FinishingModule, AttachmentModule, WorkModule, DbComponentModule, DbEngineEntityModule]
+  imports: [
+    UserModule,
+    FinishingModule,
+    AttachmentModule,
+    WorkModule,
+    DbComponentModule,
+    DbEngineEntityModule,
+  ],
+  exports: [],
 })
 export class RepositoryModule {}

@@ -23,7 +23,7 @@ interface ListColorArguments {
   add_new_color: {
     colorName: string;
     colorType: ColorType;
-    dto?: Partial<ColorDto>
+    dto?: Partial<ColorDto>;
   };
   add_new_converter: {
     colorName: string;
@@ -38,6 +38,8 @@ interface ListColorArguments {
     converterName: string;
     name: string;
     value: number;
+  };
+  remove_all_colors: {
   };
   remove_color: {
     colorName: string;

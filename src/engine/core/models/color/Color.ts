@@ -4,13 +4,15 @@ import {
   ConverterTransparency,
   ColorConverterGloss,
 } from '../../@types/color-types';
+import { IDto } from '../../interfaces/dto-interface';
 import {
   ColorColerDto,
   ColorConverterDto,
   ColorDto,
 } from '../../interfaces/dtos/model-dtos/color-dto';
 
-export class Color {
+export class Color implements IDto<ColorDto> {
+  id: number = 0;
   converters: ColorConverter[] = [];
   currentConverter: ColorConverter | null = null;
   name: string;
@@ -21,17 +23,28 @@ export class Color {
     this.colorType = colorType;
   }
 
+  getDto(): ColorDto {
+    return {
+      name: this.name,
+      colorType: this.colorType,
+      converters: this.converters,
+      currentConverter: this.currentConverter,
+    };
+  }
+
   addConverter(
     name: string,
     typeConverter: TypeColorConverter,
     transparency: ConverterTransparency,
     converterGloss: ColorConverterGloss = '40%',
+    value: number = 0
   ): ColorConverter {
     const converter = new ColorConverter(
       name,
       typeConverter,
       transparency,
       converterGloss,
+      value
     );
     const index = this.converters.findIndex(
       (c) => c.name.toUpperCase() === name.toUpperCase(),
@@ -72,6 +85,7 @@ export class Color {
     const index = this.converters.findIndex(
       (c) => c.name.toUpperCase() === name.toUpperCase(),
     );
+
     return this.converters[index] || null;
   }
 
@@ -97,7 +111,8 @@ export class Color {
 
   update(dto: Partial<ColorDto>): this {
     if (!dto) return this;
-    if (typeof dto.name !== 'undefined') this.name = dto.name;
+    if (typeof dto.id !== 'undefined') this.id = dto.id;
+      if (typeof dto.name !== 'undefined') this.name = dto.name;
     if (typeof dto.colorType !== 'undefined') this.colorType = dto.colorType;
     if (typeof dto.currentConverter !== 'undefined')
       this.currentConverter = dto.currentConverter;
@@ -119,6 +134,7 @@ export class Color {
 
 
 export class ColorConverter {
+  id: number = 0;
   public typeConverter: TypeColorConverter;
   public converterGloss: ColorConverterGloss;
   public name: string;
@@ -130,11 +146,13 @@ export class ColorConverter {
     typeConverter: TypeColorConverter,
     transparency: ConverterTransparency,
     converterGloss: ColorConverterGloss = '40%',
+    value: number = 0
   ) {
     this.name = name;
     this.typeConverter = typeConverter;
     this.converterGloss = converterGloss;
     this.transparency = transparency;
+    this.value = value;
   }
   addColer(name: string, value: number = 0): this {
     const index = this.colers.findIndex(
@@ -172,6 +190,8 @@ export class ColorConverter {
   }
 
   update(dto: Partial<ColorConverterDto>): this {
+    if (!dto) return this;
+    if (typeof dto.id !== 'undefined') this.id = dto.id;
     if (typeof dto.name !== 'undefined') this.name = dto.name;
     if (typeof dto.converterGloss !== 'undefined')
       this.converterGloss = dto.converterGloss;
@@ -191,6 +211,7 @@ export class ColorConverter {
 }
 
 export class ColorColer {
+  id: number = 0;
   name: string;
   value: number;
   constructor(name: string, value: number = 0) {
@@ -202,6 +223,7 @@ export class ColorColer {
     this.value = value;
   }
   update(dto: Partial<ColorColerDto>): this {
+    if (typeof dto.id !== 'undefined') this.id = dto.id;
     if (typeof dto.name !== 'undefined') this.name = dto.name;
     if (typeof dto.value !== 'undefined') this.value = dto.value;
     return this;

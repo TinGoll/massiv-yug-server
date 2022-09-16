@@ -4,6 +4,7 @@ import { InternalChatGateway } from './io/chat/internal-chat.gateway';
 import { OrdersGateway } from './io/orders/orders.gateway';
 import { ListsGateway } from './io/lists/lists.gateway';
 import { ListEditorModule } from '../list-editor/list-editor.module';
+import { AuthorizationGateway } from './io/authorization/authorization.gateway';
 
 @Module({
   imports: [ListEditorModule],
@@ -12,6 +13,7 @@ import { ListEditorModule } from '../list-editor/list-editor.module';
     InternalChatGateway,
     OrdersGateway,
     ListsGateway,
+    AuthorizationGateway,
   ],
 })
 export class SocketModule {}

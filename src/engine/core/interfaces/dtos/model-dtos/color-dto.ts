@@ -24,6 +24,7 @@ import { ColorConverterGloss, ColorType, ConverterTransparency, TypeColorConvert
 // }
 
 export interface ColorDto {
+  id?: number;
   converters: ColorConverterDto[];
   currentConverter?: any;
   name: string;
@@ -31,6 +32,7 @@ export interface ColorDto {
 }
 
 export interface ColorConverterDto {
+  id?: number;
   value: number;
   colers: ColorColerDto[];
   name: string;
@@ -40,6 +42,7 @@ export interface ColorConverterDto {
 }
 
 export interface ColorColerDto {
+  id?: number;
   name: string;
   value: number;
 }

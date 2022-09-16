@@ -10,6 +10,7 @@ import path, { join } from 'path';
 import { SocketModule } from './modules/socket/socket.module';
 import { RepositoryModule } from './modules/repository/repository.module';
 import { ListEditorModule } from './modules/list-editor/list-editor.module';
+import { AuthorizationModule } from './modules/authorization/authorization.module';
 
 
 
@@ -51,6 +52,7 @@ import { ListEditorModule } from './modules/list-editor/list-editor.module';
     SocketModule,
     RepositoryModule,
     ListEditorModule,
+    AuthorizationModule,
   ],
   controllers: [],
   providers: [],

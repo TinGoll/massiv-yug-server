@@ -29,7 +29,7 @@ export class ColerResolver {
 
   @Query(() => ColerEntity)
   async getOneColor(@Args('id') id: number) {
-    return await this.colerService.getOnColer(id);
+    return await this.colerService.getOneColer(id);
   }
 
   @Query(() => [ColerEntity])
