@@ -20,6 +20,10 @@ export class WorkService {
     return await this.workRepository.findOne({ where: { id } });
   }
 
+  async getOneByName(name: string): Promise<WorkEntity> {
+    return await this.workRepository.findOne({ where: { name } });
+  }
+
   async getAll(): Promise<WorkEntity[]> {
     return await this.workRepository.find();
   }
@@ -27,6 +31,10 @@ export class WorkService {
   async remove(id: number): Promise<number> {
     await this.workRepository.delete({ id });
     return id;
+  }
+
+  async removeByName(name: string): Promise<void> {
+    await this.workRepository.delete({ name });
   }
 
   async update(updateWorkInput: UpdateWorkInput): Promise<WorkEntity> {

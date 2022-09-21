@@ -1,3 +1,6 @@
+import { ColerEntity } from 'src/modules/repository/finishing/entities/coler.entity';
+import { ColorEntity } from 'src/modules/repository/finishing/entities/color.entity';
+import { ConverterEntity } from 'src/modules/repository/finishing/entities/converter.entity';
 import {
   ColorType,
   TypeColorConverter,
@@ -22,7 +25,7 @@ export class Color implements IDto<ColorDto> {
     this.name = name;
     this.colorType = colorType;
   }
-
+ 
   getDto(): ColorDto {
     return {
       name: this.name,
@@ -37,14 +40,14 @@ export class Color implements IDto<ColorDto> {
     typeConverter: TypeColorConverter,
     transparency: ConverterTransparency,
     converterGloss: ColorConverterGloss = '40%',
-    value: number = 0
+    value: number = 0,
   ): ColorConverter {
     const converter = new ColorConverter(
       name,
       typeConverter,
       transparency,
       converterGloss,
-      value
+      value,
     );
     const index = this.converters.findIndex(
       (c) => c.name.toUpperCase() === name.toUpperCase(),
@@ -57,15 +60,16 @@ export class Color implements IDto<ColorDto> {
     return converter;
   }
 
-  removeConverter(name: string): boolean {
+  removeConverter(name: string): number {
     const index = this.converters.findIndex(
       (c) => c.name.toUpperCase() === name.toUpperCase(),
     );
     if (index !== -1) {
+      const converterId = this.converters[index].id;
       this.converters.splice(index, 1);
-      return true;
+      return converterId;
     }
-    return false;
+    return 0;
   }
 
   setCurrentConverter(index: number): this {
@@ -112,7 +116,7 @@ export class Color implements IDto<ColorDto> {
   update(dto: Partial<ColorDto>): this {
     if (!dto) return this;
     if (typeof dto.id !== 'undefined') this.id = dto.id;
-      if (typeof dto.name !== 'undefined') this.name = dto.name;
+    if (typeof dto.name !== 'undefined') this.name = dto.name;
     if (typeof dto.colorType !== 'undefined') this.colorType = dto.colorType;
     if (typeof dto.currentConverter !== 'undefined')
       this.currentConverter = dto.currentConverter;
@@ -129,11 +133,24 @@ export class Color implements IDto<ColorDto> {
     }
     return this;
   }
+
+  public static define(colorEntity: ColorEntity): Color | null {
+    if (!colorEntity) return null;
+    const color = new Color(colorEntity.name, colorEntity.colorType);
+    color.id = colorEntity.id;
+    color.currentConverter = ColorConverter.define(
+      colorEntity.currentConverter,
+    );
+    color.converters = colorEntity.converters.map(converterDto => {
+      return ColorConverter.define(converterDto);
+    })
+    return color;
+  }
 }
 
 
 
-export class ColorConverter {
+export class ColorConverter implements IDto<ColorConverterDto> {
   id: number = 0;
   public typeConverter: TypeColorConverter;
   public converterGloss: ColorConverterGloss;
@@ -146,13 +163,24 @@ export class ColorConverter {
     typeConverter: TypeColorConverter,
     transparency: ConverterTransparency,
     converterGloss: ColorConverterGloss = '40%',
-    value: number = 0
+    value: number = 0,
   ) {
     this.name = name;
     this.typeConverter = typeConverter;
     this.converterGloss = converterGloss;
     this.transparency = transparency;
     this.value = value;
+  }
+  getDto(): ColorConverterDto {
+    return {
+      id: this.id,
+      typeConverter: this.typeConverter,
+      converterGloss: this.converterGloss,
+      name: this.name,
+      value: this.value,
+      colers: this.colers,
+      transparency: this.transparency,
+    }
   }
   addColer(name: string, value: number = 0): this {
     const index = this.colers.findIndex(
@@ -208,6 +236,25 @@ export class ColorConverter {
     }
     return this;
   }
+
+  public static define(converterEntity: ConverterEntity | null) {
+    if (!converterEntity) return null;
+      const { name, converterGloss, transparency, typeConverter, value, id } =
+        converterEntity;
+    const converter = new ColorConverter(
+      name,
+      typeConverter,
+      transparency,
+      converterGloss,
+      value,
+    );
+    converter.id = id
+    converter.colers = converterEntity.colers.map((colerDto) =>
+      ColorColer.define(colerDto),
+    );
+    return converter;
+  }
+  
 }
 
 export class ColorColer {
@@ -227,5 +274,13 @@ export class ColorColer {
     if (typeof dto.name !== 'undefined') this.name = dto.name;
     if (typeof dto.value !== 'undefined') this.value = dto.value;
     return this;
+  }
+
+  public static define(colerEntity: ColerEntity | null): ColorColer | null {
+    if (!colerEntity) return null
+    const { name, value, id } = colerEntity;
+    const coler = new ColorColer(name, value);
+    coler.id = id;
+    return coler;
   }
 }

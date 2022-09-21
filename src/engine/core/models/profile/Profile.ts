@@ -2,7 +2,12 @@ import { ProfileDto } from '../../interfaces/dtos/model-dtos/profile-dto';
 
 export class Profile {
   name: string;
+
   profileWidth: number | null;
+
+  profileWidthMini: number | null;
+
+  
   depth: number | null;
   assemblyAngle: 90 | 45 | null;
   grooveThickness: number | null;
@@ -19,6 +24,7 @@ export class Profile {
     if (!dto) return this;
     this.name = dto.name;
     this.profileWidth = dto.profileWidth;
+    this.profileWidthMini = dto.profileWidthMini;
     this.depth = dto.depth;
     this.assemblyAngle = dto.assemblyAngle;
     this.grooveThickness = dto.grooveThickness;
@@ -34,6 +40,8 @@ export class Profile {
     if (typeof dto.name !== 'undefined') this.name = dto.name;
     if (typeof dto.profileWidth !== 'undefined')
       this.profileWidth = dto.profileWidth;
+      if (typeof dto.profileWidthMini !== 'undefined')
+        this.profileWidthMini = dto.profileWidthMini;
     if (typeof dto.depth !== 'undefined') this.depth = dto.depth;
     if (typeof dto.assemblyAngle !== 'undefined')
       this.assemblyAngle = dto.assemblyAngle;
@@ -49,7 +57,7 @@ export class Profile {
     return this;
   }
 
-  public static create (dto: ProfileDto): Profile {
+  public static create(dto: ProfileDto): Profile {
     return new Profile(dto.name).update(dto);
   }
 }

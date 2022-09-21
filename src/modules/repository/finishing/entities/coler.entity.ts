@@ -33,6 +33,6 @@ export class ColerEntity {
   updatedAt: Date;
 
   
-  @ManyToOne(() => ConverterEntity, (converter) => converter.colers)
+  @ManyToOne(() => ConverterEntity, (converter) => converter.colers, {onDelete: "CASCADE"})
   converter: ConverterEntity;
 }

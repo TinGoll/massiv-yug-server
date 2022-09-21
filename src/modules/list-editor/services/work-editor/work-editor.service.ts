@@ -3,66 +3,79 @@ import { WsException } from '@nestjs/websockets';
 import { ListEditor, WorkListEditor } from 'src/engine/core/interfaces/dtos/client-dtos/edit-list-dto';
 import { WorkDto } from 'src/engine/core/interfaces/dtos/model-dtos/work-dto';
 import { Work } from 'src/engine/core/models/work/Work';
+import { UpdateWorkInput } from 'src/modules/repository/work/inputs/update-work.input';
+import { WorkService } from 'src/modules/repository/work/services/work/work.service';
 
-const mokWork: WorkDto = {
-  name: 'Курение за забором',
-  unit: 'шт.',
-  price: 5,
-  cost: 0,
-  norm: 10,
-  dateBeginning: new Date(),
-  dateEnd: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000),
-};
+
 
 @Injectable()
 export class WorkEditorService {
-  list: Work[] = [Work.create(mokWork)];
+  list: Work[] = [];
 
-  act(msg: ListEditor) {
+  constructor(private readonly workService: WorkService) {}
+
+  async act(msg: ListEditor) {
+
     if ((<WorkListEditor<'add_new_work'>>msg).operation === 'add_new_work') {
       const args = (<WorkListEditor<'add_new_work'>>msg).arguments;
-      this.addWork(args.workName, args.dto);
+      await this.addWork(args.workName, args.dto);
     }
 
     if ((<WorkListEditor<'remove_work'>>msg).operation === 'remove_work') {
       const args = (<WorkListEditor<'remove_work'>>msg).arguments;
-      this.removeWork(args.workName);
+      await this.removeWork(args.workName);
     }
 
     if ((<WorkListEditor<'update_work'>>msg).operation === 'update_work') {
       const args = (<WorkListEditor<'update_work'>>msg).arguments;
-      this.updateWork(args.workName, args.dto);
+      await this.updateWork(args.workName, args.dto);
     }
+
+    await this.load();
   }
 
-  findWork(workName: string): Work | null {
-    const work = this.list.find(
-      (w) => w.name.toUpperCase() === workName.toUpperCase(),
-    );
+  async load(): Promise<void> {
+    const works = await this.findAll()
+    this.list = works;
+  }
+
+  async findWork(workName: string): Promise<Work | null> {
+    const workEntity = await this.workService.getOneByName(workName);
+    if (!workEntity) return null;
+    const work = Work.define(workEntity);
     return work || null;
   }
 
-  addWork(workName: string, dto?: Partial<WorkDto>): Work {
-    const candidate = this.findWork(workName);
+  async findAll (): Promise<Work[]> {
+    const entityWorks = await this.workService.getAll();
+    const works = entityWorks.map(e => Work.define(e));
+    return works;
+  }
+
+  async addWork(workName: string, dto?: Partial<WorkDto>): Promise<Work> {
+    const candidate = await this.findWork(workName);
     if (candidate)
       throw new WsException(
         'Работа с таким названием не может быть создана, так как уже существует.',
       );
-    const work = new Work(workName);
-    this.list.push(work);
-    return work.update(dto);
+    const workDto = new Work(workName).update(dto).getDto();
+    const workEntity = await this.workService.crate(workDto);
+    await this.load();
+    return Work.define(workEntity);
   }
 
-  removeWork(workName: string): boolean {
-    const workIndex = this.list.findIndex(
-      (w) => w.name.toUpperCase() === workName.toUpperCase(),
-    );
-    if (workIndex === -1) return false;
-    this.list.splice(workIndex, 1);
+  async removeWork(workName: string): Promise<boolean> {
+    await this.workService.removeByName(workName);
+    await this.load();
+    return true;
   }
 
-  updateWork(workName: string, dto: Partial<WorkDto>): Work | null {
-    return this.findWork(workName)?.update(dto);
+  async updateWork(workName: string, dto: Partial<WorkDto>): Promise<Work | null> {
+    const work = await this.findWork(workName);
+    const workDto = work.update(dto).getDto();
+    const workEntity = await this.workService.update(workDto as UpdateWorkInput);
+    await this.load();
+    return Work.define(workEntity);
   }
 
   getList(): Work[] {

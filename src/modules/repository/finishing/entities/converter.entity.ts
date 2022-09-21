@@ -59,13 +59,15 @@ export class ConverterEntity {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @ManyToOne(() => ColorEntity, (color) => color.converters)
+  @Column({nullable: true})
+  colorId: number;
+
+  @ManyToOne(() => ColorEntity, (color) => color.converters, {onDelete: "CASCADE"})
   color: ColorEntity;
 
   @OneToMany(() => ColerEntity, (coler) => coler.converter, {
     eager: true,
     onDelete: 'CASCADE',
-    onUpdate: 'CASCADE',
   })
   colers: ColerEntity[];
 }

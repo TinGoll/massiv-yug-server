@@ -3,7 +3,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { ColorColer } from 'src/engine/core/models/color/Color';
 import { Repository } from 'typeorm';
 import { ColorEntity } from '../../entities/color.entity';
-import { ConverterEntity } from '../../entities/converter.entity';
 import { CreateColerInput } from '../../inputs/create-coler.input';
 import { CreateColorInput } from '../../inputs/create-color.input';
 import { CreateConverterInput } from '../../inputs/create-converter.input';
@@ -28,6 +27,14 @@ export class ColorService {
     return await this.colorRepository.findOne({ where: { id } });
   }
 
+  async getOneColorByName(name: string): Promise<ColorEntity | null> {
+    return await this.colorRepository.findOne({
+      where: {
+        name,
+      },
+    });
+  }
+
   async getAllColors(): Promise<ColorEntity[]> {
     return await this.colorRepository.find();
   }
@@ -37,8 +44,28 @@ export class ColorService {
     return id;
   }
 
+  async removeColorByName(name: string): Promise<void> {
+    await this.colorRepository.delete({ name });
+  }
+
   async removeAll(): Promise<void> {
-    await this.colorRepository.clear()
+    const colors = await this.getAllColors();
+    for (const color of colors) {
+      await this.colorRepository.delete({id: color.id})
+    }
+  }
+
+  async updateColorByName(
+    name: string,
+    updateColorInput: Partial<UpdateColorInput>,
+  ): Promise<ColorEntity | null> {
+    await this.colorRepository.update(
+      {
+        name,
+      },
+      { ...updateColorInput },
+    );
+    return await this.getOneColorByName(name);
   }
 
   async updateColor(updateColorInput: UpdateColorInput): Promise<ColorEntity> {
@@ -82,7 +109,6 @@ export class ColorService {
   ): Promise<ColorColer | null> {
 
     const converter = await this.converterService.getOne(converterId);
-
     if (!converter) return null;
 
     const colers = await Promise.all(
@@ -90,7 +116,6 @@ export class ColorService {
         return await this.colerServive.crateColer(input);
       }),
     );
-
     converter.colers = colers;
     this.converterService.save(converter);
   }

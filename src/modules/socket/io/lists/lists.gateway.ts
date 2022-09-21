@@ -5,10 +5,11 @@ import {
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
+  WsException,
   WsResponse,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { Logger } from '@nestjs/common';
+import { Logger, UseFilters, UsePipes, ValidationPipe } from '@nestjs/common';
 import { GatewayServerListsListenEvents } from './events/list.server.listen.events';
 import { GatewayServerListsEmitEvents } from './events/list.server.emit.even';
 import { GatewayClientListsEmitEvents } from './events/list.client.emit.even';
@@ -16,6 +17,7 @@ import { GatewayClientListsListenEvents } from './events/list.client.listen.even
 import { ListEditor } from 'src/engine/core/interfaces/dtos/client-dtos/edit-list-dto';
 import { InitializingClientState, InitializingClientTools } from 'src/engine/core/interfaces/dtos/server-dtos/init-state-dto';
 import { ToolsService } from 'src/modules/list-editor/services/tools/tools.service';
+import { WebsocketExceptionsFilter } from 'src/filters/exceptions/websocket-exceptions.filter';
 
 type ClientIo = Socket<
   GatewayClientListsListenEvents,
@@ -34,6 +36,8 @@ type ServerIo = Server<
     origin: '*',
   },
 })
+@UseFilters(WebsocketExceptionsFilter)
+@UsePipes(new ValidationPipe({ transform: true }))
 export class ListsGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {
@@ -48,18 +52,21 @@ export class ListsGateway
 
   afterInit(server: ServerIo) {}
 
-  getInitializingState(): InitializingClientState {
+  async getInitializingState(): Promise<InitializingClientState> {
+    if (!this.toolsService.isReady()) await this.toolsService.load();
     const initState: InitializingClientState = {
       tools: this.toolsService.getTools(),
     };
     return initState;
   }
 
-  handleConnection(client: ClientIo, ...args: string[]): void {
+  async handleConnection(client: ClientIo, ...args: string[]): Promise<void> {
     this.logger.log(`Клиент: ${client.id} подключился`);
 
-    client.emit('init', this.getInitializingState());
-    
+    const data = await this.getInitializingState();
+
+    client.emit('init', data);
+
     client.broadcast.emit('log', {
       ts: Date.now(),
       msg: `Клиент: ${client.id} подключился.`,
@@ -78,23 +85,23 @@ export class ListsGateway
   /** Редактор списков */
 
   @SubscribeMessage('listEditor')
-  handleListEditor(
-    client: ClientIo,
-    payload: ListEditor,
-  ): WsResponse<InitializingClientTools> {
-    this.logger.log(JSON.stringify(payload, null, 2));
-    this.toolsService.getListEditorService().act(payload);
+  handleListEditor(client: ClientIo, payload: ListEditor): void {
 
-    const tools = this.toolsService.getTools();
-    client.broadcast.emit('tools', tools);
-    return {
-      event: 'tools',
-      data: tools,
-    };
+    this.toolsService
+      .getListEditorService()
+      .act(payload)
+      .then(() => {
+        const tools = this.toolsService.getTools();
+        this.server.emit('tools', tools);
+      }).catch((e) => {
+        console.log("Ошибка отловлена", e);
+        
+      });
   }
   /** Запрос на получение всех инструментов. */
   @SubscribeMessage('tools')
-  handleGetTools(): WsResponse<InitializingClientTools> {
+  async handleGetTools(): Promise<WsResponse<InitializingClientTools>> {
+    if (!this.toolsService.isReady()) await this.toolsService.load();
     return {
       event: 'tools',
       data: this.toolsService.getTools(),

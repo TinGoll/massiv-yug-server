@@ -39,14 +39,15 @@ export class ColorEntity {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @OneToOne(() => ConverterEntity)
+  @OneToOne(() => ConverterEntity, {
+    onDelete: "CASCADE"
+  })
   @JoinColumn()
   currentConverter: ConverterEntity;
 
   @OneToMany(() => ConverterEntity, (converter) => converter.color, {
     eager: true,
     onDelete: 'CASCADE',
-    onUpdate: 'CASCADE',
   })
   converters: ConverterEntity[];
 }

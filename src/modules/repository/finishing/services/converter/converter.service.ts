@@ -22,6 +22,18 @@ export class ConverterService {
     return await this.converterRepository.findOne({ where: { id } });
   }
 
+  async getOneByName(
+    name: string,
+    colorId: number,
+  ): Promise<ConverterEntity | null> {
+    return await this.converterRepository.findOne({
+      where: {
+        colorId,
+        name,
+      },
+    });
+  }
+
   async getAll(): Promise<ConverterEntity[]> {
     return await this.converterRepository.find();
   }
@@ -41,6 +53,21 @@ export class ConverterService {
       },
     );
     return this.getOne(updateConverterInput.id);
+  }
+
+  async updateByName(
+    colorId: number,
+    name: string,
+    updateConverterInput: Partial<UpdateConverterInput>,
+  ): Promise<ConverterEntity> {
+    await this.converterRepository.update(
+      {
+        colorId,
+        name,
+      },
+      { ...updateConverterInput },
+    );
+    return await this.getOneByName(name, colorId);
   }
 
   async save(converter: ConverterEntity): Promise<ConverterEntity> {
