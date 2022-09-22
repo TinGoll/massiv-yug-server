@@ -1,5 +1,5 @@
-import { Profile } from 'src/engine/core/models/profile/Profile';
-import { Component } from 'yug-entity-component-system';
+import { Profile } from "src/core/modeles/profile/Profile";
+import { Component } from "yug-entity-component-system";
 
 interface ProfileAttachmentProbs {
   left: Profile | null;

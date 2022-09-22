@@ -1,6 +1,6 @@
-import { Unit } from "../../@types/other-types";
-import { IDto } from "../../interfaces/dto-interface";
-import { WorkDto } from "../../interfaces/dtos/model-dtos/work-dto";
+import { Unit } from "../../../engine/core/@types/other-types";
+import { IDto } from "../../../engine/core/interfaces/dto-interface";
+import { WorkDto } from "../../../engine/core/interfaces/dtos/model-dtos/work-dto";
 
 export class Work implements IDto<WorkDto> {
   id: number = 0;
@@ -29,15 +29,15 @@ export class Work implements IDto<WorkDto> {
 
   update(dto: Partial<WorkDto>): this {
     if (!dto) return this;
-    if (typeof dto.id !== 'undefined') this.id = dto.id;
-    if (typeof dto.cost !== 'undefined') this.cost = dto.cost;
-    if (typeof dto.dateBeginning !== 'undefined')
+    if (typeof dto.id !== "undefined") this.id = dto.id;
+    if (typeof dto.cost !== "undefined") this.cost = dto.cost;
+    if (typeof dto.dateBeginning !== "undefined")
       this.dateBeginning = dto.dateBeginning;
-    if (typeof dto.dateEnd !== 'undefined') this.dateEnd = dto.dateEnd;
-    if (typeof dto.name !== 'undefined') this.name = dto.name;
-    if (typeof dto.norm !== 'undefined') this.norm = dto.norm;
-    if (typeof dto.price !== 'undefined') this.price = dto.price;
-    if (typeof dto.unit !== 'undefined') this.unit = dto.unit;
+    if (typeof dto.dateEnd !== "undefined") this.dateEnd = dto.dateEnd;
+    if (typeof dto.name !== "undefined") this.name = dto.name;
+    if (typeof dto.norm !== "undefined") this.norm = dto.norm;
+    if (typeof dto.price !== "undefined") this.price = dto.price;
+    if (typeof dto.unit !== "undefined") this.unit = dto.unit;
     return this;
   }
 

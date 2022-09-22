@@ -1,5 +1,4 @@
-import { Color } from "../../models/color/Color";
-
+import { Color } from "../../../../core/modeles/finishing/color/Color";
 
 const colorList: Color[] = [];
 
@@ -14,9 +13,6 @@ converter
   .addColer("0920", 0.282)
   .addColer("0925", 0.038);
 
-
-
 colorList.push(colorRal9010);
 
-export {colorList};
-
+export { colorList };

@@ -1,20 +1,29 @@
-import { ArgumentsHost, ExceptionFilter, Injectable } from '@nestjs/common';
-import { WsException } from '@nestjs/websockets';
-import { ColorConverterGloss, ColorType, ConverterTransparency, TypeColorConverter } from 'src/engine/core/@types/color-types';
+import { ArgumentsHost, ExceptionFilter, Injectable } from "@nestjs/common";
+import { WsException } from "@nestjs/websockets";
+import {
+  ColorConverterGloss,
+  ColorType,
+  ConverterTransparency,
+  TypeColorConverter,
+} from "src/engine/core/@types/color-types";
 import {
   ListEditor,
   ColorListEditor,
-} from 'src/engine/core/interfaces/dtos/client-dtos/edit-list-dto';
+} from "src/engine/core/interfaces/dtos/client-dtos/edit-list-dto";
 import {
   ColorDto,
   ColorConverterDto,
   ColorColerDto,
-} from 'src/engine/core/interfaces/dtos/model-dtos/color-dto';
-import { Color, ColorConverter, ColorColer } from 'src/engine/core/models/color/Color';
+} from "src/engine/core/interfaces/dtos/model-dtos/color-dto";
+import {
+  Color,
+  ColorConverter,
+  ColorColer,
+} from "src/core/modeles/finishing/color/Color";
 
-import { ColerService } from 'src/modules/repository/finishing/services/coler/coler.service';
-import { ColorService } from 'src/modules/repository/finishing/services/color/color.service';
-import { ConverterService } from 'src/modules/repository/finishing/services/converter/converter.service';
+import { ColerService } from "src/modules/repository/finishing/services/coler/coler.service";
+import { ColorService } from "src/modules/repository/finishing/services/color/color.service";
+import { ConverterService } from "src/modules/repository/finishing/services/converter/converter.service";
 
 @Injectable()
 export class ColorEditorService {
@@ -23,67 +32,73 @@ export class ColorEditorService {
   constructor(
     private readonly colorServive: ColorService,
     private readonly converterService: ConverterService,
-    private readonly colerService: ColerService,
+    private readonly colerService: ColerService
   ) {}
 
-
   async act(msg: ListEditor): Promise<void> {
-    
-   try {
-     if (!msg.arguments) return;
-     if ((<ColorListEditor<'add_new_color'>>msg).operation === 'add_new_color') {
-       const args = (<ColorListEditor<'add_new_color'>>msg).arguments;
-       await this.addColor(args.colorName, args.colorType, args.dto);
-     }
- 
-     if (
-       (<ColorListEditor<'add_new_converter'>>msg).operation ===
-       'add_new_converter'
-     ) {
-       const args = (<ColorListEditor<'add_new_converter'>>msg).arguments;
- 
-       if (!args) return;
-       await this.addConverters(args);
-     }
- 
-     if ((<ColorListEditor<'add_new_coler'>>msg).operation === 'add_new_coler') {
-       const args = (<ColorListEditor<'add_new_coler'>>msg).arguments;
-       await this.addColer(args);
-     }
- 
-     if ((<ColorListEditor<'update_color'>>msg).operation === 'update_color') {
-       const args = (<ColorListEditor<'update_color'>>msg).arguments;
-       await this.updateColor(args.colorName, args.dto);
-     }
- 
-     if (
-       (<ColorListEditor<'update_converter'>>msg).operation ===
-       'update_converter'
-     ) {
-       const args = (<ColorListEditor<'update_converter'>>msg).arguments;
-       await this.updateConverter(args.colorName, args.converterName, args.dto);
-     }
-     if ((<ColorListEditor<'update_coler'>>msg).operation === 'update_coler') {
-       const args = (<ColorListEditor<'update_coler'>>msg).arguments;
-       await this.updateColer(
-         args.colorName,
-         args.converterName,
-         args.colerName,
-         args.dto,
-       );
-     }
- 
-     if (
-       (<ColorListEditor<'remove_all_colors'>>msg).operation ===
-       'remove_all_colors'
-     ) {
-       await this.removeAllColors();
-     }
- 
-     await this.load();
-   } catch (e) {
+    try {
+      if (!msg.arguments) return;
+      if (
+        (<ColorListEditor<"add_new_color">>msg).operation === "add_new_color"
+      ) {
+        const args = (<ColorListEditor<"add_new_color">>msg).arguments;
+        await this.addColor(args.colorName, args.colorType, args.dto);
+      }
+
+      if (
+        (<ColorListEditor<"add_new_converter">>msg).operation ===
+        "add_new_converter"
+      ) {
+        const args = (<ColorListEditor<"add_new_converter">>msg).arguments;
+
+        if (!args) return;
+        await this.addConverters(args);
+      }
+
+      if (
+        (<ColorListEditor<"add_new_coler">>msg).operation === "add_new_coler"
+      ) {
+        const args = (<ColorListEditor<"add_new_coler">>msg).arguments;
+        await this.addColer(args);
+      }
+
+      if ((<ColorListEditor<"update_color">>msg).operation === "update_color") {
+        const args = (<ColorListEditor<"update_color">>msg).arguments;
+        await this.updateColor(args.colorName, args.dto);
+      }
+
+      if (
+        (<ColorListEditor<"update_converter">>msg).operation ===
+        "update_converter"
+      ) {
+        const args = (<ColorListEditor<"update_converter">>msg).arguments;
+        await this.updateConverter(
+          args.colorName,
+          args.converterName,
+          args.dto
+        );
+      }
+      if ((<ColorListEditor<"update_coler">>msg).operation === "update_coler") {
+        const args = (<ColorListEditor<"update_coler">>msg).arguments;
+        await this.updateColer(
+          args.colorName,
+          args.converterName,
+          args.colerName,
+          args.dto
+        );
+      }
+
+      if (
+        (<ColorListEditor<"remove_all_colors">>msg).operation ===
+        "remove_all_colors"
+      ) {
+        await this.removeAllColors();
+      }
+
+      await this.load();
+    } catch (e) {
       throw e;
-   }
+    }
   }
 
   async load() {
@@ -95,13 +110,13 @@ export class ColorEditorService {
   async addColor(
     colorName: string,
     colorType: ColorType,
-    dto?: Partial<ColorDto>,
+    dto?: Partial<ColorDto>
   ): Promise<Color> {
     const candidate = await this.findColor(colorName);
 
     if (candidate)
       throw new WsException(
-        'Цвет с таким названием не может быть создан, так как уже существует.',
+        "Цвет с таким названием не может быть создан, так как уже существует."
       );
     const color = new Color(colorName, colorType);
     this.colorList.push(color);
@@ -126,12 +141,12 @@ export class ColorEditorService {
       args.typeConverter,
       args.transparency,
       args.converterGloss,
-      args.value,
+      args.value
     );
 
     const newConverter = await this.colorServive.addConverter(
       color.id,
-      converter,
+      converter
     );
     converter.update(newConverter);
     return converter;
@@ -148,7 +163,7 @@ export class ColorEditorService {
 
     const converter = await this.converterService.getOneByName(
       args.converterName,
-      color.id,
+      color.id
     );
     if (!converter) return;
     const coler = await this.colorServive.addColer(converter.id, args);
@@ -178,7 +193,7 @@ export class ColorEditorService {
 
   async removeConverter(
     colorName: string,
-    converterName: string,
+    converterName: string
   ): Promise<boolean> {
     const color = await this.findColor(colorName);
     if (!color) return false;
@@ -190,7 +205,7 @@ export class ColorEditorService {
   async removeColer(
     colorName: string,
     converterName: string,
-    colerName: string,
+    colerName: string
   ): Promise<boolean> {
     const color = await this.findColor(colorName);
     if (!color) return false;
@@ -199,11 +214,11 @@ export class ColorEditorService {
 
   async updateColor(
     colorName: string,
-    dto: Partial<ColorDto>,
+    dto: Partial<ColorDto>
   ): Promise<Color | null> {
     const colorEntity = await this.colorServive.updateColorByName(
       colorName,
-      dto,
+      dto
     );
     return Color.define(colorEntity);
   }
@@ -211,14 +226,14 @@ export class ColorEditorService {
   async updateConverter(
     colorName: string,
     converterName: string,
-    dto: Partial<ColorConverterDto>,
+    dto: Partial<ColorConverterDto>
   ): Promise<ColorConverter | null> {
     const color = await this.findColor(colorName);
     if (!color) return null;
     const converterEntity = await this.converterService.updateByName(
       color.id,
       converterName,
-      dto,
+      dto
     );
     return ColorConverter.define(converterEntity);
   }
@@ -227,7 +242,7 @@ export class ColorEditorService {
     colorName: string,
     converterName: string,
     colerName: string,
-    dto: Partial<ColorColerDto>,
+    dto: Partial<ColorColerDto>
   ): Promise<ColorColer | null> {
     return (
       (await this.findColor(colorName))

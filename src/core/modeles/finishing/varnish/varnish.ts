@@ -1,1 +1,5 @@
-export class Varnish {}
+export class Varnish {
+  name: string;
+
+  constructor() {}
+}

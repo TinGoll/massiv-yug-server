@@ -1,18 +1,18 @@
-import { ColerEntity } from 'src/modules/repository/finishing/entities/coler.entity';
-import { ColorEntity } from 'src/modules/repository/finishing/entities/color.entity';
-import { ConverterEntity } from 'src/modules/repository/finishing/entities/converter.entity';
+import { ColerEntity } from "src/modules/repository/finishing/entities/coler.entity";
+import { ColorEntity } from "src/modules/repository/finishing/entities/color.entity";
+import { ConverterEntity } from "src/modules/repository/finishing/entities/converter.entity";
 import {
   ColorType,
   TypeColorConverter,
   ConverterTransparency,
   ColorConverterGloss,
-} from '../../@types/color-types';
-import { IDto } from '../../interfaces/dto-interface';
+} from "../../../../engine/core/@types/color-types";
+import { IDto } from "../../../../engine/core/interfaces/dto-interface";
 import {
   ColorColerDto,
   ColorConverterDto,
   ColorDto,
-} from '../../interfaces/dtos/model-dtos/color-dto';
+} from "../../../../engine/core/interfaces/dtos/model-dtos/color-dto";
 
 export class Color implements IDto<ColorDto> {
   id: number = 0;
@@ -25,7 +25,7 @@ export class Color implements IDto<ColorDto> {
     this.name = name;
     this.colorType = colorType;
   }
- 
+
   getDto(): ColorDto {
     return {
       name: this.name,
@@ -39,18 +39,18 @@ export class Color implements IDto<ColorDto> {
     name: string,
     typeConverter: TypeColorConverter,
     transparency: ConverterTransparency,
-    converterGloss: ColorConverterGloss = '40%',
-    value: number = 0,
+    converterGloss: ColorConverterGloss = "40%",
+    value: number = 0
   ): ColorConverter {
     const converter = new ColorConverter(
       name,
       typeConverter,
       transparency,
       converterGloss,
-      value,
+      value
     );
     const index = this.converters.findIndex(
-      (c) => c.name.toUpperCase() === name.toUpperCase(),
+      (c) => c.name.toUpperCase() === name.toUpperCase()
     );
     if (index !== -1) {
       this.converters[index] = converter;
@@ -62,7 +62,7 @@ export class Color implements IDto<ColorDto> {
 
   removeConverter(name: string): number {
     const index = this.converters.findIndex(
-      (c) => c.name.toUpperCase() === name.toUpperCase(),
+      (c) => c.name.toUpperCase() === name.toUpperCase()
     );
     if (index !== -1) {
       const converterId = this.converters[index].id;
@@ -87,7 +87,7 @@ export class Color implements IDto<ColorDto> {
 
   findConverter(name: string): ColorConverter | null {
     const index = this.converters.findIndex(
-      (c) => c.name.toUpperCase() === name.toUpperCase(),
+      (c) => c.name.toUpperCase() === name.toUpperCase()
     );
 
     return this.converters[index] || null;
@@ -98,14 +98,14 @@ export class Color implements IDto<ColorDto> {
   }
   updateConverter(
     converterName: string,
-    dto: Partial<ColorConverterDto>,
+    dto: Partial<ColorConverterDto>
   ): ColorConverter | null {
     return this.findConverter(converterName)?.update(dto) || null;
   }
   updateColer(
     converterName: string,
     colerName: string,
-    dto: ColorColerDto,
+    dto: ColorColerDto
   ): ColorColer | null {
     return (
       this.findConverter(converterName)?.findColer(colerName)?.update(dto) ||
@@ -115,16 +115,16 @@ export class Color implements IDto<ColorDto> {
 
   update(dto: Partial<ColorDto>): this {
     if (!dto) return this;
-    if (typeof dto.id !== 'undefined') this.id = dto.id;
-    if (typeof dto.name !== 'undefined') this.name = dto.name;
-    if (typeof dto.colorType !== 'undefined') this.colorType = dto.colorType;
-    if (typeof dto.currentConverter !== 'undefined')
+    if (typeof dto.id !== "undefined") this.id = dto.id;
+    if (typeof dto.name !== "undefined") this.name = dto.name;
+    if (typeof dto.colorType !== "undefined") this.colorType = dto.colorType;
+    if (typeof dto.currentConverter !== "undefined")
       this.currentConverter = dto.currentConverter;
 
-    if (typeof dto.converters !== 'undefined') {
+    if (typeof dto.converters !== "undefined") {
       for (const converter of dto.converters) {
         const converterIndex = this.converters.findIndex(
-          (c) => c.name.toUpperCase() === converter.name.toUpperCase(),
+          (c) => c.name.toUpperCase() === converter.name.toUpperCase()
         );
         if (converterIndex !== -1) {
           this.converters[converterIndex].update(converter);
@@ -139,16 +139,14 @@ export class Color implements IDto<ColorDto> {
     const color = new Color(colorEntity.name, colorEntity.colorType);
     color.id = colorEntity.id;
     color.currentConverter = ColorConverter.define(
-      colorEntity.currentConverter,
+      colorEntity.currentConverter
     );
-    color.converters = colorEntity.converters.map(converterDto => {
+    color.converters = colorEntity.converters.map((converterDto) => {
       return ColorConverter.define(converterDto);
-    })
+    });
     return color;
   }
 }
-
-
 
 export class ColorConverter implements IDto<ColorConverterDto> {
   id: number = 0;
@@ -162,8 +160,8 @@ export class ColorConverter implements IDto<ColorConverterDto> {
     name: string,
     typeConverter: TypeColorConverter,
     transparency: ConverterTransparency,
-    converterGloss: ColorConverterGloss = '40%',
-    value: number = 0,
+    converterGloss: ColorConverterGloss = "40%",
+    value: number = 0
   ) {
     this.name = name;
     this.typeConverter = typeConverter;
@@ -180,11 +178,11 @@ export class ColorConverter implements IDto<ColorConverterDto> {
       value: this.value,
       colers: this.colers,
       transparency: this.transparency,
-    }
+    };
   }
   addColer(name: string, value: number = 0): this {
     const index = this.colers.findIndex(
-      (c) => c.name.toUpperCase() === name.toUpperCase(),
+      (c) => c.name.toUpperCase() === name.toUpperCase()
     );
     if (index !== -1) {
       this.colers[index].value = value;
@@ -196,14 +194,14 @@ export class ColorConverter implements IDto<ColorConverterDto> {
 
   findColer(colerName: string): ColorColer | null {
     const colerIndex = this.colers.findIndex(
-      (c) => c.name.toUpperCase() === colerName.toUpperCase(),
+      (c) => c.name.toUpperCase() === colerName.toUpperCase()
     );
     if (colerIndex === -1) return null;
     return this.colers[colerIndex] || null;
   }
   removeColer(name: string): boolean {
     const index = this.colers.findIndex(
-      (c) => c.name.toUpperCase() === name.toUpperCase(),
+      (c) => c.name.toUpperCase() === name.toUpperCase()
     );
     if (index !== -1) {
       this.colers.splice(index, 1);
@@ -219,16 +217,16 @@ export class ColorConverter implements IDto<ColorConverterDto> {
 
   update(dto: Partial<ColorConverterDto>): this {
     if (!dto) return this;
-    if (typeof dto.id !== 'undefined') this.id = dto.id;
-    if (typeof dto.name !== 'undefined') this.name = dto.name;
-    if (typeof dto.converterGloss !== 'undefined')
+    if (typeof dto.id !== "undefined") this.id = dto.id;
+    if (typeof dto.name !== "undefined") this.name = dto.name;
+    if (typeof dto.converterGloss !== "undefined")
       this.converterGloss = dto.converterGloss;
-    if (typeof dto.transparency !== 'undefined')
+    if (typeof dto.transparency !== "undefined")
       this.transparency = dto.transparency;
-    if (typeof dto.typeConverter !== 'undefined')
+    if (typeof dto.typeConverter !== "undefined")
       this.typeConverter = dto.typeConverter;
-    if (typeof dto.value !== 'undefined') this.value = dto.value;
-    if (typeof dto.colers !== 'undefined') {
+    if (typeof dto.value !== "undefined") this.value = dto.value;
+    if (typeof dto.colers !== "undefined") {
       for (const colerDto of dto.colers) {
         const coler = this.findColer(colerDto.name);
         if (coler) coler.update(colerDto);
@@ -239,22 +237,27 @@ export class ColorConverter implements IDto<ColorConverterDto> {
 
   public static define(converterEntity: ConverterEntity | null) {
     if (!converterEntity) return null;
-      const { name, converterGloss, transparency, typeConverter, value, id } =
-        converterEntity;
+    const {
+      name,
+      converterGloss,
+      transparency,
+      typeConverter,
+      value,
+      id,
+    } = converterEntity;
     const converter = new ColorConverter(
       name,
       typeConverter,
       transparency,
       converterGloss,
-      value,
+      value
     );
-    converter.id = id
+    converter.id = id;
     converter.colers = converterEntity.colers.map((colerDto) =>
-      ColorColer.define(colerDto),
+      ColorColer.define(colerDto)
     );
     return converter;
   }
-  
 }
 
 export class ColorColer {
@@ -270,14 +273,14 @@ export class ColorColer {
     this.value = value;
   }
   update(dto: Partial<ColorColerDto>): this {
-    if (typeof dto.id !== 'undefined') this.id = dto.id;
-    if (typeof dto.name !== 'undefined') this.name = dto.name;
-    if (typeof dto.value !== 'undefined') this.value = dto.value;
+    if (typeof dto.id !== "undefined") this.id = dto.id;
+    if (typeof dto.name !== "undefined") this.name = dto.name;
+    if (typeof dto.value !== "undefined") this.value = dto.value;
     return this;
   }
 
   public static define(colerEntity: ColerEntity | null): ColorColer | null {
-    if (!colerEntity) return null
+    if (!colerEntity) return null;
     const { name, value, id } = colerEntity;
     const coler = new ColorColer(name, value);
     coler.id = id;

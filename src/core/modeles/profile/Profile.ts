@@ -1,4 +1,4 @@
-import { ProfileDto } from '../../interfaces/dtos/model-dtos/profile-dto';
+import { ProfileDto } from "../../../engine/core/interfaces/dtos/model-dtos/profile-dto";
 
 export class Profile {
   name: string;
@@ -7,7 +7,6 @@ export class Profile {
 
   profileWidthMini: number | null;
 
-  
   depth: number | null;
   assemblyAngle: 90 | 45 | null;
   grooveThickness: number | null;
@@ -37,22 +36,22 @@ export class Profile {
 
   update(dto: Partial<ProfileDto>): this {
     if (!dto) return this;
-    if (typeof dto.name !== 'undefined') this.name = dto.name;
-    if (typeof dto.profileWidth !== 'undefined')
+    if (typeof dto.name !== "undefined") this.name = dto.name;
+    if (typeof dto.profileWidth !== "undefined")
       this.profileWidth = dto.profileWidth;
-      if (typeof dto.profileWidthMini !== 'undefined')
-        this.profileWidthMini = dto.profileWidthMini;
-    if (typeof dto.depth !== 'undefined') this.depth = dto.depth;
-    if (typeof dto.assemblyAngle !== 'undefined')
+    if (typeof dto.profileWidthMini !== "undefined")
+      this.profileWidthMini = dto.profileWidthMini;
+    if (typeof dto.depth !== "undefined") this.depth = dto.depth;
+    if (typeof dto.assemblyAngle !== "undefined")
       this.assemblyAngle = dto.assemblyAngle;
-    if (typeof dto.grooveThickness !== 'undefined')
+    if (typeof dto.grooveThickness !== "undefined")
       this.grooveThickness = dto.grooveThickness;
-    if (typeof dto.grooveDepth !== 'undefined')
+    if (typeof dto.grooveDepth !== "undefined")
       this.grooveDepth = dto.grooveDepth;
-    if (typeof dto.chamferSize !== 'undefined')
+    if (typeof dto.chamferSize !== "undefined")
       this.chamferSize = dto.chamferSize;
-    if (typeof dto.tenonSize !== 'undefined') this.tenonSize = dto.tenonSize;
-    if (typeof dto.bottomShelfThickness !== 'undefined')
+    if (typeof dto.tenonSize !== "undefined") this.tenonSize = dto.tenonSize;
+    if (typeof dto.bottomShelfThickness !== "undefined")
       this.bottomShelfThickness = dto.bottomShelfThickness;
     return this;
   }

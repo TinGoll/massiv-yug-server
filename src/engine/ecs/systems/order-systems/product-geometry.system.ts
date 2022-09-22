@@ -1,10 +1,10 @@
-import { Panel } from 'src/engine/core/models/attachment/Panel';
-import { Profile } from 'src/engine/core/models/profile/Profile';
-import { IteratingSystem, Family, Entity } from 'yug-entity-component-system';
-import { PanelAttachmentComponent } from '../../components/attachment/panel.attachment.component';
-import { ProfileAttachmentComponent } from '../../components/attachment/profile.attacment.component';
-import { GeometryComponent } from '../../components/geometry/geometry.component';
-import { ProductComponent } from '../../components/product/product.component';
+import { Panel } from "src/core/modeles/attachment/Panel";
+import { Profile } from "src/core/modeles/profile/Profile";
+import { IteratingSystem, Family, Entity } from "yug-entity-component-system";
+import { PanelAttachmentComponent } from "../../components/attachment/panel.attachment.component";
+import { ProfileAttachmentComponent } from "../../components/attachment/profile.attacment.component";
+import { GeometryComponent } from "../../components/geometry/geometry.component";
+import { ProductComponent } from "../../components/product/product.component";
 
 export class ProductGeometrySystem extends IteratingSystem {
   constructor() {
@@ -14,18 +14,18 @@ export class ProductGeometrySystem extends IteratingSystem {
         ProductComponent,
         PanelAttachmentComponent,
         ProfileAttachmentComponent,
-        GeometryComponent,
-      ).get(),
+        GeometryComponent
+      ).get()
     );
   }
 
   processEntity(entity: Entity, deltaTime: number): void {
     const geo = entity.getComponent<GeometryComponent>(GeometryComponent);
     const panels = entity.getComponent<PanelAttachmentComponent<Panel>>(
-      PanelAttachmentComponent,
+      PanelAttachmentComponent
     );
     const profile = entity.getComponent<ProfileAttachmentComponent>(
-      ProfileAttachmentComponent,
+      ProfileAttachmentComponent
     );
     const product = entity.getComponent<ProductComponent>(ProductComponent);
 
@@ -39,7 +39,7 @@ export class ProductGeometrySystem extends IteratingSystem {
       });
     }
     if (!profile.profiles.top) {
-      profile.profiles.left = new Profile('Левый профиль', {
+      profile.profiles.left = new Profile("Левый профиль", {
         assemblyAngle: 45,
         bottomShelfThickness: 22,
         chamferSize: 10,
@@ -47,7 +47,7 @@ export class ProductGeometrySystem extends IteratingSystem {
         grooveDepth: 10,
         profileWidth: 80,
       });
-      profile.profiles.right = new Profile('Правый профиль', {
+      profile.profiles.right = new Profile("Правый профиль", {
         assemblyAngle: 45,
         bottomShelfThickness: 22,
         chamferSize: 10,
@@ -55,7 +55,7 @@ export class ProductGeometrySystem extends IteratingSystem {
         grooveDepth: 10,
         profileWidth: 80,
       });
-      profile.profiles.top = new Profile('Верхний профиль', {
+      profile.profiles.top = new Profile("Верхний профиль", {
         assemblyAngle: 45,
         bottomShelfThickness: 22,
         chamferSize: 10,
@@ -63,7 +63,7 @@ export class ProductGeometrySystem extends IteratingSystem {
         grooveDepth: 10,
         profileWidth: 80,
       });
-      profile.profiles.bot = new Profile('Нижний профиль', {
+      profile.profiles.bot = new Profile("Нижний профиль", {
         assemblyAngle: 45,
         bottomShelfThickness: 22,
         chamferSize: 10,
@@ -88,6 +88,5 @@ export class ProductGeometrySystem extends IteratingSystem {
     panel.item.shirt.geometry.height = panel.item.geometry.height - 80;
     panel.item.shirt.geometry.width = panel.item.geometry.width - 80;
     panel.item.shirt.geometry.square = panel.item.shirt.geometry.getSquare();
-
   }
 }

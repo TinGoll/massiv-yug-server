@@ -1,7 +1,7 @@
-import { Color } from 'src/engine/core/models/color/Color';
-import { ColorDto } from '../model-dtos/color-dto';
-import { ProfileDto } from '../model-dtos/profile-dto';
-import { WorkDto } from '../model-dtos/work-dto';
+import { Color } from "src/core/modeles/finishing/color/Color";
+import { ColorDto } from "../model-dtos/color-dto";
+import { ProfileDto } from "../model-dtos/profile-dto";
+import { WorkDto } from "../model-dtos/work-dto";
 
 export interface InitializingClientState {
   tools: InitializingClientTools;

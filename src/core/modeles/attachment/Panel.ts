@@ -1,9 +1,9 @@
-import { Geometry } from '../geometry/Geometry';
+import { Geometry } from "../geometry/Geometry";
 
 export class Panel {
   public geometry: Geometry = new Geometry();
   shirt: Shirt | null = null;
-  
+
   constructor() {}
 
   createShirt() {

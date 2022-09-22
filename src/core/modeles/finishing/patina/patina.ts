@@ -1,1 +1,5 @@
-export class Patina {}
+export class Patina {
+  name: string;
+
+  constructor() {}
+}
