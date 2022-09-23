@@ -1,4 +1,4 @@
-import { InitializingClientTools, ClientLog, InitializingClientState } from "src/engine/core/interfaces/dtos/server-dtos/init-state-dto";
+import { InitializingClientTools, ClientLog, InitializingClientState } from "src/core/types/event-types/init/init-state-dto";
 
 export interface GatewayServerListsEmitEvents {
   tools: (data: InitializingClientTools) => void;

@@ -3,7 +3,7 @@ import {
   TypeColorConverter,
   ColorConverterGloss,
   ConverterTransparency,
-} from 'src/engine/core/@types/color-types';
+} from 'src/core/types/model-types/color-types';
 
 @InputType()
 export class UpdateConverterInput {

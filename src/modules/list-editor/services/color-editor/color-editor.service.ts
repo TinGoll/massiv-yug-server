@@ -5,16 +5,16 @@ import {
   ColorType,
   ConverterTransparency,
   TypeColorConverter,
-} from "src/engine/core/@types/color-types";
+} from "src/core/types/model-types/color-types";
 import {
   ListEditor,
   ColorListEditor,
-} from "src/engine/core/interfaces/dtos/client-dtos/edit-list-dto";
+} from "src/core/types/event-types/list-editor/client/edit-list-actions";
 import {
   ColorDto,
   ColorConverterDto,
   ColorColerDto,
-} from "src/engine/core/interfaces/dtos/model-dtos/color-dto";
+} from "src/core/types/dtos/finishing-dto/color-dto";
 import {
   Color,
   ColorConverter,

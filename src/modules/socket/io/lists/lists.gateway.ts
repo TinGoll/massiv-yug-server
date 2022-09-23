@@ -14,8 +14,8 @@ import { GatewayServerListsListenEvents } from './events/list.server.listen.even
 import { GatewayServerListsEmitEvents } from './events/list.server.emit.even';
 import { GatewayClientListsEmitEvents } from './events/list.client.emit.even';
 import { GatewayClientListsListenEvents } from './events/list.client.listen.events';
-import { ListEditor } from 'src/engine/core/interfaces/dtos/client-dtos/edit-list-dto';
-import { InitializingClientState, InitializingClientTools } from 'src/engine/core/interfaces/dtos/server-dtos/init-state-dto';
+import { ListEditor } from 'src/core/types/event-types/list-editor/client/edit-list-actions';
+import { InitializingClientState, InitializingClientTools } from 'src/core/types/event-types/init/init-state-dto';
 import { ToolsService } from 'src/modules/list-editor/services/tools/tools.service';
 import { WebsocketExceptionsFilter } from 'src/filters/exceptions/websocket-exceptions.filter';
 

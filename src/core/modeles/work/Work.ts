@@ -1,6 +1,6 @@
-import { Unit } from "../../../engine/core/@types/other-types";
-import { IDto } from "../../../engine/core/interfaces/dto-interface";
-import { WorkDto } from "../../../engine/core/interfaces/dtos/model-dtos/work-dto";
+import { Unit } from "src/core/types/model-types/other-types";
+import { IDto } from "../../types/interfaces/dto-interface";
+import { WorkDto } from "../../types/dtos/work-dto/work-dto";
 
 export class Work implements IDto<WorkDto> {
   id: number = 0;

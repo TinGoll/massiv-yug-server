@@ -1,4 +1,4 @@
-import { ColorConverterGloss, ConverterTransparency, TypeColorConverter } from 'src/engine/core/@types/color-types';
+import { ColorConverterGloss, ConverterTransparency, TypeColorConverter } from 'src/core/types/model-types/color-types';
 import { ColerEntity } from './coler.entity';
 import { ColorEntity } from './color.entity';
 import { Field, ID, ObjectType } from '@nestjs/graphql';

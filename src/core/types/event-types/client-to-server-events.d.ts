@@ -3,7 +3,7 @@
 /***************** Декларации от Клиента к Серверу ******************** */
 /********************************************************************** */
 
-import { ListEditor } from "./dtos/client-dtos/edit-list-dto";
+import { ListEditor } from "./list-editor/client/edit-list-actions";
 
 export interface ClientToServerEvents {
   listEditor: (listObject: ListEditor) => void;

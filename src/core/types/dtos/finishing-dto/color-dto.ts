@@ -9,7 +9,7 @@ import {
   ColorType,
   ConverterTransparency,
   TypeColorConverter,
-} from "src/engine/core/@types/color-types";
+} from "src/core/types/model-types/color-types";
 import {
   ColorColer,
   ColorConverter,

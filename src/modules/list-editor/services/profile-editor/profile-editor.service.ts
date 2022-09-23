@@ -3,8 +3,8 @@ import { WsException } from "@nestjs/websockets";
 import {
   ListEditor,
   ProfileListEditor,
-} from "src/engine/core/interfaces/dtos/client-dtos/edit-list-dto";
-import { ProfileDto } from "src/engine/core/interfaces/dtos/model-dtos/profile-dto";
+} from "src/core/types/event-types/list-editor/client/edit-list-actions";
+import { ProfileDto } from "src/core/types/dtos/profile-dto/profile-dto";
 import { Profile } from "src/core/modeles/profile/Profile";
 
 const mokProfile: ProfileDto = {

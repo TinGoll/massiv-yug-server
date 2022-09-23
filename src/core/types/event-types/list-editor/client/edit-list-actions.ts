@@ -1,13 +1,23 @@
 
+import {
+  ColorType,
+  TypeColorConverter,
+  ConverterTransparency,
+  ColorConverterGloss,
+} from 'src/core/types/model-types/color-types';
+import {
+  ColorColerDto,
+  ColorConverterDto,
+  ColorDto,
+} from '../../../dtos/finishing-dto/color-dto';
+import { ProfileDto } from '../../../dtos/profile-dto/profile-dto';
+import { WorkDto } from '../../../dtos/work-dto/work-dto';
 
 /********************************************************************************** */
 /***************************** Технические типы *********************************** */
 /********************************************************************************** */
 
-import { ColorType, TypeColorConverter, ConverterTransparency, ColorConverterGloss } from "src/engine/core/@types/color-types";
-import { ColorColerDto, ColorConverterDto, ColorDto } from "../model-dtos/color-dto";
-import { ProfileDto } from "../model-dtos/profile-dto";
-import { WorkDto } from "../model-dtos/work-dto";
+
 
 type listName = typeof listNames[number];
 const listNames = ['colors', 'patinas', 'works', 'profiles'] as const;

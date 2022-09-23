@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { WsException } from '@nestjs/websockets';
-import { InitializingClientTools } from 'src/engine/core/interfaces/dtos/server-dtos/init-state-dto';
+import { InitializingClientTools } from 'src/core/types/event-types/init/init-state-dto';
 import { ListEditorService } from '../list-editor/list-editor.service';
 
 @Injectable()

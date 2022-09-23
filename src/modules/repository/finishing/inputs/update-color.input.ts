@@ -1,5 +1,5 @@
 import { Field, ID, InputType } from '@nestjs/graphql';
-import { ColorType } from 'src/engine/core/@types/color-types';
+import { ColorType } from 'src/core/types/model-types/color-types';
 
 
 @InputType()

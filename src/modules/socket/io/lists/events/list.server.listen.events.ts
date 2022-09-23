@@ -1,5 +1,5 @@
-import { ListEditor } from "src/engine/core/interfaces/dtos/client-dtos/edit-list-dto";
-import { InitializingClientTools } from "src/engine/core/interfaces/dtos/server-dtos/init-state-dto";
+import { ListEditor } from "src/core/types/event-types/list-editor/client/edit-list-actions";
+import { InitializingClientTools } from "src/core/types/event-types/init/init-state-dto";
 
 export interface GatewayServerListsListenEvents {
   listEditor: (listObject: ListEditor) => void;

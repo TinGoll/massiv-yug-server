@@ -1,4 +1,4 @@
-import { Color } from "../../../core/modeles/finishing/color/Color";
+import { Color } from "../../modeles/finishing/color/Color";
 
 /********************************************************************** */
 /***************** Декларации от Сервера к Клиенту ******************** */

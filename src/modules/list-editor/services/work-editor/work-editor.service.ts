@@ -3,8 +3,8 @@ import { WsException } from "@nestjs/websockets";
 import {
   ListEditor,
   WorkListEditor,
-} from "src/engine/core/interfaces/dtos/client-dtos/edit-list-dto";
-import { WorkDto } from "src/engine/core/interfaces/dtos/model-dtos/work-dto";
+} from "src/core/types/event-types/list-editor/client/edit-list-actions";
+import { WorkDto } from "src/core/types/dtos/work-dto/work-dto";
 import { Work } from "src/core/modeles/work/Work";
 import { UpdateWorkInput } from "src/modules/repository/work/inputs/update-work.input";
 import { WorkService } from "src/modules/repository/work/services/work/work.service";

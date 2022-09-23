@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { WsException } from '@nestjs/websockets';
-import { ListEditor } from 'src/engine/core/interfaces/dtos/client-dtos/edit-list-dto';
-import { InitializingClientLists } from 'src/engine/core/interfaces/dtos/server-dtos/init-state-dto';
+import { ListEditor } from 'src/core/types/event-types/list-editor/client/edit-list-actions';
+import { InitializingClientLists } from 'src/core/types/event-types/init/init-state-dto';
 import { ColorEditorService } from '../color-editor/color-editor.service';
 import { ProfileEditorService } from '../profile-editor/profile-editor.service';
 import { WorkEditorService } from '../work-editor/work-editor.service';

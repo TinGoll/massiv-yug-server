@@ -1,4 +1,5 @@
-import { Unit } from "src/engine/core/@types/other-types";
+import { Unit } from "src/core/types/model-types/other-types";
+
 
 export interface WorkDto {
   id?: number;

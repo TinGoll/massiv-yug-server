@@ -1,4 +1,4 @@
-import { ProfileDto } from "../../../engine/core/interfaces/dtos/model-dtos/profile-dto";
+import { ProfileDto } from "../../types/dtos/profile-dto/profile-dto";
 
 export class Profile {
   name: string;

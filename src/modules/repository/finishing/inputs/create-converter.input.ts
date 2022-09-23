@@ -1,5 +1,5 @@
 import { Field, InputType } from "@nestjs/graphql";
-import { ColorConverterGloss, ConverterTransparency, TypeColorConverter } from "src/engine/core/@types/color-types";
+import { ColorConverterGloss, ConverterTransparency, TypeColorConverter } from "src/core/types/model-types/color-types";
 
 
 

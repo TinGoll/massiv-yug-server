@@ -6,13 +6,13 @@ import {
   TypeColorConverter,
   ConverterTransparency,
   ColorConverterGloss,
-} from "../../../../engine/core/@types/color-types";
-import { IDto } from "../../../../engine/core/interfaces/dto-interface";
+} from "../../../types/model-types/color-types";
+import { IDto } from "../../../types/interfaces/dto-interface";
 import {
   ColorColerDto,
   ColorConverterDto,
   ColorDto,
-} from "../../../../engine/core/interfaces/dtos/model-dtos/color-dto";
+} from "../../../types/dtos/finishing-dto/color-dto";
 
 export class Color implements IDto<ColorDto> {
   id: number = 0;
