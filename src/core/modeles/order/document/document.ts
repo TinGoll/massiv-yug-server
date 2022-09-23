@@ -1,4 +1,4 @@
-import { Panel } from "src/core/modeles/attachment/Panel";
+import { Panel } from "../../panel/Panel";
 import { Color } from "src/core/modeles/finishing/color/Color";
 import { Material } from "src/core/modeles/msterial/Material";
 import { Profile } from "src/core/modeles/profile/Profile";
