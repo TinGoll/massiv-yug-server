@@ -1,6 +1,3 @@
-import { ColerEntity } from "src/modules/repository/finishing/entities/coler.entity";
-import { ColorEntity } from "src/modules/repository/finishing/entities/color.entity";
-import { ConverterEntity } from "src/modules/repository/finishing/entities/converter.entity";
 import {
   ColorType,
   TypeColorConverter,
@@ -13,6 +10,9 @@ import {
   ColorConverterDto,
   ColorDto,
 } from "../../../types/dtos/finishing-dto/color-dto";
+import { ColerEntity } from "src/modules/repositories/finishing/entities/coler.entity";
+import { ColorEntity } from "src/modules/repositories/finishing/entities/color.entity";
+import { ConverterEntity } from "src/modules/repositories/finishing/entities/converter.entity";
 
 export class Color implements IDto<ColorDto> {
   id: number = 0;
@@ -167,6 +167,7 @@ export class ColorConverter implements IDto<ColorConverterDto> {
     this.typeConverter = typeConverter;
     this.converterGloss = converterGloss;
     this.transparency = transparency;
+    
     this.value = value;
   }
   getDto(): ColorConverterDto {

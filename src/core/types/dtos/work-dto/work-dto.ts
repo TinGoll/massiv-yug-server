@@ -1,6 +1,5 @@
 import { Unit } from "src/core/types/model-types/other-types";
 
-
 export interface WorkDto {
   id?: number;
   name: string;

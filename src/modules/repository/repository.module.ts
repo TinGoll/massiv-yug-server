@@ -1,21 +1,31 @@
 import { Module } from '@nestjs/common';
-import { UserModule } from './user/user.module';
-import { FinishingModule } from './finishing/finishing.module';
-import { AttachmentModule } from './attachment/attachment.module';
-import { WorkModule } from './work/work.module';
-import { DbComponentModule } from './db-component/db-component.module';
-import { DbEngineEntityModule } from './db-engine-entity/db-engine-entity.module';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { ColorSampleEntity, ColorConverterEntity, ColorConverterColerEntity, DocumentColorEntity } from './finishing/document-color/entities/document-color.entity';
+import { DocumentColorService } from './finishing/document-color/services/document-color/document-color.service';
+import { DocumentPatinaEntity, PatinaConverterColerEntity, PatinaConverterEntity, PatinaSampleEntity } from './finishing/document-patina/entities/document-patina.entity';
+import { VarnishSampleEntity, DocumentVarnishEntity } from './finishing/document-varnish/entities/document-varnish.entity';
+import { MaterialSampleEntity } from './material/entities/document-material.entity';
+import { PanelSampleEntity } from './panel/entities/document-panel.entity';
 
 
 @Module({
   imports: [
-    UserModule,
-    FinishingModule,
-    AttachmentModule,
-    WorkModule,
-    DbComponentModule,
-    DbEngineEntityModule,
+    TypeOrmModule.forFeature([
+      // entities
+      ColorSampleEntity,
+      ColorConverterEntity,
+      ColorConverterColerEntity,
+      DocumentColorEntity,
+      PatinaSampleEntity,
+      PatinaConverterEntity,
+      PatinaConverterColerEntity,
+      DocumentPatinaEntity,
+      VarnishSampleEntity,
+      DocumentVarnishEntity,
+      MaterialSampleEntity,
+      PanelSampleEntity,
+    ]),
   ],
-  exports: [],
+  providers: [DocumentColorService],
 })
 export class RepositoryModule {}

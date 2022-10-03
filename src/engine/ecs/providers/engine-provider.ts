@@ -9,11 +9,13 @@ import { ProductGeometrySystem } from '../systems/order-systems/product-geometry
 
 @Injectable()
 export class EngineProvider {
+
   private previous_time: number = 0;
   private interval: NodeJS.Timer;
   private interval_time: number = 5000;
 
   engine: Engine;
+
   constructor() {
     this.engine = Engine.create();
     this.define();
@@ -21,17 +23,28 @@ export class EngineProvider {
   }
 
   define() {
+
+
     this.engine.addSystem(new GeometrySystem());
     this.engine.addSystem(new ProductGeometrySystem());
 
     const entityFasad = this.engine.createEntity();
+
+    
     entityFasad
       .add(new GeometryComponent(916, 446, 20))
       .add(new PanelAttachmentComponent())
       .add(new ProfileAttachmentComponent())
       .add(new ProductComponent());
     this.engine.addEntity(entityFasad);
+
+
   }
+
+
+
+
+
 
   /** Старт цикла */
   public start(): this {

@@ -1,5 +1,5 @@
-import { Person } from "../../person/person";
-import { BookDocument } from "../document/document";
+import { Person } from '../../person/person';
+import { BookDocument } from '../document/document';
 
 type BookResults = {
   finishingSquare: number;
@@ -8,6 +8,10 @@ type BookResults = {
   profileLinearMeters: number;
   chmzLinearMeters: number;
 };
+
+interface BookState {
+
+}
 
 export class Book {
   id: number | null = null;
@@ -23,6 +27,8 @@ export class Book {
 
   documents: BookDocument[] = [];
 
+  private _not_save_database: boolean = false;
+
   results: BookResults = {
     finishingSquare: 0,
     facadeSquare: 0,
@@ -30,5 +36,30 @@ export class Book {
     profileLinearMeters: 0,
     chmzLinearMeters: 0,
   };
+
   constructor() {}
+
+  isNotSavedToDb(): boolean {
+    return this._not_save_database;
+  }
+
+  getState(): BookState {
+    return {
+      ...this,
+      documents: this.documents.map(d => d.getState())
+    }
+  }
+
+  public static load() {
+    // Реализовать загрузку из базы данных, путем приема в качестве аргумента сущности книги.
+    return new Book();
+  }
+
+  public static new(): Book {
+    const book = new Book();
+    book._not_save_database = true;
+    return book;
+  }
+
+
 }

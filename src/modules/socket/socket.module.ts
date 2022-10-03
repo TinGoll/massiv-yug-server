@@ -5,9 +5,12 @@ import { OrdersGateway } from './io/orders/orders.gateway';
 import { ListsGateway } from './io/lists/lists.gateway';
 import { ListEditorModule } from '../list-editor/list-editor.module';
 import { AuthorizationGateway } from './io/authorization/authorization.gateway';
+import { ProcessingModule } from '../processing/processing.module';
+import { OrderModule } from '../repositories/order/order.module';
+
 
 @Module({
-  imports: [ListEditorModule],
+  imports: [ListEditorModule, ProcessingModule, OrderModule],
   providers: [
     ConstructorGateway,
     InternalChatGateway,
@@ -15,5 +18,6 @@ import { AuthorizationGateway } from './io/authorization/authorization.gateway';
     ListsGateway,
     AuthorizationGateway,
   ],
+  exports: [OrdersGateway],
 })
 export class SocketModule {}

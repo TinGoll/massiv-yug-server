@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
-import { FinishingModule } from '../repository/finishing/finishing.module';
-import { WorkModule } from '../repository/work/work.module';
+import { FinishingModule } from '../repositories/finishing/finishing.module';
+import { WorkModule } from '../repositories/work/work.module';
 import { ColorEditorService } from './services/color-editor/color-editor.service';
 import { ListEditorService } from './services/list-editor/list-editor.service';
 import { ProfileEditorService } from './services/profile-editor/profile-editor.service';

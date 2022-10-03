@@ -8,11 +8,10 @@ import { EngineModule } from './engine/engine.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import path, { join } from 'path';
 import { SocketModule } from './modules/socket/socket.module';
-import { RepositoryModule } from './modules/repository/repository.module';
 import { ListEditorModule } from './modules/list-editor/list-editor.module';
 import { AuthorizationModule } from './modules/authorization/authorization.module';
-
-
+import { ProcessingModule } from './modules/processing/processing.module';
+import { RepositoryModule } from './modules/repository/repository.module';
 
 @Module({
   imports: [
@@ -45,14 +44,15 @@ import { AuthorizationModule } from './modules/authorization/authorization.modul
         migrationsTableName: 'migrations',
         synchronize: true,
         autoLoadEntities: true,
-        logging: ['error', ], //'query',
+        logging: ['error'], //'query',
       }),
     }),
     EngineModule,
     SocketModule,
-    RepositoryModule,
     ListEditorModule,
     AuthorizationModule,
+    ProcessingModule,
+    RepositoryModule
   ],
   controllers: [],
   providers: [],

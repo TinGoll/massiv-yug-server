@@ -6,6 +6,7 @@ import { Patina } from "../../finishing/patina/patina";
 import { Varnish } from "../../finishing/varnish/varnish";
 import { Book } from "../book/book";
 import { DocumentElement } from "../element/element";
+import { BookDocumentCreateInput } from "src/core/types/inputs/order-inputs/document-inputs/book.document.create.input";
 
 type DocumentResults = {
   finishingSquare: number;
@@ -21,10 +22,17 @@ type DocumentFinishing = {
   varnis: Varnish | null;
 };
 
+interface DocumentState {
+
+}
+
 export class BookDocument {
   id: number = null;
   bookId: number | null = null;
   book: Book | null = null;
+
+  createdAt: Date;
+  updatedAt: Date;
 
   material: Material | null = null;
   profile: Profile | null = null;
@@ -44,7 +52,19 @@ export class BookDocument {
     chmzLinearMeters: 0,
   };
 
+  elements: DocumentElement[] = [];
+
   constructor() {}
+
+  getState(): DocumentState {
+    return {
+      ...this,
+      finishing: {
+        ...this.finishing,
+      },
+      elements: this.elements.map((e) => e.getState()),
+    };
+  }
 
   createElement(): DocumentElement {
     const element = new DocumentElement();

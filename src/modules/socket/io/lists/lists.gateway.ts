@@ -1,4 +1,6 @@
 import {
+  ConnectedSocket,
+  MessageBody,
   OnGatewayConnection,
   OnGatewayDisconnect,
   OnGatewayInit,
@@ -8,7 +10,7 @@ import {
   WsException,
   WsResponse,
 } from '@nestjs/websockets';
-import { Server, Socket } from 'socket.io';
+import { Namespace, Server, Socket } from 'socket.io';
 import { Logger, UseFilters, UsePipes, ValidationPipe } from '@nestjs/common';
 import { GatewayServerListsListenEvents } from './events/list.server.listen.events';
 import { GatewayServerListsEmitEvents } from './events/list.server.emit.even';
@@ -42,7 +44,7 @@ export class ListsGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {
   @WebSocketServer()
-  server: ServerIo;
+  server: Namespace;
 
   private logger: Logger = new Logger('SocketLists');
 
@@ -50,7 +52,19 @@ export class ListsGateway
   constructor(private readonly toolsService: ToolsService) {}
   /************************************************************* */
 
-  afterInit(server: ServerIo) {}
+  afterInit(server: ServerIo) {
+
+   this.logger.log('afterInit');
+
+   this.server.adapter.on('create-room', (room) => {
+    console.log(`Создана новая комната ${room}`);
+   });
+
+   this.server.adapter.on('delete-room', (room) => {
+     console.log(`Комната ${room} удалена`);
+   });
+    
+  }
 
   async getInitializingState(): Promise<InitializingClientState> {
     if (!this.toolsService.isReady()) await this.toolsService.load();
@@ -66,11 +80,11 @@ export class ListsGateway
     const data = await this.getInitializingState();
 
     client.emit('init', data);
-
     client.broadcast.emit('log', {
       ts: Date.now(),
       msg: `Клиент: ${client.id} подключился.`,
     });
+ 
   }
 
   handleDisconnect(client: ClientIo) {
@@ -86,25 +100,31 @@ export class ListsGateway
 
   @SubscribeMessage('listEditor')
   handleListEditor(client: ClientIo, payload: ListEditor): void {
-
     this.toolsService
       .getListEditorService()
       .act(payload)
       .then(() => {
         const tools = this.toolsService.getTools();
         this.server.emit('tools', tools);
-      }).catch((e) => {
-        console.log("Ошибка отловлена", e);
-        
+      })
+      .catch((e) => {
+        console.log('Ошибка отловлена', e);
       });
   }
   /** Запрос на получение всех инструментов. */
   @SubscribeMessage('tools')
   async handleGetTools(): Promise<WsResponse<InitializingClientTools>> {
     if (!this.toolsService.isReady()) await this.toolsService.load();
+
     return {
       event: 'tools',
       data: this.toolsService.getTools(),
     };
+  }
+
+  @SubscribeMessage('createRoom')
+  createRoom(@MessageBody() data: string, @ConnectedSocket() client: Socket) {
+
+    client.join(data);
   }
 }

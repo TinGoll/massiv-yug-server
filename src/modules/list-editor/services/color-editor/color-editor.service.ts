@@ -20,10 +20,11 @@ import {
   ColorConverter,
   ColorColer,
 } from "src/core/modeles/finishing/color/Color";
+import { ColerService } from "src/modules/repositories/finishing/services/coler/coler.service";
+import { ColorService } from "src/modules/repositories/finishing/services/color/color.service";
+import { ConverterService } from "src/modules/repositories/finishing/services/converter/converter.service";
 
-import { ColerService } from "src/modules/repository/finishing/services/coler/coler.service";
-import { ColorService } from "src/modules/repository/finishing/services/color/color.service";
-import { ConverterService } from "src/modules/repository/finishing/services/converter/converter.service";
+
 
 @Injectable()
 export class ColorEditorService {

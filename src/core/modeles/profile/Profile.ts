@@ -4,7 +4,6 @@ export class Profile {
   name: string;
 
   profileWidth: number | null;
-
   profileWidthMini: number | null;
 
   depth: number | null;

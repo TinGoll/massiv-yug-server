@@ -6,8 +6,8 @@ import {
 } from "src/core/types/event-types/list-editor/client/edit-list-actions";
 import { WorkDto } from "src/core/types/dtos/work-dto/work-dto";
 import { Work } from "src/core/modeles/work/Work";
-import { UpdateWorkInput } from "src/modules/repository/work/inputs/update-work.input";
-import { WorkService } from "src/modules/repository/work/services/work/work.service";
+import { UpdateWorkInput } from "src/modules/repositories/work/inputs/update-work.input";
+import { WorkService } from "src/modules/repositories/work/services/work/work.service";
 
 @Injectable()
 export class WorkEditorService {

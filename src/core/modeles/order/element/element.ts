@@ -5,7 +5,16 @@ export class DocumentElement extends Entity {
   id: number | null = null;
   documentId: number | null = null;
   document: BookDocument | null = null;
+
   constructor() {
     super();
   }
+
+  getState(): any {
+    return {
+      ...this
+    }
+  }
 }
+
+const element = new DocumentElement()

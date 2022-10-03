@@ -20,6 +20,7 @@ export class ProductGeometrySystem extends IteratingSystem {
   }
 
   processEntity(entity: Entity, deltaTime: number): void {
+    
     const geo = entity.getComponent<GeometryComponent>(GeometryComponent);
     const panels = entity.getComponent<PanelAttachmentComponent<Panel>>(
       PanelAttachmentComponent,
