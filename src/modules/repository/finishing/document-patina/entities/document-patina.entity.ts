@@ -1,4 +1,5 @@
 import { PatinaType } from 'src/core/types/model-types/patina-types';
+import { DocumentEntity } from 'src/modules/repository/order/entities/document.entity';
 import {
   Entity,
   Column,
@@ -8,6 +9,7 @@ import {
   ManyToOne,
   OneToMany,
   JoinColumn,
+  OneToOne,
 } from 'typeorm';
 
 @Entity('patina_samples')
@@ -97,4 +99,11 @@ export class DocumentPatinaEntity {
   @ManyToOne((type) => PatinaSampleEntity)
   @JoinColumn({ name: 'sampleId' })
   sample: PatinaSampleEntity;
+
+  // Подключение документа
+  @OneToOne(() => DocumentEntity, (document) => document.color, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'documentId' })
+  document: DocumentEntity;
 }

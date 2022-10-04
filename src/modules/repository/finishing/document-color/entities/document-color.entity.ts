@@ -4,6 +4,7 @@ import {
   ConverterTransparency,
   TypeColorConverter,
 } from 'src/core/types/model-types/color-types';
+import { DocumentEntity } from 'src/modules/repository/order/entities/document.entity';
 import {
   Entity,
   Column,
@@ -13,6 +14,7 @@ import {
   ManyToOne,
   OneToMany,
   JoinColumn,
+  OneToOne,
 } from 'typeorm';
 
 // **********************************************************************
@@ -107,10 +109,10 @@ export class ColorConverterColerEntity {
   converter: ColorConverterEntity;
 }
 
+
 /** Цвет документа */
 @Entity('document_colors')
 export class DocumentColorEntity {
-  
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -122,17 +124,23 @@ export class DocumentColorEntity {
   @Column()
   converterId: number;
 
-  
-
-  @Column('json', { default: { converterAmount: 0, colerAmounts: [] } })
+  @Column('jsonb', { default: { converterAmount: 0, colerAmounts: [] } })
   data: {
     converterAmount: number;
     colerAmounts: Array<{ colerName: string; amount: number }>;
   };
 
-  @ManyToOne((type) => ColorSampleEntity)
+  @ManyToOne((sample) => ColorSampleEntity, {
+    eager: true,
+    onDelete: 'SET NULL',
+  })
   @JoinColumn({ name: 'sampleId' })
   sample: ColorSampleEntity;
 
-
+  // Подключение документа
+  @OneToOne(() => DocumentEntity, (document) => document.color, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'documentId' })
+  document: DocumentEntity;
 }

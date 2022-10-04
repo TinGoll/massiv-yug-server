@@ -7,7 +7,6 @@ import {
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
-  WsException,
   WsResponse,
 } from '@nestjs/websockets';
 import { Namespace, Server, Socket } from 'socket.io';
@@ -16,6 +15,7 @@ import { GatewayServerListsListenEvents } from './events/list.server.listen.even
 import { GatewayServerListsEmitEvents } from './events/list.server.emit.even';
 import { GatewayClientListsEmitEvents } from './events/list.client.emit.even';
 import { GatewayClientListsListenEvents } from './events/list.client.listen.events';
+
 import { ListEditor } from 'src/core/types/event-types/list-editor/client/edit-list-actions';
 import { InitializingClientState, InitializingClientTools } from 'src/core/types/event-types/init/init-state-dto';
 import { ToolsService } from 'src/modules/list-editor/services/tools/tools.service';
@@ -43,6 +43,7 @@ type ServerIo = Server<
 export class ListsGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {
+
   @WebSocketServer()
   server: Namespace;
 
@@ -52,21 +53,10 @@ export class ListsGateway
   constructor(private readonly toolsService: ToolsService) {}
   /************************************************************* */
 
-  afterInit(server: ServerIo) {
-
-   this.logger.log('afterInit');
-
-   this.server.adapter.on('create-room', (room) => {
-    console.log(`Создана новая комната ${room}`);
-   });
-
-   this.server.adapter.on('delete-room', (room) => {
-     console.log(`Комната ${room} удалена`);
-   });
-    
-  }
+  afterInit(server: ServerIo) {}
 
   async getInitializingState(): Promise<InitializingClientState> {
+
     if (!this.toolsService.isReady()) await this.toolsService.load();
     const initState: InitializingClientState = {
       tools: this.toolsService.getTools(),
