@@ -9,6 +9,7 @@ import {
   OneToMany,
 } from 'typeorm';
 import { PersonEntity } from '../../person/entities/person.entity';
+import { BookStatusEntity } from './book-statuses.entity';
 import { DocumentEntity } from './document.entity';
 
 export class СommonOrderData {
@@ -31,7 +32,7 @@ export class СommonOrderData {
 @Entity('order_books')
 export class BookEntity extends СommonOrderData {
   /** Номер / название клиента */
-  @Column({ type: 'varchar', length: 512 })
+  @Column({ type: 'varchar', length: 256 })
   nameFromClient: string;
 
   /** Комментарий / примечание */
@@ -65,14 +66,3 @@ export class BookEntity extends СommonOrderData {
   documents: DocumentEntity[];
 }
 
-@Entity('book_statuses')
-export class BookStatusEntity {
-  @PrimaryGeneratedColumn()
-  id: number;
-
-  @Column({ type: 'varchar', length: 128 })
-  name: string;
-
-  @Column({ type: 'numeric' })
-  index: number;
-}

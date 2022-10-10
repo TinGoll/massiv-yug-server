@@ -1,32 +1,28 @@
-import { MaterialType } from 'src/core/types/model-types/material-type';
-import {
-  Entity,
-  Column,
-  PrimaryGeneratedColumn,
-  CreateDateColumn,
-  UpdateDateColumn,
-} from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, OneToOne } from "typeorm";
+import { VarnishSampleEntity } from "../../finishing/document-varnish/entities/sample-varnish.entity";
+import { DocumentEntity } from "../../order/entities/document.entity";
 
-@Entity('material_sample')
-export class MaterialSampleEntity {
+
+@Entity('document_material')
+export class DocumentMaterialEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @CreateDateColumn()
-  createdAt: Date;
+  @Column('numeric', { default: 0 })
+  value: number;
 
-  @UpdateDateColumn()
-  updatedAt: Date;
+  @ManyToOne((type) => VarnishSampleEntity, { onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'sampleId' })
+  sample: VarnishSampleEntity;
 
-  @Column({ type: 'varchar', length: 256 })
-  name: string;
+  sampleId: number;
 
-  @Column('enum', {
-    enum: ['Массив твердый', 'Массив мягкий', 'МДФ'],
-    nullable: true,
+  // Подключение документа
+  @OneToOne(() => DocumentEntity, (document) => document.color, {
+    onDelete: 'CASCADE',
   })
-  type: MaterialType;
+  @JoinColumn({ name: 'documentId' })
+  document: DocumentEntity;
 
-  @Column('boolean', { default: false })
-  deleted: boolean;
+  documentId: number;
 }

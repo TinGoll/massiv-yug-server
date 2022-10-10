@@ -10,9 +10,7 @@ import {
   ColorConverterDto,
   ColorDto,
 } from "../../../types/dtos/finishing-dto/color-dto";
-import { ColerEntity } from "src/modules/repositories/finishing/entities/coler.entity";
-import { ColorEntity } from "src/modules/repositories/finishing/entities/color.entity";
-import { ConverterEntity } from "src/modules/repositories/finishing/entities/converter.entity";
+
 
 export class Color implements IDto<ColorDto> {
   id: number = 0;
@@ -134,18 +132,18 @@ export class Color implements IDto<ColorDto> {
     return this;
   }
 
-  public static define(colorEntity: ColorEntity): Color | null {
-    if (!colorEntity) return null;
-    const color = new Color(colorEntity.name, colorEntity.colorType);
-    color.id = colorEntity.id;
-    color.currentConverter = ColorConverter.define(
-      colorEntity.currentConverter
-    );
-    color.converters = colorEntity.converters.map((converterDto) => {
-      return ColorConverter.define(converterDto);
-    });
-    return color;
-  }
+  // public static define(colorEntity: ColorEntity): Color | null {
+  //   if (!colorEntity) return null;
+  //   const color = new Color(colorEntity.name, colorEntity.colorType);
+  //   color.id = colorEntity.id;
+  //   color.currentConverter = ColorConverter.define(
+  //     colorEntity.currentConverter
+  //   );
+  //   color.converters = colorEntity.converters.map((converterDto) => {
+  //     return ColorConverter.define(converterDto);
+  //   });
+  //   return color;
+  // }
 }
 
 export class ColorConverter implements IDto<ColorConverterDto> {
@@ -236,29 +234,29 @@ export class ColorConverter implements IDto<ColorConverterDto> {
     return this;
   }
 
-  public static define(converterEntity: ConverterEntity | null) {
-    if (!converterEntity) return null;
-    const {
-      name,
-      converterGloss,
-      transparency,
-      typeConverter,
-      value,
-      id,
-    } = converterEntity;
-    const converter = new ColorConverter(
-      name,
-      typeConverter,
-      transparency,
-      converterGloss,
-      value
-    );
-    converter.id = id;
-    converter.colers = converterEntity.colers.map((colerDto) =>
-      ColorColer.define(colerDto)
-    );
-    return converter;
-  }
+//   public static define(converterEntity: ConverterEntity | null) {
+//     if (!converterEntity) return null;
+//     const {
+//       name,
+//       converterGloss,
+//       transparency,
+//       typeConverter,
+//       value,
+//       id,
+//     } = converterEntity;
+//     const converter = new ColorConverter(
+//       name,
+//       typeConverter,
+//       transparency,
+//       converterGloss,
+//       value
+//     );
+//     converter.id = id;
+//     converter.colers = converterEntity.colers.map((colerDto) =>
+//       ColorColer.define(colerDto)
+//     );
+//     return converter;
+//   }
 }
 
 export class ColorColer {
@@ -280,11 +278,11 @@ export class ColorColer {
     return this;
   }
 
-  public static define(colerEntity: ColerEntity | null): ColorColer | null {
-    if (!colerEntity) return null;
-    const { name, value, id } = colerEntity;
-    const coler = new ColorColer(name, value);
-    coler.id = id;
-    return coler;
-  }
+  // public static define(colerEntity: ColerEntity | null): ColorColer | null {
+  //   if (!colerEntity) return null;
+  //   const { name, value, id } = colerEntity;
+  //   const coler = new ColorColer(name, value);
+  //   coler.id = id;
+  //   return coler;
+  // }
 }

@@ -8,10 +8,9 @@ import { EngineModule } from './engine/engine.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import path, { join } from 'path';
 import { SocketModule } from './modules/socket/socket.module';
-import { ListEditorModule } from './modules/list-editor/list-editor.module';
-import { AuthorizationModule } from './modules/authorization/authorization.module';
 import { ProcessingModule } from './modules/processing/processing.module';
 import { RepositoryModule } from './modules/repository/repository.module';
+import { HttpModule } from '@nestjs/axios';
 
 @Module({
   imports: [
@@ -23,12 +22,20 @@ import { RepositoryModule } from './modules/repository/repository.module';
       rootPath: join(__dirname, '..', '..', 'client', 'build'),
       exclude: ['/api*', '/graphql'],
     }),
-    GraphQLModule.forRoot<ApolloDriverConfig>({
-      driver: ApolloDriver,
-      autoSchemaFile: 'schema.gql',
-      sortSchema: true,
-      playground: true,
+    HttpModule.registerAsync({
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => ({
+        timeout: configService.get('HTTP_TIMEOUT'),
+        maxRedirects: configService.get('HTTP_MAX_REDIRECTS'),
+      }),
+      inject: [ConfigService],
     }),
+    // GraphQLModule.forRoot<ApolloDriverConfig>({
+    //   driver: ApolloDriver,
+    //   autoSchemaFile: 'schema.gql',
+    //   sortSchema: true,
+    //   playground: true,
+    // }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -49,10 +56,8 @@ import { RepositoryModule } from './modules/repository/repository.module';
     }),
     EngineModule,
     SocketModule,
-    ListEditorModule,
-    AuthorizationModule,
     ProcessingModule,
-    RepositoryModule
+    RepositoryModule,
   ],
   controllers: [],
   providers: [],

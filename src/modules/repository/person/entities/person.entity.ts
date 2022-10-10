@@ -19,10 +19,12 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   ManyToOne,
-  OneToMany,
   JoinColumn,
   OneToOne,
 } from 'typeorm';
+import { ClientAccount } from './client-account.entity';
+import { UserAccount } from './user-account.entity';
+
 
 export class СommonPerson {
   /** id человека */
@@ -56,8 +58,7 @@ export class СommonPerson {
 export class PersonEntity extends СommonPerson {
   // Роли
   @Column({
-    type: 'set',
-    enum: PersonRole,
+    type: 'jsonb',
     default: [PersonRole.USER, PersonRole.CLIENT],
   })
   personRoles: PersonRole[];
@@ -74,34 +75,3 @@ export class PersonEntity extends СommonPerson {
   userAccount: UserAccount;
 }
 
-/** Аккаунт пользователя. */
-@Entity('user_account')
-export class UserAccount {
-
-  @PrimaryGeneratedColumn()
-  id: number;
-
-  // Роли
-  @Column({
-    type: 'set',
-    enum: UserRole,
-    default: [UserRole.GUEST],
-  })
-  userRoles: UserRole[];
-
-
-
-  @OneToOne(() => PersonEntity, (user) => user.userAccount)
-  user: PersonEntity;
-}
-
-/** Аккаунт клиента. */
-@Entity('client_account')
-export class ClientAccount {
-
-  @PrimaryGeneratedColumn()
-  id: number;
-
-  @OneToMany(() => PersonEntity, (photo) => photo.clientAccount)
-  clients: PersonEntity[];
-}

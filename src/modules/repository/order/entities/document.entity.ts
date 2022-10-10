@@ -1,32 +1,41 @@
-import { Entity, JoinColumn, OneToOne, Column, ManyToOne, OneToMany } from 'typeorm';
+import {
+  Entity,
+  JoinColumn,
+  OneToOne,
+  Column,
+  ManyToOne,
+  OneToMany,
+} from 'typeorm';
 import {
   BookDocumentType,
   DocumentGlossiness,
 } from 'src/core/types/model-types/document-types';
+
+import { BookEntity, СommonOrderData } from './book.entity';
+import { ElementEntity } from './element.entity';
 import { DocumentColorEntity } from '../../finishing/document-color/entities/document-color.entity';
 import { DocumentPatinaEntity } from '../../finishing/document-patina/entities/document-patina.entity';
 import { DocumentVarnishEntity } from '../../finishing/document-varnish/entities/document-varnish.entity';
-import { MaterialSampleEntity } from '../../material/entities/document-material.entity';
-import { PanelSampleEntity } from '../../panel/entities/document-panel.entity';
+
+import { DocumentMaterialEntity } from '../../material/entities/document-material.entity';
+import { DocumentPanelEntity } from '../../panel/entities/document-panel.entity';
 import { DocumentProfileEntity } from '../../profile/entities/document-profile.entity';
-import { BookEntity, СommonOrderData } from './book.entity';
-import { ElementEntity } from './element.entity';
 
 @Entity('documents')
 export class DocumentEntity extends СommonOrderData {
   @Column({ type: 'varchar', length: 64 })
   documentType: BookDocumentType;
 
-  // Параметры без уникальных настроек.
-  @ManyToOne(() => MaterialSampleEntity, { eager: true, onDelete: 'SET NULL' })
-  @JoinColumn({ name: 'materialId' })
-  material: MaterialSampleEntity;
+  @OneToOne(() => DocumentPanelEntity, (panel) => panel.document, {
+    eager: true,
+  })
+  panel: DocumentPanelEntity;
 
-  @ManyToOne(() => MaterialSampleEntity, { eager: true, onDelete: 'SET NULL' })
-  @JoinColumn({ name: 'panelId' })
-  panel: PanelSampleEntity;
+  @OneToOne(() => DocumentMaterialEntity, (material) => material.document, {
+    eager: true,
+  })
+  material: DocumentMaterialEntity;
 
-  // Параметры с уникальными настройками.
   @OneToOne(() => DocumentProfileEntity, (profile) => profile.document, {
     eager: true,
   })
@@ -47,7 +56,7 @@ export class DocumentEntity extends СommonOrderData {
   })
   varnish: DocumentVarnishEntity;
 
-  /** Степень блеска. */
+  /** Глянцевость. */
   @Column({
     type: 'enum',
     enum: [

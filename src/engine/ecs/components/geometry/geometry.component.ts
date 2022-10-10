@@ -3,6 +3,7 @@ import { Component } from "yug-entity-component-system";
 
 export class GeometryComponent extends Component {
   geometry: Geometry;
+
   constructor(
     height: number | null = null,
     width: number | null = null,

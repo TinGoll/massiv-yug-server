@@ -11,10 +11,6 @@ import {
 import { Namespace, Server, Socket } from 'socket.io';
 import { RoomManager } from 'src/modules/processing/room-manager';
 import { OrderRoom } from 'src/modules/processing/rooms/order-room/order.room';
-import {
-  BookService,
-  OrderlistContentItem,
-} from 'src/modules/repositories/order/services/book/book.service';
 
 @WebSocketGateway({
   namespace: 'orders',
@@ -33,7 +29,7 @@ export class OrdersGateway
 
   constructor(
     private readonly roomManager: RoomManager,
-    private readonly bookService: BookService,
+ 
   ) {}
 
   afterInit(server: Server) {
@@ -77,8 +73,7 @@ export class OrdersGateway
   /**************** Уведомления **************** */
 
   async notificationContentList() {
-    const list = await this.bookService.getContentList();
-    this.server.emit('order-list', list);
+    
   }
 
   async notificationRoomState(roomId: string) {
@@ -101,17 +96,7 @@ export class OrdersGateway
     }
   }
 
-  /********************************************* */
-  /************* Получение списков ************* */
-
-  @SubscribeMessage('order-list')
-  async getContentList(): Promise<WsResponse<Array<OrderlistContentItem>>> {
-    const list = await this.bookService.getContentList();
-    return {
-      event: 'order-list',
-      data: list,
-    };
-  }
+  
 
   /********************************************* */
   /*********** Работа с комнатами ************** */
@@ -123,35 +108,35 @@ export class OrdersGateway
     payload: {
       type: string;
     },
-  ): Promise<WsResponse<{ roomId: string; bookState: any }>> {
-    const book = await this.bookService.new(payload.type, client);
-    const room = await this.roomManager.create<OrderRoom>(
-      book.id,
-      'ORDER_ROOM',
-      book,
-    );
-    client.join(room.id);
-    return {
-      event: 'room-state',
-      data: room.getRoomState(),
-    };
+  ): Promise<void> {
+    // const book = await this.bookService.new(payload.type, client);
+    // const room = await this.roomManager.create<OrderRoom>(
+    //   book.id,
+    //   'ORDER_ROOM',
+    //   book,
+    // );
+    // client.join(room.id);
+    // return {
+    //   event: 'room-state',
+    //   data: room.getRoomState(),
+    // };
   }
 
   /** Открытие существующего заказа */
   @SubscribeMessage('order-open')
   async openOrder(client: Socket, payload: { id: string }): Promise<void> {
-    let room = this.roomManager.getRoom(payload.id);
-    if (!room) {
-      const book = await this.bookService.load(Number(payload.id), client);
-      if (!book) return;
-      room = await this.roomManager.create<OrderRoom>(
-        book.id,
-        'ORDER_ROOM',
-        book,
-      );
-    }
-    client.join(room.id);
-    return;
+    // let room = this.roomManager.getRoom(payload.id);
+    // if (!room) {
+    //   const book = await this.bookService.load(Number(payload.id), client);
+    //   if (!book) return;
+    //   room = await this.roomManager.create<OrderRoom>(
+    //     book.id,
+    //     'ORDER_ROOM',
+    //     book,
+    //   );
+    // }
+    // client.join(room.id);
+    // return;
   }
 
   /** Удаление заказа. */

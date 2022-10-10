@@ -1,44 +1,24 @@
+import { Entity, PrimaryGeneratedColumn, ManyToOne, JoinColumn, OneToOne } from "typeorm";
+import { DocumentEntity } from "../../order/entities/document.entity";
+import { PanelSampleEntity } from "./sample-panel.entity";
 
-import {
-  Entity,
-  Column,
-  PrimaryGeneratedColumn,
-  CreateDateColumn,
-  UpdateDateColumn,
-} from 'typeorm';
 
-@Entity('panel_samples')
-export class PanelSampleEntity {
+@Entity('document_panel')
+export class DocumentPanelEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @CreateDateColumn()
-  createdAt: Date;
+  @ManyToOne((type) => PanelSampleEntity, { onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'sampleId' })
+  sample: PanelSampleEntity;
 
-  @UpdateDateColumn()
-  updatedAt: Date;
+  sampleId: number;
 
-  @Column({ type: 'varchar', length: 256 })
-  name: string;
-
-  /** Название рубашки */
-  @Column({ type: 'varchar', length: 256 })
-  shirtName: string;
-
-  /** Толщина рубашки */
-  @Column()
-  depthOverlay: number;
-
-  /** Припуск для расчета рубашки */
-  @Column()
-  indent: number;
-
-  /** Отступ для рубашки */
-  @Column()
-  figoreaSize: number;
-
-  @Column({type: "varchar", length: 560})
-  drawing: string;
-
+  // Подключение документа
+  @OneToOne(() => DocumentEntity, (document) => document.color, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'documentId' })
+  document: DocumentEntity;
+  documentId: number;
 }
-
