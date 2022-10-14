@@ -14,6 +14,10 @@ export class DocumentPatinaEntity {
   @Column()
   converterId: number;
 
+  /** Название из старой бд */
+  @Column({ type: 'varchar', length: 256, nullable: true })
+  previousName?: string;
+
   @ManyToOne((type) => PatinaSampleEntity, { onDelete: 'SET NULL' })
   @JoinColumn({ name: 'sampleId' })
   sample: PatinaSampleEntity;

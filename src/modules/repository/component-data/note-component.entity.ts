@@ -1,5 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, JoinColumn, OneToOne } from "typeorm";
-import { ElementEntity } from "../order/entities/element.entity";
+import { ElementEntity } from "../order/entities/document-element.entity";
+
 
 @Entity('component_note')
 export class NoteComponentEntity {

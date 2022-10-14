@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { WsException } from '@nestjs/websockets';
-import { async } from 'rxjs';
 import { Repository } from 'typeorm';
 import { ColorConverterColerEntity } from '../../entities/color-coler.entity';
 import { ColorConverterEntity } from '../../entities/color-converter.entity';
@@ -45,7 +44,7 @@ export class ColorService {
       if (candidate)
         throw new WsException('Шаблон с таким именем уже существует.');
       
-      const { converters, ...createData } = createInput;
+      const { converters = [], ...createData } = createInput;
       const savedConverters = await Promise.all(converters.map(async c => {
         return await this.createConverter(c);
       }))

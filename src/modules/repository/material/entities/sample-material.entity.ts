@@ -23,7 +23,14 @@ export class MaterialSampleEntity {
   name: string;
 
   @Column('enum', {
-    enum: ['Массив твердый', 'Массив мягкий', 'МДФ'],
+    enum: [
+      'Массив твердый',
+      'Массив мягкий',
+      'МДФ',
+      'Полиуретан',
+      'ЛДСП',
+      'ДСП',
+    ],
     nullable: true,
   })
   type: MaterialType;

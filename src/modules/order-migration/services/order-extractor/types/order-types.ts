@@ -1,11 +1,6 @@
-import { HttpService } from '@nestjs/axios';
-import { Injectable, UseInterceptors } from '@nestjs/common';
-import { interval, map, Observable, Subject } from 'rxjs';
-import { AxiosResponse } from 'axios';
-import { TestInterceptor } from '../interceptors/test.interceptor';
 
 
-    export interface MigrationElementData {
+    export interface MigrationOrderElementData {
       id: number;
       orderId: number;
       name: string;
@@ -67,28 +62,5 @@ import { TestInterceptor } from '../interceptors/test.interceptor';
       planDatePack: Date;
       termoshov: string;
       profileAngle: string;
-      elements: MigrationElementData[];
+      elements: MigrationOrderElementData[];
     }
-
-
-export interface Response<T> {
-  data: T;
-}
-
-@UseInterceptors(TestInterceptor<{}>)
-@Injectable()
-export class HttpConsumingServiceService {
-  private readonly DATA_URL =
-    'http://192.168.2.10:3131/api/service/migration/get-order-data/17000';
-
-  constructor(private readonly http: HttpService) {}
-
-  callHttp(orders: number[]): Observable<Response<MigrationOrderData[]>> {
-
-    const obs = this.http.get(
-      `http://192.168.2.10:3131/api/service/migration/get-order-data/${orders.join(";")}`,
-    );
-    const data = obs.pipe(map((p) => p.data));
-    return data;
-  }
-}

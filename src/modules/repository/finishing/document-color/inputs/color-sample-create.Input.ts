@@ -4,8 +4,6 @@ import { ConverterCreateInput } from "./converter-create.input";
 
 export class ColorCreateSampleInput {
   name: string;
-
   colorType: ColorType;
-
-  converters: ConverterCreateInput[];
+  converters?: ConverterCreateInput[];
 }

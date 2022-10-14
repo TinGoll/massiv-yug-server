@@ -12,7 +12,6 @@ import {
 } from 'src/core/types/model-types/document-types';
 
 import { BookEntity, СommonOrderData } from './book.entity';
-import { ElementEntity } from './element.entity';
 import { DocumentColorEntity } from '../../finishing/document-color/entities/document-color.entity';
 import { DocumentPatinaEntity } from '../../finishing/document-patina/entities/document-patina.entity';
 import { DocumentVarnishEntity } from '../../finishing/document-varnish/entities/document-varnish.entity';
@@ -20,6 +19,7 @@ import { DocumentVarnishEntity } from '../../finishing/document-varnish/entities
 import { DocumentMaterialEntity } from '../../material/entities/document-material.entity';
 import { DocumentPanelEntity } from '../../panel/entities/document-panel.entity';
 import { DocumentProfileEntity } from '../../profile/entities/document-profile.entity';
+import { ElementEntity } from './document-element.entity';
 
 @Entity('documents')
 export class DocumentEntity extends СommonOrderData {
@@ -66,14 +66,15 @@ export class DocumentEntity extends СommonOrderData {
       'Глянец (70%)',
       'Сильный глянец (90%)',
     ],
-  })
+    nullable: true
+  })  
   glossiness: DocumentGlossiness;
 
   @Column({ type: 'jsonb', default: {} })
   resultData: any;
 
   /** Комментарий / примечание */
-  @Column({ type: 'varchar', length: 512 })
+  @Column({ type: 'varchar', length: 512, nullable: true })
   note: string;
 
   /** Книга документа */

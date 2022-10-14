@@ -27,13 +27,22 @@ import { ProfileSampleEntity } from './profile/entities/sample-profile.entity';
 import { DocumentProfileEntity } from './profile/entities/document-profile.entity';
 import { BookStatusEntity } from './order/entities/book-statuses.entity';
 import { BookEntity } from './order/entities/book.entity';
-import { ElementEntity, ElementSampleEntity } from './order/entities/element.entity';
 import { GeometryComponentEntity } from './component-data/geometry-component.entity';
 import { NoteComponentEntity } from './component-data/note-component.entity';
 import { ColorService } from './finishing/document-color/services/document-color/document-color.service';
 import { PatinaService } from './finishing/document-patina/services/document-patina/document-patina.service';
 import { ProfileService } from './profile/services/profile/profile.service';
 import { ProfileImporter } from './profile/services/profile-importer';
+import { SettingService } from './setting-data/services/setting/setting.service';
+import { SettingEntity } from './setting-data/entities/setting.entity';
+import { PersonPhone } from './person/entities/person-phone-entity';
+import { PersonCard } from './person/entities/person-card-entity';
+import { PersonEmail } from './person/entities/person-email-entity';
+import { PersonBankAccount } from './person/entities/person-bank-account.entity';
+import { PersonAddress } from './person/entities/person-address';
+import { OrderService } from './order/services/order/order.service';
+import { ElementEntity } from './order/entities/document-element.entity';
+import { ElementSampleEntity } from './order/entities/sample-element.entity';
 
 @Module({
   imports: [
@@ -65,6 +74,12 @@ import { ProfileImporter } from './profile/services/profile-importer';
       ElementEntity,
       GeometryComponentEntity,
       NoteComponentEntity,
+      SettingEntity,
+      PersonPhone,
+      PersonCard,
+      PersonEmail,
+      PersonBankAccount,
+      PersonAddress,
     ]),
   ],
   providers: [
@@ -75,8 +90,9 @@ import { ProfileImporter } from './profile/services/profile-importer';
     PanelService,
     PersonService,
     ProfileService,
-    
     ProfileImporter,
+    SettingService,
+    OrderService,
   ],
   exports: [
     ColorService,
@@ -86,8 +102,9 @@ import { ProfileImporter } from './profile/services/profile-importer';
     PanelService,
     PersonService,
     ProfileService,
-
+    SettingService,
     ProfileImporter,
+    OrderService,
   ],
 })
 export class RepositoryModule {}

@@ -7,18 +7,22 @@ import { AuthorizationGateway } from './io/authorization/authorization.gateway';
 import { ProcessingModule } from '../processing/processing.module';
 import { RepositoryModule } from '../repository/repository.module';
 import { HttpModule } from '@nestjs/axios';
-import { HttpConsumingServiceService } from './http-consuming-service/http-consuming-service.service';
+import { OrderMigrationModule } from '../order-migration/order-migration.module';
 
 
 
 @Module({
-  imports: [ProcessingModule, RepositoryModule, HttpModule],
+  imports: [
+    ProcessingModule,
+    RepositoryModule,
+    HttpModule,
+    OrderMigrationModule,
+  ],
   providers: [
     ConstructorGateway,
     OrdersGateway,
     ListsGateway,
     AuthorizationGateway,
-    HttpConsumingServiceService,
   ],
   exports: [OrdersGateway],
 })

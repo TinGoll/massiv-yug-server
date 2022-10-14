@@ -7,9 +7,15 @@ export enum PersonRole {
 
 /** Роли пользователя */
 export enum UserRole {
-  ADMIN = 'admin',
-  MANAGER = 'manager',
-  GUEST = 'guest',
+  ADMIN = 'Админ',
+  MANAGER = 'Менеджер',
+  SBORKA = 'Сборка',
+  SHLIFOVKA = 'Шлифовка',
+  LAKIROVKA = 'Лакировка',
+  UPAKOVKA = 'Упаковка',
+  GUEST = 'Гость',
+  ACCOUNTANT = 'Бухгалтер',
+  GRAND_PACKER = 'Главный упаковщик',
 }
 
 import {
@@ -21,8 +27,14 @@ import {
   ManyToOne,
   JoinColumn,
   OneToOne,
+  OneToMany,
 } from 'typeorm';
 import { ClientAccount } from './client-account.entity';
+import { PersonAddress } from './person-address';
+import { PersonBankAccount } from './person-bank-account.entity';
+import { PersonCard } from './person-card-entity';
+import { PersonEmail } from './person-email-entity';
+import { PersonPhone } from './person-phone-entity';
 import { UserAccount } from './user-account.entity';
 
 
@@ -32,13 +44,13 @@ export class СommonPerson {
   id: number;
   // Имя фамилия отчество
   /** Имя */
-  @Column({ type: 'varchar', length: 256 })
+  @Column({ type: 'varchar', length: 256, nullable: true })
   firstName: string;
   /** Фамилия */
-  @Column({ type: 'varchar', length: 256 })
+  @Column({ type: 'varchar', length: 256, nullable: true })
   lastName: string;
   /** Отчество */
-  @Column({ type: 'varchar', length: 256 })
+  @Column({ type: 'varchar', length: 256, nullable: true })
   middleName: string;
 
   /** Дата создания */
@@ -59,19 +71,44 @@ export class PersonEntity extends СommonPerson {
   // Роли
   @Column({
     type: 'jsonb',
-    default: [PersonRole.USER, PersonRole.CLIENT],
+    default: [PersonRole.USER],
   })
   personRoles: PersonRole[];
 
   /** Подключение аккаунта клиента  */
-  @ManyToOne(() => ClientAccount, (account) => account.clients, {
+  @OneToOne(() => ClientAccount, (account) => account.person, {
     eager: true,
   })
   @JoinColumn({ name: 'clientAccountId' })
   clientAccount: ClientAccount;
 
-  @OneToOne(() => UserAccount, (account) => account.user)
+  @OneToOne(() => UserAccount, (account) => account.person)
   @JoinColumn({ name: 'userAccountId' })
   userAccount: UserAccount;
+
+  @OneToMany(() => PersonPhone, (phone) => phone.person, {
+    eager: true,
+  })
+  phones: PersonPhone[];
+
+  @OneToMany(() => PersonCard, (card) => card.person, {
+    eager: true,
+  })
+  cards: PersonCard[];
+
+  @OneToMany(() => PersonEmail, (email) => email.person, {
+    eager: true,
+  })
+  emails: PersonEmail[];
+
+  @OneToMany(() => PersonBankAccount, (bankAccount) => bankAccount.person, {
+    eager: true,
+  })
+  bankAccounts: PersonBankAccount[];
+
+  @OneToMany(() => PersonAddress, (bankAccount) => bankAccount.person, {
+    eager: true,
+  })
+  addresses: PersonAddress[];
 }
 

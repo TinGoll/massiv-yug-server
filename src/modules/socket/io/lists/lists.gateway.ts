@@ -34,7 +34,7 @@ import { PanelCreateInput } from 'src/modules/repository/panel/inputs/panel-crea
 import { ProfileCreateInput } from 'src/modules/repository/profile/inputs/profile-create.input';
 import { ProfileService } from 'src/modules/repository/profile/services/profile/profile.service';
 import { ProfileImporter } from 'src/modules/repository/profile/services/profile-importer';
-import { HttpConsumingServiceService } from '../../http-consuming-service/http-consuming-service.service';
+import { OrderExtractorService } from 'src/modules/order-migration/services/order-extractor/order-extractor.service';
 
 type ClientIo = Socket<
   GatewayClientListsListenEvents,
@@ -68,7 +68,7 @@ export class ListsGateway
     private readonly panelService: PanelService,
     private readonly profileService: ProfileService,
     private readonly profileImporter: ProfileImporter,
-    private readonly httpConsumingServiceService: HttpConsumingServiceService,
+    private readonly orderExtractorService: OrderExtractorService,
   ) {}
   /************************************************************* */
   afterInit(server: ServerIo) {}
@@ -251,25 +251,19 @@ export class ListsGateway
       // await this.profileImporter.import()
       // const data = await this.profileService.findSample(163);
       // const data = await this.profileService.findAllSamples();
-      const data = this.httpConsumingServiceService.callHttp([
-        23000
-      ]);
-      data.subscribe({
-        next(value) {
-          client.emit('sample-profile-import', value);
-        },
-        error(err) {
-          this.sendError(client, err);
-        },
-        complete() {
-          console.log('COMPLITE');
-        },
-      });
-
-      // return {
-      //   event: 'sample-profile-import',
-      //   data,
-      // };
+      // this.orderExtractorService.getNextOrder(17000).subscribe({
+      //   next(value) {
+      //     client.emit('sample-profile-import', value);
+      //   },
+      //   error(err) {
+      //     console.log(err);
+      //   },
+      //   complete() {
+      //     console.log('COMPLITE');
+      //   },
+      // });
+      const value = await this.orderExtractorService.getNextOrder(17000);
+      client.emit('sample-profile-import', value);
     } catch (e) {
       this.sendError(client, e);
     }

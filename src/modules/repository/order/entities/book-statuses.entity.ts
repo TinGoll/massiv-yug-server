@@ -9,6 +9,6 @@ export class BookStatusEntity {
   @Column({ type: 'varchar', length: 128 })
   name: string;
 
-  @Column({ type: 'numeric' })
+  @Column({ type: 'decimal', precision: 5, scale: 2, default: 0 })
   index: number;
 }

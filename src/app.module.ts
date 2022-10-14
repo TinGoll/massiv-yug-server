@@ -11,6 +11,7 @@ import { SocketModule } from './modules/socket/socket.module';
 import { ProcessingModule } from './modules/processing/processing.module';
 import { RepositoryModule } from './modules/repository/repository.module';
 import { HttpModule } from '@nestjs/axios';
+import { OrderMigrationModule } from './modules/order-migration/order-migration.module';
 
 @Module({
   imports: [
@@ -20,7 +21,9 @@ import { HttpModule } from '@nestjs/axios';
     }),
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', '..', 'client', 'build'),
-      exclude: ['/api*', '/graphql'],
+      renderPath: '/',
+      serveStaticOptions: {},
+      exclude: ['/api/*'],
     }),
     HttpModule.registerAsync({
       imports: [ConfigModule],
@@ -58,6 +61,7 @@ import { HttpModule } from '@nestjs/axios';
     SocketModule,
     ProcessingModule,
     RepositoryModule,
+    OrderMigrationModule, // Временный модуль, для миграции заказов
   ],
   controllers: [],
   providers: [],

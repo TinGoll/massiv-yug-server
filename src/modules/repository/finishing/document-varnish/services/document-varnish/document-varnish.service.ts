@@ -23,7 +23,9 @@ export class VarnishService {
   async createSample(input: VarnisCreateInput): Promise<VarnishSampleEntity> {
     try {
       if (!input.name) throw new WsException('Не указано название шаблона.');
+      
       const candidate = await this.findSampleToName(input.name);
+
       if (candidate)
         throw new WsException('Шаблон с таким именем уже существует.');
       const sample = await this.varnishSampleEntityRepository.save({

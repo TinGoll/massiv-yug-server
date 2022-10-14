@@ -21,6 +21,10 @@ export class DocumentColorEntity {
     colerAmounts: Array<{ colerName: string; amount: number }>;
   };
 
+  /** Название из старой бд */
+  @Column({ type: 'varchar', length: 256, nullable: true })
+  previousName?: string;
+
   @ManyToOne((sample) => ColorSampleEntity, {
     eager: true,
     onDelete: 'SET NULL',

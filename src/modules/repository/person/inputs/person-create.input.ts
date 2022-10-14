@@ -1,3 +1,4 @@
+import { ClientAccount } from '../entities/client-account.entity';
 import { PersonRole, UserRole } from '../entities/person.entity';
 
 export class PersonCreateInput {
@@ -11,11 +12,12 @@ export class PersonCreateInput {
   personRoles?: PersonRole[];
 }
 
-export class PersonClientAccountCreateInput {
-  personId: number;
-}
+export interface PersonClientAccountCreateInput extends Partial<ClientAccount> {}
 
 export class PersonUserAccountCreateInput {
-  personId: number;
+  login: string;
+  password: string;
   userRoles: UserRole[];
+  status?: 'active' | 'fired';
+  personId?: number;
 }

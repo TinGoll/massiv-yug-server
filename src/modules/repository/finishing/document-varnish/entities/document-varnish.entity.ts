@@ -10,6 +10,10 @@ export class DocumentVarnishEntity {
   @Column('numeric', { default: 0 })
   value: number;
 
+  /** Название из старой бд */
+  @Column({ type: 'varchar', length: 256, nullable: true })
+  previousName?: string;
+
   @ManyToOne((type) => VarnishSampleEntity, { onDelete: 'SET NULL' })
   @JoinColumn({ name: 'sampleId' })
   sample: VarnishSampleEntity;

@@ -32,15 +32,15 @@ export class СommonOrderData {
 @Entity('order_books')
 export class BookEntity extends СommonOrderData {
   /** Номер / название клиента */
-  @Column({ type: 'varchar', length: 256 })
+  @Column({ type: 'varchar', length: 256, nullable: true })
   nameFromClient: string;
 
   /** Комментарий / примечание */
-  @Column({ type: 'varchar', length: 512 })
+  @Column({ type: 'varchar', length: 512, nullable: true })
   note: string;
 
   /** Штрих код */
-  @Column({ type: 'varchar', length: 128 })
+  @Column({ type: 'varchar', length: 128, nullable: true })
   barcode: string;
 
   /** Результативные данные */

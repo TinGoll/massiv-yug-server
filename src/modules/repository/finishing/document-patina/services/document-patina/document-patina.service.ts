@@ -38,15 +38,17 @@ export class PatinaService {
     createInput: PatinaCreateInput,
   ): Promise<PatinaSampleEntity> {
     try {
+
       if (!createInput.name)
         throw new WsException('Не указано название шаблона патины.');
       const candidate = await this.findSampleToName(createInput.name);
+
       if (candidate)
         throw new WsException('Шаблон с таким именем уже существует.');
 
-      const { converters, ...createData } = createInput;
+      const { converters = [], ...createData } = createInput;
       const savedConverters = await Promise.all(
-        converters.map(async (c) => await this.createConverter(c)),
+        converters?.map(async (c) => await this.createConverter(c)),
       );
       const entity = this.patinaSampleEntityRepository.create(createData);
       entity.converters = savedConverters;
