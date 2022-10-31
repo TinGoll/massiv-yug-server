@@ -24,20 +24,18 @@ export class OrderRoom extends Room {
     return this.book;
   }
 
-  getRoomState(): {roomId: string, bookState: any} {
+  getRoomState(): { roomId: string; bookState: any } {
     return {
       roomId: this.id,
-      bookState: this.book?.getState() || null
-    }
+      bookState: this.book?.getState() || null,
+    };
   }
 
   async command(
     server: Server,
     client: Socket,
     ...args: any[]
-  ): Promise<void> {
-    
-  }
+  ): Promise<void> {}
 
   async afterCreation(): Promise<void> {
     console.log(this.id, this.roomType, 'afterCreation');
@@ -46,4 +44,6 @@ export class OrderRoom extends Room {
   async destroy(): Promise<void> {
     console.log(this.id, this.roomType, 'destroy');
   }
+
+  update(dt: number): void {}
 }

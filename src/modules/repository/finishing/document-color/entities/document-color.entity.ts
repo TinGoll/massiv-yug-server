@@ -12,8 +12,11 @@ export class DocumentColorEntity {
   @Column('numeric', { default: 0 })
   value: number;
 
-  @Column()
+  @Column({ nullable: true })
   converterId: number;
+
+  @Column({ type: 'varchar', length: 512, nullable: true })
+  note: string;
 
   @Column('jsonb', { default: { converterAmount: 0, colerAmounts: [] } })
   data: {

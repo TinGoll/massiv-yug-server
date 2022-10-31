@@ -1,4 +1,4 @@
-import { Engine } from "yug-entity-component-system";
+
 
 export class Geometry {
   public height: number | null = null;

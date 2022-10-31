@@ -1,7 +1,13 @@
-import { DocumentEntity } from "src/modules/repository/order/entities/document.entity";
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, OneToOne } from "typeorm";
-import { PatinaSampleEntity } from "./sample-patina.entity";
-
+import { DocumentEntity } from 'src/modules/repository/order/entities/document.entity';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  JoinColumn,
+  OneToOne,
+} from 'typeorm';
+import { PatinaSampleEntity } from './sample-patina.entity';
 
 @Entity('document_patinas')
 export class DocumentPatinaEntity {
@@ -11,12 +17,15 @@ export class DocumentPatinaEntity {
   @Column('numeric', { default: 0 })
   value: number;
 
-  @Column()
+  @Column({nullable: true})
   converterId: number;
 
   /** Название из старой бд */
   @Column({ type: 'varchar', length: 256, nullable: true })
   previousName?: string;
+
+  @Column({ type: 'varchar', length: 512, nullable: true })
+  note: string;
 
   @ManyToOne((type) => PatinaSampleEntity, { onDelete: 'SET NULL' })
   @JoinColumn({ name: 'sampleId' })

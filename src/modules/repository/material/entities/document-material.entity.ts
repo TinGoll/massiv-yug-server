@@ -1,6 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, OneToOne } from "typeorm";
-import { VarnishSampleEntity } from "../../finishing/document-varnish/entities/sample-varnish.entity";
 import { DocumentEntity } from "../../order/entities/document.entity";
+import { MaterialSampleEntity } from "./sample-material.entity";
 
 
 @Entity('document_material')
@@ -11,11 +11,9 @@ export class DocumentMaterialEntity {
   @Column('numeric', { default: 0 })
   value: number;
 
-  @ManyToOne((type) => VarnishSampleEntity, { onDelete: 'SET NULL' })
+  @ManyToOne((type) => MaterialSampleEntity, { onDelete: 'SET NULL' })
   @JoinColumn({ name: 'sampleId' })
-  sample: VarnishSampleEntity;
-
-  sampleId: number;
+  sample: MaterialSampleEntity;
 
   // Подключение документа
   @OneToOne(() => DocumentEntity, (document) => document.color, {

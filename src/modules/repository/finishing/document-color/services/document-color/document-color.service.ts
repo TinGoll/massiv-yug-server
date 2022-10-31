@@ -16,7 +16,6 @@ import { SampleUpdateInput } from '../../inputs/color-sample-update.input';
 import { ConverterCreateInput } from '../../inputs/converter-create.input';
 import { ConverterUpdateInput } from '../../inputs/converter-update.input';
 
-
 @Injectable()
 export class ColorService {
   constructor(
@@ -43,11 +42,13 @@ export class ColorService {
       const candidate = await this.findSampleToName(createInput.name);
       if (candidate)
         throw new WsException('Шаблон с таким именем уже существует.');
-      
+
       const { converters = [], ...createData } = createInput;
-      const savedConverters = await Promise.all(converters.map(async c => {
-        return await this.createConverter(c);
-      }))
+      const savedConverters = await Promise.all(
+        converters.map(async (c) => {
+          return await this.createConverter(c);
+        }),
+      );
 
       const entity = this.colorSampleRepository.create(createData);
       entity.converters = savedConverters;
@@ -65,10 +66,12 @@ export class ColorService {
     createInput: ConverterCreateInput,
   ): Promise<ColorConverterEntity> {
     try {
-      const { colers =[], ...crateData } = createInput;
-      const savedColers = await Promise.all(colers.map(async c => {
-        return await this.createColer(c)
-      }));
+      const { colers = [], ...crateData } = createInput;
+      const savedColers = await Promise.all(
+        colers.map(async (c) => {
+          return await this.createColer(c);
+        }),
+      );
       const entity = this.colorConverterRepository.create(crateData);
       entity.colers = savedColers;
       const converter = await this.colorConverterRepository.save(entity);
@@ -207,28 +210,31 @@ export class ColorService {
   }
 
   // **********************************************************************
-  // создание поля документа
-  async addDocumentNode(
+  // создание поля документа (не сохранено в базу)
+  addDocumentNode(
     createInput: ColorDocumentCreateInput,
-  ): Promise<DocumentColorEntity> {
+  ): DocumentColorEntity {
     try {
-      const {
-        documentId,
-        sampleId,
-        data = {},
-        value = 0,
-        converterId,
-      } = createInput;
+      const { data = {}, value = 0, converterId, previousName } = createInput;
 
-      const node = await this.documentColorRepository.save({
-        documentId,
-        sampleId,
+      const node = this.documentColorRepository.create({
         data,
         value,
         converterId,
+        previousName,
       });
 
       return node;
+    } catch (e) {
+      throw new WsException(e);
+    }
+  }
+
+  async saveDocumentNode(
+    entity: DocumentColorEntity,
+  ): Promise<DocumentColorEntity> {
+    try {
+      return await this.documentColorRepository.save(entity);
     } catch (e) {
       throw new WsException(e);
     }

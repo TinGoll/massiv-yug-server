@@ -13,7 +13,7 @@ import { BookStatusEntity } from './book-statuses.entity';
 import { DocumentEntity } from './document.entity';
 
 export class СommonOrderData {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn("identity")
   id: number;
 
   /** Дата создания */

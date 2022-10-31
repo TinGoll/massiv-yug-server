@@ -5,8 +5,9 @@ import { Repository } from 'typeorm';
 import { BookEntity } from '../../entities/book.entity';
 import { DocumentEntity } from '../../entities/document.entity';
 import { ElementSampleEntity } from '../../entities/sample-element.entity';
-import { CreateBookInput } from '../../inputs/book.input';
-import { CreateDocumentInput } from '../../inputs/document.input';
+import { BookCreateInput } from '../../inputs/book.input';
+import { DocumentCreateInput } from '../../inputs/document.input';
+
 
 @Injectable()
 export class OrderService {
@@ -21,7 +22,7 @@ export class OrderService {
 
   /*************************************************************************** */
   /** Создание новой книги */
-  async createBook(input: CreateBookInput): Promise<BookEntity> {
+  async createBook(input: BookCreateInput): Promise<BookEntity> {
     try {
       const book = await this.bookRepository.save({ ...input });
       return book;
@@ -31,7 +32,7 @@ export class OrderService {
   }
 
   /** Создание новой книги */
-  async createDocument(input: CreateDocumentInput): Promise<DocumentEntity> {
+  async createDocument(input: DocumentCreateInput): Promise<DocumentEntity> {
     try {
       const document = await this.documentRepository.save({ ...input });
       return document;
@@ -39,6 +40,4 @@ export class OrderService {
       throw new WsException(e);
     }
   }
-
-
 }

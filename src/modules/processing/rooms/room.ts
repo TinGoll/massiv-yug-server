@@ -4,7 +4,7 @@ import { RoomManager } from '../room-manager';
 export type RoomType = 'ORDER_ROOM';
 
 export abstract class Room {
-  id: string
+  id: string;
   roomManager: RoomManager;
   roomType: RoomType;
 
@@ -22,11 +22,11 @@ export abstract class Room {
   async destroy(): Promise<void> {}
   /** Вызывается после создания команты. Переопределите, что бы использовать в своих целях. */
   async afterCreation(): Promise<void> {}
+
   update(dt: number): void {}
 
   setType(roomType: RoomType): this {
     this.roomType = roomType;
     return this;
   }
-
 }

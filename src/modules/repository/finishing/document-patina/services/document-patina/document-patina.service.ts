@@ -38,7 +38,6 @@ export class PatinaService {
     createInput: PatinaCreateInput,
   ): Promise<PatinaSampleEntity> {
     try {
-
       if (!createInput.name)
         throw new WsException('Не указано название шаблона патины.');
       const candidate = await this.findSampleToName(createInput.name);
@@ -216,25 +215,28 @@ export class PatinaService {
 
   // **********************************************************************
   // создание поля документа
-  async addDocumentNode(createInput: any): Promise<DocumentPatinaEntity> {
+  addDocumentNode(createInput: {
+    value?: number;
+    converterId?: number;
+  }): DocumentPatinaEntity {
     try {
-      const {
-        documentId,
-        sampleId,
-        data = {},
-        value = 0,
-        converterId,
-      } = createInput;
-
-      const node = await this.documentPatinaEntityRepository.save({
-        documentId,
-        sampleId,
-        data,
+      const { value = 0, converterId } = createInput;
+      const node = this.documentPatinaEntityRepository.create({
         value,
         converterId,
       });
-
       return node;
+    } catch (e) {
+      throw new WsException(e);
+    }
+  }
+
+  /** Сохранение узла патина - документ */
+  async saveDocumentNode(
+    entity: DocumentPatinaEntity,
+  ): Promise<DocumentPatinaEntity> {
+    try {
+      return await this.documentPatinaEntityRepository.save(entity);
     } catch (e) {
       throw new WsException(e);
     }

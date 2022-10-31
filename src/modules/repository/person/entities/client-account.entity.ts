@@ -3,6 +3,7 @@ import {
   PrimaryGeneratedColumn,
   OneToOne,
   Column,
+  JoinColumn,
 } from 'typeorm';
 import { PersonEntity } from './person.entity';
 
@@ -28,19 +29,27 @@ export class ClientAccount {
 
   @Column({ type: 'varchar', length: 256, nullable: true })
   comment?: string;
+  
   @Column({ type: 'int', nullable: true })
   managerId?: number;
 
-  @Column({ type: 'enum', enum: PayType, default: PayType.CASH, nullable: true })
+  @Column({
+    type: 'enum',
+    enum: PayType,
+    default: PayType.CASH,
+    nullable: true,
+  })
   payType?: string;
-  
+
   @Column({ type: 'varchar', length: 128, nullable: true })
   webSite?: string;
- 
-  @Column({type: "jsonb", default: {}})
+
+  @Column({ type: 'jsonb', default: {} })
   extraData: ClientExtraData;
 
+
   @OneToOne(() => PersonEntity, (person) => person.clientAccount)
+  @JoinColumn({ name: 'personId' })
   person: PersonEntity;
 
   personId: number;

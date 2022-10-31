@@ -1,17 +1,16 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { GraphQLModule } from '@nestjs/graphql';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { EngineModule } from './engine/engine.module';
 
 import { ServeStaticModule } from '@nestjs/serve-static';
-import path, { join } from 'path';
+import { join } from 'path';
 import { SocketModule } from './modules/socket/socket.module';
 import { ProcessingModule } from './modules/processing/processing.module';
 import { RepositoryModule } from './modules/repository/repository.module';
 import { HttpModule } from '@nestjs/axios';
 import { OrderMigrationModule } from './modules/order-migration/order-migration.module';
+import { EcsModule } from './modules/ecs/ecs.module';
 
 @Module({
   imports: [
@@ -54,14 +53,15 @@ import { OrderMigrationModule } from './modules/order-migration/order-migration.
         migrationsTableName: 'migrations',
         synchronize: true,
         autoLoadEntities: true,
-        logging: ['error'], //'query',
+        logging: ['error', 'warn'], //'query',
       }),
     }),
     EngineModule,
     SocketModule,
     ProcessingModule,
     RepositoryModule,
-    OrderMigrationModule, // Временный модуль, для миграции заказов
+    OrderMigrationModule,
+    EcsModule, // Модуль импортирован временно, для миграции заказов
   ],
   controllers: [],
   providers: [],

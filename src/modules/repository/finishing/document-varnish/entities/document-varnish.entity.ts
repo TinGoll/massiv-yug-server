@@ -1,6 +1,13 @@
-import { DocumentEntity } from "src/modules/repository/order/entities/document.entity";
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, OneToOne } from "typeorm";
-import { VarnishSampleEntity } from "./sample-varnish.entity";
+import { DocumentEntity } from 'src/modules/repository/order/entities/document.entity';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  JoinColumn,
+  OneToOne,
+} from 'typeorm';
+import { VarnishSampleEntity } from './sample-varnish.entity';
 
 @Entity('document_varnish')
 export class DocumentVarnishEntity {
@@ -13,6 +20,8 @@ export class DocumentVarnishEntity {
   /** Название из старой бд */
   @Column({ type: 'varchar', length: 256, nullable: true })
   previousName?: string;
+  @Column({ type: 'varchar', length: 512, nullable: true })
+  note: string;
 
   @ManyToOne((type) => VarnishSampleEntity, { onDelete: 'SET NULL' })
   @JoinColumn({ name: 'sampleId' })

@@ -96,14 +96,22 @@ export class PanelService {
   }
 
   /** Создание связного узла с документом */
-  async addDocumentNode(
-    input: PanelDocumentCreateInput,
-  ): Promise<DocumentPanelEntity> {
+  addDocumentNode(input: PanelDocumentCreateInput = {}): DocumentPanelEntity {
     try {
-      const node = await this.documentPanelEntityRepository.save({
+      const node = this.documentPanelEntityRepository.create({
         ...input,
       });
       return node;
+    } catch (e) {
+      throw new WsException(e);
+    }
+  }
+
+  async saveDocumentNode(
+    entity: DocumentPanelEntity,
+  ): Promise<DocumentPanelEntity> {
+    try {
+      return await this.documentPanelEntityRepository.save(entity);
     } catch (e) {
       throw new WsException(e);
     }

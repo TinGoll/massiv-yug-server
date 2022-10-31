@@ -27,12 +27,12 @@ export class RoomManager {
 
   async remove(roomId: string): Promise<string> {
     // Вызов функции перед удалением из менеджера. Можно использовать для сохранения данных, перед отчисткой.
-
     await this.get(roomId)?.destroy();
     // Удаление комнаты из коллекции.
     this.delete(roomId);
     return roomId;
   }
+  /** Существует ли комната */
   isExists (roomId: string | number): boolean {
     return this.rooms.has(String(roomId));
   }
@@ -42,14 +42,17 @@ export class RoomManager {
     return this.rooms;
   }
 
+  /** Получение комнаты по ключу */
   getRoom<T extends Room = Room>(roomId: string | number): T | null {
     return <T>(this.get(roomId) || null);
   }
 
+  /** Получить имена комнат */
   getRoomNames(): string[] {
     return [...this.rooms.keys()];
   }
 
+  /** Создать инстанс команты с передачей книги заказа. */
   getRoomInstance<T extends Room = Room>(type: RoomType, ...args: any[]): T {
     switch (type) {
       case 'ORDER_ROOM':

@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToOne } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToOne, JoinColumn } from 'typeorm';
 import { UserRole, PersonEntity } from './person.entity';
 
 /** Аккаунт пользователя. */
@@ -23,7 +23,8 @@ export class UserAccount {
   status: 'fired' | 'active';
 
   @OneToOne(() => PersonEntity, (person) => person.userAccount, {
-    onDelete: "CASCADE"
+    onDelete: 'CASCADE',
   })
+  @JoinColumn({ name: 'personId' })
   person: PersonEntity;
 }

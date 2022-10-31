@@ -233,7 +233,29 @@ export class PersonService {
     try {
       return await this.personRepository.findOne({
         where: { firstName: name },
+        relations: {
+          userAccount: true,
+          clientAccount: true
+        }
       });
+    } catch (e) {
+      new WsException(e);
+    }
+  }
+
+  async findToLogin(login: string): Promise<PersonEntity | null> {
+    try {
+      const person = await this.personRepository.findOne({
+        relations: {
+          userAccount: true,
+        },
+        where: {
+          userAccount: {
+            login,
+          },
+        },
+      });
+      return person || null;
     } catch (e) {
       new WsException(e);
     }

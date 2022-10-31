@@ -3,9 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { WsException } from '@nestjs/websockets';
 import { Repository } from 'typeorm';
 import { DocumentVarnishEntity } from '../../entities/document-varnish.entity';
-import {
-  VarnishSampleEntity,
-} from '../../entities/sample-varnish.entity';
+import { VarnishSampleEntity } from '../../entities/sample-varnish.entity';
 import { VarnisCreateInput } from '../../inputs/varnish-create.input';
 import { VarnishDocumentCreateInput } from '../../inputs/varnish-document-create.input';
 import { VarnishDocumentUpdateInput } from '../../inputs/varnish-document-update.input';
@@ -23,7 +21,7 @@ export class VarnishService {
   async createSample(input: VarnisCreateInput): Promise<VarnishSampleEntity> {
     try {
       if (!input.name) throw new WsException('Не указано название шаблона.');
-      
+
       const candidate = await this.findSampleToName(input.name);
 
       if (candidate)
@@ -106,17 +104,22 @@ export class VarnishService {
   }
 
   /** Создание связующего звена для подключения к документу */
-  async addDocumentNode(
-    input: VarnishDocumentCreateInput,
-  ): Promise<DocumentVarnishEntity> {
-    const { documentId, sampleId, value = 0 } = input;
-    const node = await this.documentVarnishEntityRepository.save({
-      documentId,
-      sampleId,
+  addDocumentNode(input: VarnishDocumentCreateInput): DocumentVarnishEntity {
+    const { value = 0 } = input;
+    const node = this.documentVarnishEntityRepository.create({
       value,
     });
-
     return node;
+  }
+
+  async saveDocumentNode(
+    entity: DocumentVarnishEntity,
+  ): Promise<DocumentVarnishEntity> {
+    try {
+      return await this.documentVarnishEntityRepository.save(entity);
+    } catch (e) {
+      throw new WsException(e);
+    }
   }
 
   /** Обновления связующего звена для подключения к документу */

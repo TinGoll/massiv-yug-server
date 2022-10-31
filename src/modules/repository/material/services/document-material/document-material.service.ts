@@ -105,12 +105,10 @@ export class MaterialService {
       throw new WsException(e);
     }
   }
-/** Создание связного узла с документом */
-  async addDocumentNode(
-    input: MaterialDocumentCreateInput,
-  ): Promise<DocumentMaterialEntity> {
+  /** Создание связного узла с документом */
+  addDocumentNode(input: MaterialDocumentCreateInput): DocumentMaterialEntity {
     try {
-      const node = await this.documentMaterialEntityRepository.save({
+      const node = this.documentMaterialEntityRepository.create({
         ...input,
       });
       return node;
@@ -118,17 +116,32 @@ export class MaterialService {
       throw new WsException(e);
     }
   }
-/** Обновление связного узла с документом */
-  async updateDocumentNode(input: MaterialDocumentUpdateInput): Promise<DocumentMaterialEntity> {
+
+  async saveDocumentNode(
+    entity: DocumentMaterialEntity,
+  ): Promise<DocumentMaterialEntity> {
+    try {
+      return await this.documentMaterialEntityRepository.save(entity);
+    } catch (e) {
+      throw new WsException(e);
+    }
+  }
+
+  /** Обновление связного узла с документом */
+  async updateDocumentNode(
+    input: MaterialDocumentUpdateInput,
+  ): Promise<DocumentMaterialEntity> {
     try {
       const { id, ...updateData } = input;
       await this.documentMaterialEntityRepository.update(
         { id },
         { ...updateData },
       );
-      return await this.documentMaterialEntityRepository.findOne({where: {id}});
+      return await this.documentMaterialEntityRepository.findOne({
+        where: { id },
+      });
     } catch (e) {
-      throw new WsException(e)
+      throw new WsException(e);
     }
   }
 }

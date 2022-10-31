@@ -7,7 +7,7 @@ export interface Response<T> {
   data: T;
 }
 
-const BASE_URL = 'http://192.168.2.10:3131/api';
+const BASE_URL = 'http://192.168.2.10:3134/api';
 
 @Injectable()
 export class ItmHttpService {

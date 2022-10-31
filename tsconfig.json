@@ -16,6 +16,14 @@
     "noImplicitAny": false,
     "strictBindCallApply": false,
     "forceConsistentCasingInFileNames": false,
-    "noFallthroughCasesInSwitch": false
+    "noFallthroughCasesInSwitch": false,
+    "paths": {
+      "y/modules/ecs/lib/test": [
+        "libs/modules/ecs/lib/test/src"
+      ],
+      "y/modules/ecs/lib/test/*": [
+        "libs/modules/ecs/lib/test/src/*"
+      ]
+    }
   }
 }

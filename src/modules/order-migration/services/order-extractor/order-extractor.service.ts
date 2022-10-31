@@ -62,4 +62,19 @@ export class OrderExtractorService {
       );
     return firstValueFrom(order$, { defaultValue: null });
   }
+
+  getHeaderDataAllorders(): Promise<MigrationOrderData[]> {
+    const order$ = this.itmHttpService
+      .get<MigrationOrderData[] | null>(
+        `service/migration/get-header-data-orders`,
+      )
+      .pipe(
+        map((response) => {
+          if (!response.data) return null;
+          const entry = response.data;
+          return entry;
+        }),
+      );
+    return firstValueFrom(order$, { defaultValue: null });
+  }
 }

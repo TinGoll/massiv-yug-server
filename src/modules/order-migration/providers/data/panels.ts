@@ -1,0 +1,21 @@
+
+export const migrationPanels = [
+  { name: 'Жалюзи', shirtName: null, depthOverlay: null, figoreaSize: null, indent: null },
+  { name: 'Кассиопея', shirtName: '10 мм.', depthOverlay: null, figoreaSize: null, indent: null },
+  { name: 'Мария', shirtName: null, depthOverlay: null, figoreaSize: null, indent: null },
+  { name: 'Милан', shirtName: null, depthOverlay: null, figoreaSize: null, indent: null },
+  { name: 'Плоская', shirtName: null, depthOverlay: null, figoreaSize: null, indent: null },
+  { name: 'Буазери', shirtName: null, depthOverlay: null, figoreaSize: null, indent: null },
+  { name: 'Рубашка 1.5мм', shirtName: '1.5 мм', depthOverlay: 1.5, figoreaSize: 101 , indent: null},
+  { name: 'Рубашка 4мм', shirtName: '4 мм', depthOverlay: 4, figoreaSize: 40, indent: null },
+  { name: 'Рубашка буазери', shirtName: '1.5 мм', depthOverlay: 1.5, figoreaSize: 101, indent: null },
+  { name: 'Афина', shirtName: '1.5 мм', depthOverlay: 1.5, figoreaSize: 101, indent: null },
+  { name: 'Стандарт', shirtName: null, depthOverlay: null, figoreaSize: null, indent: null },
+  { name: 'Тиффани', shirtName: '4 мм', depthOverlay: 4, figoreaSize: 40, indent: null },
+  { name: 'Фигурная', shirtName: null, depthOverlay: null, figoreaSize: null, indent: null },
+  { name: 'Флора', shirtName: null, depthOverlay: null, figoreaSize: null, indent: null },
+  { name: 'Нео-Классика', shirtName: '8 мм', depthOverlay: 8, figoreaSize: 80, indent: null },
+  { name: 'Нео Берта с цв.', shirtName: null, depthOverlay: null, figoreaSize: null, indent: null },
+  { name: 'Венетто', shirtName: null, depthOverlay: null, figoreaSize: null, indent: null },
+  { name: 'Скалли', shirtName: '4 мм', depthOverlay: 4, figoreaSize: 40, indent: null },
+];

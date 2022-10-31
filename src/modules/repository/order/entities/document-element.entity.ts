@@ -1,4 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, ManyToOne, JoinColumn, OneToOne } from "typeorm";
+import { ComponentKey } from "src/modules/ecs/services/component-mapper";
+import { Entity, PrimaryGeneratedColumn, ManyToOne, JoinColumn, OneToOne, Column } from "typeorm";
 import { GeometryComponentEntity } from "../../component-data/geometry-component.entity";
 import { NoteComponentEntity } from "../../component-data/note-component.entity";
 import { DocumentEntity } from "./document.entity";
@@ -12,7 +13,10 @@ export class ElementEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  /** Книга документа */
+  @Column({ type: 'varchar', length: 256 })
+  name: string;
+
+  /** Документ */
   @ManyToOne(() => DocumentEntity, {
     onDelete: 'CASCADE',
   })
@@ -21,13 +25,18 @@ export class ElementEntity {
   })
   document: DocumentEntity;
 
-
   @ManyToOne((sample) => ElementSampleEntity, {
     eager: true,
     onDelete: 'SET NULL',
   })
   @JoinColumn({ name: 'sampleId' })
   sample: ElementSampleEntity;
+
+  @Column({ type: 'jsonb', default: [] })
+  components: Array<{
+    componentName: ComponentKey;
+    data: object;
+  }>;
 
   /******************************************** */
   /********* Подключение компонентов ********** */

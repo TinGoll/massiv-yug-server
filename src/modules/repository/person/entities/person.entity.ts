@@ -37,7 +37,6 @@ import { PersonEmail } from './person-email-entity';
 import { PersonPhone } from './person-phone-entity';
 import { UserAccount } from './user-account.entity';
 
-
 export class СommonPerson {
   /** id человека */
   @PrimaryGeneratedColumn()
@@ -77,13 +76,14 @@ export class PersonEntity extends СommonPerson {
 
   /** Подключение аккаунта клиента  */
   @OneToOne(() => ClientAccount, (account) => account.person, {
-    eager: true,
+    // eager: true,
   })
-  @JoinColumn({ name: 'clientAccountId' })
   clientAccount: ClientAccount;
 
-  @OneToOne(() => UserAccount, (account) => account.person)
-  @JoinColumn({ name: 'userAccountId' })
+  /** Подключение аккаунат пользователя */
+  @OneToOne(() => UserAccount, (account) => account.person, {
+    //  eager: true,
+  })
   userAccount: UserAccount;
 
   @OneToMany(() => PersonPhone, (phone) => phone.person, {
@@ -111,4 +111,3 @@ export class PersonEntity extends СommonPerson {
   })
   addresses: PersonAddress[];
 }
-

@@ -7,10 +7,12 @@ export class Work implements IDto<WorkDto> {
   name: string;
   unit: Unit;
   price: number;
-  cost: number;
   norm: number;
+
+  cost: number;
   dateBeginning: Date;
   dateEnd: Date;
+
   constructor(name: string) {
     this.name = name;
   }
@@ -29,15 +31,15 @@ export class Work implements IDto<WorkDto> {
 
   update(dto: Partial<WorkDto>): this {
     if (!dto) return this;
-    if (typeof dto.id !== "undefined") this.id = dto.id;
-    if (typeof dto.cost !== "undefined") this.cost = dto.cost;
-    if (typeof dto.dateBeginning !== "undefined")
+    if (typeof dto.id !== 'undefined') this.id = dto.id;
+    if (typeof dto.cost !== 'undefined') this.cost = dto.cost;
+    if (typeof dto.dateBeginning !== 'undefined')
       this.dateBeginning = dto.dateBeginning;
-    if (typeof dto.dateEnd !== "undefined") this.dateEnd = dto.dateEnd;
-    if (typeof dto.name !== "undefined") this.name = dto.name;
-    if (typeof dto.norm !== "undefined") this.norm = dto.norm;
-    if (typeof dto.price !== "undefined") this.price = dto.price;
-    if (typeof dto.unit !== "undefined") this.unit = dto.unit;
+    if (typeof dto.dateEnd !== 'undefined') this.dateEnd = dto.dateEnd;
+    if (typeof dto.name !== 'undefined') this.name = dto.name;
+    if (typeof dto.norm !== 'undefined') this.norm = dto.norm;
+    if (typeof dto.price !== 'undefined') this.price = dto.price;
+    if (typeof dto.unit !== 'undefined') this.unit = dto.unit;
     return this;
   }
 

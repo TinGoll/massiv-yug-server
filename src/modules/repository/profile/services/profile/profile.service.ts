@@ -5,6 +5,7 @@ import { Repository } from 'typeorm';
 import { DocumentProfileEntity } from '../../entities/document-profile.entity';
 import { ProfileSampleEntity } from '../../entities/sample-profile.entity';
 import { ProfileCreateInput } from '../../inputs/profile-create.input';
+import { ProfileDocumentCreateInput } from '../../inputs/profile-document-create.input';
 
 @Injectable()
 export class ProfileService {
@@ -65,6 +66,27 @@ export class ProfileService {
         },
       });
       return samples;
+    } catch (e) {
+      throw new WsException(e);
+    }
+  }
+
+  addDocumentNode(input: ProfileDocumentCreateInput): DocumentProfileEntity {
+    try {
+      const entity = new DocumentProfileEntity();
+      entity.angle = input.angle;
+      entity.widths = [...input.widths];
+      return entity;
+    } catch (e) {
+      throw new WsException(e);
+    }
+  }
+
+  async saveDocumentNode(
+    entity: DocumentProfileEntity,
+  ): Promise<DocumentProfileEntity> {
+    try {
+      return await this.documentProfileEntityRepository.save(entity);
     } catch (e) {
       throw new WsException(e);
     }

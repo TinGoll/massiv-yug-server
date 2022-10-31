@@ -43,9 +43,18 @@ import { PersonAddress } from './person/entities/person-address';
 import { OrderService } from './order/services/order/order.service';
 import { ElementEntity } from './order/entities/document-element.entity';
 import { ElementSampleEntity } from './order/entities/sample-element.entity';
+import { BookService } from './order/services/book/book.service';
+import { DocumentService } from './order/services/document/document.service';
+import { ElementService } from './order/services/element/element.service';
+import { EcsModule } from '../ecs/ecs.module';
+import { WorkSampleEntity } from './work/entities/work-sample.emtity';
+import { SectorEntity } from './sector/entities/sector-entity';
+import { SectorService } from './sector/services/sector/sector.service';
+import { WorkService } from './work/services/work/work.service';
 
 @Module({
   imports: [
+    EcsModule, // Удалить этот модуль.
     TypeOrmModule.forFeature([
       // entities
       ColorSampleEntity,
@@ -80,6 +89,8 @@ import { ElementSampleEntity } from './order/entities/sample-element.entity';
       PersonEmail,
       PersonBankAccount,
       PersonAddress,
+      WorkSampleEntity,
+      SectorEntity,
     ]),
   ],
   providers: [
@@ -93,6 +104,11 @@ import { ElementSampleEntity } from './order/entities/sample-element.entity';
     ProfileImporter,
     SettingService,
     OrderService,
+    ElementService,
+    BookService,
+    DocumentService,
+    SectorService,
+    WorkService,
   ],
   exports: [
     ColorService,
@@ -105,6 +121,11 @@ import { ElementSampleEntity } from './order/entities/sample-element.entity';
     SettingService,
     ProfileImporter,
     OrderService,
+    ElementService,
+    BookService,
+    DocumentService,
+    SectorService,
+    WorkService,
   ],
 })
 export class RepositoryModule {}

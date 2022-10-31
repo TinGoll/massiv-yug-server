@@ -19,6 +19,9 @@ export class DocumentProfileEntity {
 
   @Column('enum', { enum: ['90°', '45°'], nullable: true })
   angle: '90°' | '45°';
+  
+  @Column({type: "varchar", nullable: true, length: 512})
+  note: string;
 
   @ManyToOne((type) => ProfileSampleEntity, {
     eager: true,
