@@ -1,16 +1,14 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { EngineModule } from './engine/engine.module';
 
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
-import { SocketModule } from './modules/socket/socket.module';
-import { ProcessingModule } from './modules/processing/processing.module';
-import { RepositoryModule } from './modules/repository/repository.module';
 import { HttpModule } from '@nestjs/axios';
-import { OrderMigrationModule } from './modules/order-migration/order-migration.module';
-import { EcsModule } from './modules/ecs/ecs.module';
+import { ApolloDriverConfig, ApolloDriver } from '@nestjs/apollo';
+import { GraphQLModule } from '@nestjs/graphql';
+import { RepositoryModule } from './modules/repository/repository.module';
+
 
 @Module({
   imports: [
@@ -18,6 +16,12 @@ import { EcsModule } from './modules/ecs/ecs.module';
       isGlobal: true,
       envFilePath: '../.env',
     }),
+    // GraphQLModule.forRoot<ApolloDriverConfig>({
+    //   driver: ApolloDriver,
+    //   autoSchemaFile: 'schema.gql',
+    //   sortSchema: true,
+    //   playground: true,
+    // }),
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', '..', 'client', 'build'),
       renderPath: '/',
@@ -32,12 +36,6 @@ import { EcsModule } from './modules/ecs/ecs.module';
       }),
       inject: [ConfigService],
     }),
-    // GraphQLModule.forRoot<ApolloDriverConfig>({
-    //   driver: ApolloDriver,
-    //   autoSchemaFile: 'schema.gql',
-    //   sortSchema: true,
-    //   playground: true,
-    // }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -56,12 +54,7 @@ import { EcsModule } from './modules/ecs/ecs.module';
         logging: ['error', 'warn'], //'query',
       }),
     }),
-    EngineModule,
-    SocketModule,
-    ProcessingModule,
     RepositoryModule,
-    OrderMigrationModule,
-    EcsModule, // Модуль импортирован временно, для миграции заказов
   ],
   controllers: [],
   providers: [],

@@ -9,11 +9,16 @@ import {
   OneToMany,
 } from 'typeorm';
 import { PersonEntity } from '../../person/entities/person.entity';
-import { BookStatusEntity } from './book-statuses.entity';
+import { BookStatusEntity } from './book.status.entity';
 import { DocumentEntity } from './document.entity';
 
-export class СommonOrderData {
-  @PrimaryGeneratedColumn("identity")
+export const BOOK_BARCODE_PREFIX: number = 22;
+
+interface BookResultData {}
+
+@Entity('order_books')
+export class BookEntity {
+  @PrimaryGeneratedColumn('identity')
   id: number;
 
   /** Дата создания */
@@ -27,10 +32,7 @@ export class СommonOrderData {
   /** Отметка об удалении */
   @Column('boolean', { default: false })
   deleted: boolean;
-}
 
-@Entity('order_books')
-export class BookEntity extends СommonOrderData {
   /** Номер / название клиента */
   @Column({ type: 'varchar', length: 256, nullable: true })
   nameFromClient: string;
@@ -45,8 +47,9 @@ export class BookEntity extends СommonOrderData {
 
   /** Результативные данные */
   @Column({ type: 'jsonb', default: {} })
-  resultData: any;
+  resultData: BookResultData;
 
+  
   @ManyToOne(() => PersonEntity, { eager: true, onDelete: 'SET NULL' })
   @JoinColumn({ name: 'clientId' })
   client: PersonEntity;
@@ -65,4 +68,3 @@ export class BookEntity extends СommonOrderData {
   })
   documents: DocumentEntity[];
 }
-

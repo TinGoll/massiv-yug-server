@@ -1,3 +1,22 @@
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+  ManyToOne,
+  JoinColumn,
+  OneToOne,
+  OneToMany,
+} from 'typeorm';
+import { PersonAddress } from './person.address.entity';
+import { PersonBankAccount } from './person.bank.account.entity';
+import { PersonCard } from './person.card.entity';
+import { ClientAccount } from './person.client.account.entity';
+import { PersonEmail } from './person.email.entity';
+import { PersonPhone } from './person.phone.entity';
+import { UserAccount } from './person.user.account.entity';
+
 // Роли person, общие
 export enum PersonRole {
   USER = 'user',
@@ -18,30 +37,12 @@ export enum UserRole {
   GRAND_PACKER = 'Главный упаковщик',
 }
 
-import {
-  Entity,
-  Column,
-  PrimaryGeneratedColumn,
-  CreateDateColumn,
-  UpdateDateColumn,
-  ManyToOne,
-  JoinColumn,
-  OneToOne,
-  OneToMany,
-} from 'typeorm';
-import { ClientAccount } from './client-account.entity';
-import { PersonAddress } from './person-address';
-import { PersonBankAccount } from './person-bank-account.entity';
-import { PersonCard } from './person-card-entity';
-import { PersonEmail } from './person-email-entity';
-import { PersonPhone } from './person-phone-entity';
-import { UserAccount } from './user-account.entity';
-
-export class СommonPerson {
+@Entity('persons')
+export class PersonEntity {
   /** id человека */
   @PrimaryGeneratedColumn()
   id: number;
-  // Имя фамилия отчество
+
   /** Имя */
   @Column({ type: 'varchar', length: 256, nullable: true })
   firstName: string;
@@ -63,10 +64,7 @@ export class СommonPerson {
   /** Отметка об удалении */
   @Column('boolean', { default: false })
   deleted: boolean;
-}
 
-@Entity('persons')
-export class PersonEntity extends СommonPerson {
   // Роли
   @Column({
     type: 'jsonb',
@@ -74,40 +72,31 @@ export class PersonEntity extends СommonPerson {
   })
   personRoles: PersonRole[];
 
-  /** Подключение аккаунта клиента  */
-  @OneToOne(() => ClientAccount, (account) => account.person, {
-    // eager: true,
-  })
+  @OneToMany(() => PersonAddress, (bankAccount) => bankAccount.person)
+  /** Список адресов */
+  addresses: PersonAddress[];
+
+  @OneToMany(() => PersonBankAccount, (bankAccount) => bankAccount.person)
+  /** БАнковский счет */
+  bankAccounts: PersonBankAccount[];
+
+  @OneToMany(() => PersonCard, (card) => card.person)
+  /** Банковские карты */
+  cards: PersonCard[];
+
+  @OneToMany(() => PersonEmail, (email) => email.person)
+  /** Списко адресов электронной почты */
+  emails: PersonEmail[];
+
+  @OneToMany(() => PersonPhone, (phone) => phone.person)
+  /** Список телефонов */
+  phones: PersonPhone[];
+
+  @OneToOne(() => ClientAccount, (account) => account.person)
+  /** Аккаунт клиента  */
   clientAccount: ClientAccount;
 
   /** Подключение аккаунат пользователя */
-  @OneToOne(() => UserAccount, (account) => account.person, {
-    //  eager: true,
-  })
+  @OneToOne(() => UserAccount, (account) => account.person)
   userAccount: UserAccount;
-
-  @OneToMany(() => PersonPhone, (phone) => phone.person, {
-    eager: true,
-  })
-  phones: PersonPhone[];
-
-  @OneToMany(() => PersonCard, (card) => card.person, {
-    eager: true,
-  })
-  cards: PersonCard[];
-
-  @OneToMany(() => PersonEmail, (email) => email.person, {
-    eager: true,
-  })
-  emails: PersonEmail[];
-
-  @OneToMany(() => PersonBankAccount, (bankAccount) => bankAccount.person, {
-    eager: true,
-  })
-  bankAccounts: PersonBankAccount[];
-
-  @OneToMany(() => PersonAddress, (bankAccount) => bankAccount.person, {
-    eager: true,
-  })
-  addresses: PersonAddress[];
 }

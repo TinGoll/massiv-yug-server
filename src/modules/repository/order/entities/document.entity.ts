@@ -1,60 +1,48 @@
 import {
-  Entity,
-  JoinColumn,
-  OneToOne,
-  Column,
-  ManyToOne,
-  OneToMany,
-} from 'typeorm';
-import {
   BookDocumentType,
   DocumentGlossiness,
-} from 'src/core/types/model-types/document-types';
+} from 'src/core/@types/app.types';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  OneToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
+import { SampleMaterialEntity } from '../../material/entities/sample.material.entity';
+import { BookEntity } from './book.entity';
+import { DocumentColorEntity } from './document.color.entity';
+import { ElementEntity } from './document.element.entity';
+import { DocumentPanelEntity } from './document.panel.entity';
+import { DocumentPatinaEntity } from './document.patina.entity';
+import { DocumentProfileEntity } from './document.profile.entity';
+import { DocumentVarnishEntity } from './document.varnish.entity';
 
-import { BookEntity, СommonOrderData } from './book.entity';
-import { DocumentColorEntity } from '../../finishing/document-color/entities/document-color.entity';
-import { DocumentPatinaEntity } from '../../finishing/document-patina/entities/document-patina.entity';
-import { DocumentVarnishEntity } from '../../finishing/document-varnish/entities/document-varnish.entity';
+interface DocumentResultData {}
 
-import { DocumentMaterialEntity } from '../../material/entities/document-material.entity';
-import { DocumentPanelEntity } from '../../panel/entities/document-panel.entity';
-import { DocumentProfileEntity } from '../../profile/entities/document-profile.entity';
-import { ElementEntity } from './document-element.entity';
+@Entity('order_documents')
+export class DocumentEntity {
+  @PrimaryGeneratedColumn()
+  id: number;
 
-@Entity('documents')
-export class DocumentEntity extends СommonOrderData {
+  /** Дата создания */
+  @CreateDateColumn()
+  createdAt: Date;
+
+  /** Дата изменения */
+  @UpdateDateColumn()
+  updatedAt: Date;
+
+  /** Отметка об удалении */
+  @Column('boolean', { default: false })
+  deleted: boolean;
+
   @Column({ type: 'varchar', length: 64 })
   documentType: BookDocumentType;
-
-  @OneToOne(() => DocumentPanelEntity, (panel) => panel.document, {
-    eager: true,
-  })
-  panel: DocumentPanelEntity;
-
-  @OneToOne(() => DocumentMaterialEntity, (material) => material.document, {
-    eager: true,
-  })
-  material: DocumentMaterialEntity;
-
-  @OneToOne(() => DocumentProfileEntity, (profile) => profile.document, {
-    eager: true,
-  })
-  profile: DocumentProfileEntity;
-
-  @OneToOne(() => DocumentColorEntity, (color) => color.document, {
-    eager: true,
-  })
-  color: DocumentColorEntity;
-
-  @OneToOne(() => DocumentPatinaEntity, (patina) => patina.document, {
-    eager: true,
-  })
-  patina: DocumentPatinaEntity;
-
-  @OneToOne(() => DocumentVarnishEntity, (varnish) => varnish.document, {
-    eager: true,
-  })
-  varnish: DocumentVarnishEntity;
 
   /** Глянцевость. */
   @Column({
@@ -66,16 +54,53 @@ export class DocumentEntity extends СommonOrderData {
       'Глянец (70%)',
       'Сильный глянец (90%)',
     ],
-    nullable: true
-  })  
+    nullable: true,
+  })
   glossiness: DocumentGlossiness;
 
   @Column({ type: 'jsonb', default: {} })
-  resultData: any;
+  resultData: DocumentResultData;
 
   /** Комментарий / примечание */
   @Column({ type: 'varchar', length: 512, nullable: true })
   note: string;
+
+  @ManyToOne(() => SampleMaterialEntity, { eager: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'materialId' })
+  /** Основной материал документа */
+  material: SampleMaterialEntity;
+
+  @ManyToOne(() => DocumentPanelEntity, (panel) => panel.document, {
+    eager: true,
+    onDelete: 'SET NULL',
+  })
+  /** Филёнка документа. */
+  panel: DocumentPanelEntity;
+
+  @OneToOne(() => DocumentProfileEntity, (profile) => profile.document, {
+    eager: true,
+    onDelete: 'SET NULL',
+  })
+  /** Модель профиля документа */
+  profile: DocumentProfileEntity;
+
+  @OneToOne(() => DocumentColorEntity, (color) => color.document, {
+    eager: true,
+  })
+  /** Цвет документа */
+  color: DocumentColorEntity;
+
+  @OneToOne(() => DocumentPatinaEntity, (patina) => patina.document, {
+    eager: true,
+  })
+  /** Патина документа */
+  patina: DocumentPatinaEntity;
+
+  @OneToOne(() => DocumentVarnishEntity, (varnish) => varnish.document, {
+    eager: true,
+  })
+  /** Лак документа */
+  varnish: DocumentVarnishEntity;
 
   /** Книга документа */
   @ManyToOne(() => BookEntity, {
