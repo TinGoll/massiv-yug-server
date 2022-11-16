@@ -10,4 +10,8 @@ export class BookStatusEntity {
 
   @Column({ type: 'decimal', precision: 5, scale: 2, default: 0 })
   index: number;
+
+  /** Отметка об удалении */
+  @Column('boolean', { default: false })
+  deleted: boolean;
 }

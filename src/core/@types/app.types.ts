@@ -49,3 +49,6 @@ export type DocumentGlossiness =
   | 'Лёгкий глянец (40%)'
   | 'Глянец (70%)'
   | 'Сильный глянец (90%)';
+
+export interface BookResultData {}
+export interface DocumentResultData {}

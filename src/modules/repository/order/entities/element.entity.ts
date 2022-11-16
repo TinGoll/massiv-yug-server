@@ -1,10 +1,10 @@
 
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
-type ComponentKey = ""
+export type ComponentKey = ""
 
 
-interface ComponentData {
+export interface ComponentData {
   /** Название компонента */
   componentName: ComponentKey;
   /** Обеъект с полями компонента. */
@@ -43,4 +43,8 @@ export class SampleElementEntity {
 
   @Column({ type: 'jsonb', default: [] })
   body: ElementSampleBody[];
+
+  /** Отметка об удалении */
+  @Column('boolean', { default: false })
+  deleted: boolean;
 }

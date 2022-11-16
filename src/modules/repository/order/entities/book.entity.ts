@@ -1,3 +1,4 @@
+import { BookResultData } from 'src/core/@types/app.types';
 import {
   Entity,
   Column,
@@ -14,7 +15,7 @@ import { DocumentEntity } from './document.entity';
 
 export const BOOK_BARCODE_PREFIX: number = 22;
 
-interface BookResultData {}
+
 
 @Entity('order_books')
 export class BookEntity {
