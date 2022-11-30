@@ -26,7 +26,7 @@ export class DocumentVarnishEntity {
   @Column({ type: 'varchar', length: 512, nullable: true })
   note: string;
 
-  @ManyToOne((type) => SampleVarnishEntity, { onDelete: 'SET NULL' })
+  @ManyToOne((type) => SampleVarnishEntity, { onDelete: 'SET NULL', eager: true })
   @JoinColumn({ name: 'sampleId' })
   sample: SampleVarnishEntity;
 

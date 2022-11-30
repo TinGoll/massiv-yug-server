@@ -1,3 +1,4 @@
+import { WorkComponentData } from 'src/core/@types/app.types';
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -11,7 +12,6 @@ import { SampleMaterialEntity } from '../../material/entities/sample.material.en
 import { SamplePanelEntity } from '../../panel/entities/sample.panel.entity';
 import { DocumentEntity } from './document.entity';
 
-
 @Entity('order_document_panel')
 export class DocumentPanelEntity {
   @PrimaryGeneratedColumn()
@@ -20,15 +20,24 @@ export class DocumentPanelEntity {
   @Column({ type: 'varchar', length: 512, nullable: true })
   note: string;
 
-  @ManyToOne((type) => SampleColorEntity, { onDelete: 'SET NULL' })
+  @Column({ type: 'jsonb', default: [] })
+  workData: WorkComponentData[];
+
+  @Column({ type: 'jsonb', default: [] })
+  shirtWorkData: WorkComponentData[];
+
+  @ManyToOne((type) => SampleColorEntity, { onDelete: 'SET NULL', eager: true })
   @JoinColumn({ name: 'colorId' })
   color: SampleColorEntity;
 
-  @ManyToOne((type) => SampleMaterialEntity, { onDelete: 'SET NULL' })
+  @ManyToOne((type) => SampleMaterialEntity, {
+    onDelete: 'SET NULL',
+    eager: true,
+  })
   @JoinColumn({ name: 'materialId' })
   material: SampleMaterialEntity;
 
-  @ManyToOne((type) => SamplePanelEntity, { onDelete: 'SET NULL' })
+  @ManyToOne((type) => SamplePanelEntity, { onDelete: 'SET NULL', eager: true })
   @JoinColumn({ name: 'sampleId' })
   sample: SamplePanelEntity;
 

@@ -25,7 +25,9 @@ export class ColorService {
 
   /** Создать новый цвет */
   async createColor(input: ColorCreateInput): Promise<SampleColorEntity> {
-    const entity = this.newColor({ ...input });
+    const { id, createdAt, updatedAt, ...createData } =
+      input as SampleColorEntity;
+    const entity = this.newColor({ ...createData });
     return await this.saveColor(entity);
   }
   /** Обновить цвет */
@@ -54,9 +56,10 @@ export class ColorService {
   }
 
   async findColorToName(name: string): Promise<SampleColorEntity | null> {
-    return await this.colorRepository.findOne({
-      where: { name, deleted: false },
-    });
+    return await this.colorRepository
+      .createQueryBuilder()
+      .where('LOWER(name) = LOWER(:name) and deleted = false', { name })
+      .getOne();
   }
 
   async findColors(): Promise<SampleColorEntity[]> {

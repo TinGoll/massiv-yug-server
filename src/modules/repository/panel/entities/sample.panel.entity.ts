@@ -1,10 +1,17 @@
+import { PanelType } from 'src/core/@types/app.types';
 import {
   Entity,
   Column,
   PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
+  JoinTable,
+  ManyToMany,
+  JoinColumn,
+  ManyToOne,
 } from 'typeorm';
+import { SampleWorkEntity } from '../../work/entities/sample.work.entity';
+import { SampleShirtEntity } from './sample.panel.shirt.entity';
 
 @Entity('sample_panels')
 export class SamplePanelEntity {
@@ -20,26 +27,25 @@ export class SamplePanelEntity {
   @Column({ type: 'varchar', length: 256 })
   name: string;
 
-  /** Название рубашки */
   @Column({ type: 'varchar', length: 256, nullable: true })
-  shirtName: string;
-
-  /** Толщина рубашки */
-  @Column({ type: 'numeric', nullable: true })
-  depthOverlay: number;
-
-  /** Припуск для расчета рубашки */
-  @Column({ type: 'numeric', nullable: true })
-  indent: number;
-
-  /** Отступ для рубашки */
-  @Column({ nullable: true })
-  figoreaSize: number;
+  panelType: PanelType;
 
   /** ссылка на схему */
   @Column({ type: 'varchar', length: 560, nullable: true })
   drawing: string;
 
+  @ManyToOne((shirt) => SampleShirtEntity, {
+    eager: true,
+    onDelete: 'SET NULL',
+  })
+  @JoinColumn({ name: 'shirtId' })
+  /** Шаблон цвета */
+  shirt: SampleShirtEntity;
+
   @Column('boolean', { default: false })
   deleted: boolean;
+
+  @ManyToMany(() => SampleWorkEntity, { })
+  @JoinTable()
+  works: SampleWorkEntity[];
 }

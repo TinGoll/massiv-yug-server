@@ -48,9 +48,10 @@ export class MaterialService {
   }
 
   async findToName(name: string): Promise<SampleMaterialEntity | null> {
-    return await this.materialRepository.findOne({
-      where: { name, deleted: false },
-    });
+    return await this.materialRepository
+      .createQueryBuilder()
+      .where('LOWER(name) = LOWER(:name) and deleted = false', { name })
+      .getOne();
   }
 
   async findAll(): Promise<SampleMaterialEntity[]> {

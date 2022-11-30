@@ -35,7 +35,7 @@ export class DocumentPatinaEntity {
   /** Текущий конвертер */
   converter: PatinaConverterEntity;
 
-  @ManyToOne((type) => SamplePatinaEntity, { onDelete: 'SET NULL' })
+  @ManyToOne((type) => SamplePatinaEntity, { onDelete: 'SET NULL', eager: true })
   @JoinColumn({ name: 'sampleId' })
   sample: SamplePatinaEntity;
 

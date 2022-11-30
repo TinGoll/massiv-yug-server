@@ -41,7 +41,7 @@ export class DocumentEntity {
   @Column('boolean', { default: false })
   deleted: boolean;
 
-  @Column({ type: 'varchar', length: 64 })
+  @Column({ type: 'varchar', length: 64, nullable: true })
   documentType: BookDocumentType;
 
   /** Глянцевость. */
@@ -105,11 +105,12 @@ export class DocumentEntity {
   /** Книга документа */
   @ManyToOne(() => BookEntity, {
     onDelete: 'CASCADE',
+    lazy: true
   })
   @JoinColumn({
     name: 'bookId',
   })
-  book: BookEntity;
+  book: Promise<BookEntity>;
 
   /** Документы книги */
   @OneToMany(() => ElementEntity, (element) => element.document, {

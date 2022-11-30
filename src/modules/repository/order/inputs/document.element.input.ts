@@ -1,5 +1,5 @@
 import {
-  ComponentData,
+  ComponentDefaultData,
   ComponentKey,
   ElementSampleBody,
 } from '../entities/element.entity';
@@ -7,7 +7,7 @@ import {
 export class DocumentElementCreateInput {
   /** Название сущности */
   name: string;
-  default?: Array<ComponentData>;
+  default?: Array<ComponentDefaultData>;
   components?: ComponentKey[];
   body?: ElementSampleBody[];
 }
@@ -15,7 +15,7 @@ export class DocumentElementUpdateInput {
   id: number;
   /** Название сущности */
   name?: string;
-  default?: Array<ComponentData>;
+  default?: Array<ComponentDefaultData>;
   components?: ComponentKey[];
   body?: ElementSampleBody[];
 }

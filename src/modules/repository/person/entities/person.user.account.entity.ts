@@ -6,7 +6,21 @@ import {
   OneToOne,
   JoinColumn,
 } from 'typeorm';
-import { UserRole, PersonEntity } from './person.entity';
+import { PersonEntity } from './person.entity';
+
+/** Роли пользователя */
+export enum UserRole {
+  ADMIN = 'Админ',
+  MANAGER = 'Менеджер',
+  SBORKA = 'Сборка',
+  SHLIFOVKA = 'Шлифовка',
+  LAKIROVKA = 'Лакировка',
+  UPAKOVKA = 'Упаковка',
+  GUEST = 'Гость',
+  ACCOUNTANT = 'Бухгалтер',
+  GRAND_PACKER = 'Главный упаковщик',
+}
+
 
 /** Аккаунт пользователя. */
 @Entity('person_user_account')

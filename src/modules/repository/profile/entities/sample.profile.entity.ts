@@ -5,7 +5,10 @@ import {
   PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
+  JoinTable,
+  ManyToMany,
 } from 'typeorm';
+import { SampleWorkEntity } from '../../work/entities/sample.work.entity';
 
 @Entity('sample_profiles')
 export class SampleProfileEntity {
@@ -49,4 +52,8 @@ export class SampleProfileEntity {
   /** Отметка об удалении */
   @Column('boolean', { default: false })
   deleted: boolean;
+
+  @ManyToMany(() => SampleWorkEntity, {eager: true})
+  @JoinTable()
+  works: SampleWorkEntity[];
 }

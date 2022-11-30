@@ -45,9 +45,10 @@ export class SectorService {
   }
 
   async findToName(name: string): Promise<SectorEntity | null> {
-    return await this.sectorRepository.findOne({
-      where: { name, deleted: false },
-    });
+    return await this.sectorRepository
+      .createQueryBuilder()
+      .where('LOWER(name) = LOWER(:name) and deleted = false', { name })
+      .getOne();
   }
 
   async findAll(): Promise<SectorEntity[]> {

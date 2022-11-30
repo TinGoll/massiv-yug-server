@@ -45,9 +45,10 @@ export class VarnishService {
   }
 
   async findToName(name: string): Promise<SampleVarnishEntity | null> {
-    return await this.varnishRepository.findOne({
-      where: { name, deleted: false },
-    });
+    return await this.varnishRepository
+      .createQueryBuilder()
+      .where('LOWER(name) = LOWER(:name) and deleted = false', { name })
+      .getOne();
   }
 
   async findAll(): Promise<SampleVarnishEntity[]> {

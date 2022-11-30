@@ -8,6 +8,10 @@ import { HttpModule } from '@nestjs/axios';
 import { ApolloDriverConfig, ApolloDriver } from '@nestjs/apollo';
 import { GraphQLModule } from '@nestjs/graphql';
 import { RepositoryModule } from './modules/repository/repository.module';
+import { MigrationModule } from './modules/migration/migration.module';
+import { ApiModule } from './modules/api/api.module';
+import { OrderProcessingModule } from './modules/order-processing/order-processing.module';
+import { RequestModule } from './modules/request/request.module';
 
 
 @Module({
@@ -55,6 +59,10 @@ import { RepositoryModule } from './modules/repository/repository.module';
       }),
     }),
     RepositoryModule,
+    MigrationModule,
+    ApiModule,
+    OrderProcessingModule,
+    RequestModule,
   ],
   controllers: [],
   providers: [],

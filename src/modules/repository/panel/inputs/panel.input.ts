@@ -1,3 +1,6 @@
+import { SampleWorkEntity } from "../../work/entities/sample.work.entity";
+import { SampleShirtEntity } from "../entities/sample.panel.shirt.entity";
+
 /** Набор полей необходимых для добавления цвета */
 export class PanelCreateInput {
   name: string;
@@ -36,4 +39,8 @@ export class PanelUpdateInput {
 
   /** ссылка на схему */
   drawing?: string;
+
+  shirt?: SampleShirtEntity;
+  /** Массив работ */
+  works?: SampleWorkEntity[];
 }

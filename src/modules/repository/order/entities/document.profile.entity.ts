@@ -1,4 +1,4 @@
-import { SplicingAngle } from 'src/core/@types/app.types';
+import { SplicingAngle, WorkComponentData } from 'src/core/@types/app.types';
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -18,7 +18,10 @@ export class DocumentProfileEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column('simple-array')
+  @Column({ type: 'jsonb', default: [] })
+  workData: WorkComponentData[];
+
+  @Column('simple-array', { nullable: true, default: [0, 0, 0, 0] })
   widths: number[];
 
   @Column('enum', { enum: ['90°', '45°'] as SplicingAngle[], nullable: true })
@@ -31,7 +34,7 @@ export class DocumentProfileEntity {
     eager: true,
     onDelete: 'SET NULL',
   })
-  @JoinColumn({ name: 'sampleId' })
+  @JoinColumn({ name: 'sampleId', })
   sample: SampleProfileEntity;
 
   @OneToOne(() => DocumentEntity, (document) => document.profile, {

@@ -1,4 +1,4 @@
-import { BookResultData } from 'src/core/@types/app.types';
+import { BookResultData, WorkData } from 'src/core/@types/app.types';
 import {
   Entity,
   Column,
@@ -10,12 +10,11 @@ import {
   OneToMany,
 } from 'typeorm';
 import { PersonEntity } from '../../person/entities/person.entity';
+import { SampleWorkEntity } from '../../work/entities/sample.work.entity';
 import { BookStatusEntity } from './book.status.entity';
 import { DocumentEntity } from './document.entity';
 
 export const BOOK_BARCODE_PREFIX: number = 22;
-
-
 
 @Entity('order_books')
 export class BookEntity {
@@ -50,7 +49,10 @@ export class BookEntity {
   @Column({ type: 'jsonb', default: {} })
   resultData: BookResultData;
 
-  
+  @Column({ type: 'jsonb', default: [] })
+  /** В заказ копируется все работы, и сохраняються для использования в этом заказе. */
+  works: SampleWorkEntity[];
+
   @ManyToOne(() => PersonEntity, { eager: true, onDelete: 'SET NULL' })
   @JoinColumn({ name: 'clientId' })
   client: PersonEntity;
@@ -59,7 +61,7 @@ export class BookEntity {
   @JoinColumn({ name: 'authortId' })
   author: PersonEntity;
 
-  @ManyToOne(() => PersonEntity, { eager: true, onDelete: 'SET NULL' })
+  @ManyToOne(() => BookStatusEntity, { eager: true, onDelete: 'SET NULL' })
   @JoinColumn({ name: 'statusId' })
   status: BookStatusEntity;
 

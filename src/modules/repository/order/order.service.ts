@@ -60,8 +60,9 @@ export class OrderService {
 
   /** Создать новый статус книги */
   async createStatus(input: BookStatusCreateInput): Promise<BookStatusEntity> {
-    const candidate = this.findStatusToName(input.name);
+    const candidate = await this.findStatusToName(input.name);
     if (candidate) throw new Error('Статус с таким названием уже существует.');
+
     const status = this.statusRepository.create({ ...input });
     await this.statusRepository.save(status);
     return status;
@@ -85,16 +86,31 @@ export class OrderService {
     return await this.statusRepository.find({ where: { deleted: false } });
   }
 
+  newBook(input: Partial<BookCreateInput> = {}): BookEntity {
+    return this.bookRepository.create({ ...input });
+  }
+
   /** Создать новую книгу заказа */
   async createBook(input: BookCreateInput): Promise<BookEntity> {
     const entity = this.bookRepository.create({ ...input });
     await this.saveBook(entity);
     return entity;
   }
+
   /** Сохранить книгу заказа */
   async saveBook(entity: BookEntity): Promise<BookEntity> {
     return await this.bookRepository.save(entity);
   }
+
+  async assignDocumentToBook(
+    book: BookEntity,
+    document: DocumentEntity,
+  ): Promise<BookEntity> {
+    if (!book.documents) book.documents = [];
+    book.documents.push(document);
+    return await this.saveBook(book);
+  }
+
   /** Обновить книгу заказа */
   async updateBook(input: BookUpdateInput): Promise<BookEntity> {
     await this.bookRepository.update({ id: input.id }, { ...input });
@@ -107,14 +123,13 @@ export class OrderService {
   }
   /** Получить книгу по id */
   async findBookToId(id: number): Promise<BookEntity | null> {
-    return await this.bookRepository.findOne({
+    const book = await this.bookRepository.findOne({
       where: {
         id,
-        documents: {
-          deleted: false,
-        },
       },
     });
+    book.documents = book.documents?.filter((d) => !d.deleted) || [];
+    return book;
   }
 
   /** Создать новый документ */
@@ -123,6 +138,7 @@ export class OrderService {
     await this.saveDocument(entity);
     return entity;
   }
+
   /** Добавить документ в книгу */
   async addDocument(
     bookId: number,
@@ -136,6 +152,7 @@ export class OrderService {
     await this.saveBook(book);
     return document;
   }
+
   /** Сохранить документ */
   async saveDocument(entity: DocumentEntity): Promise<DocumentEntity> {
     return await this.documentRepository.save(entity);
@@ -169,122 +186,124 @@ export class OrderService {
 
   // Дополнительные поля книги.
   async assignStatusToBook(
-    bookId: number,
+    book: BookEntity,
     status: BookStatusEntity,
-  ): Promise<BookStatusEntity> {
-    const book = await this.findBookToId(bookId);
-    if (!book) throw new Error('Заказ с таким id не существует.');
+  ): Promise<BookEntity> {
     book.status = status;
     await this.saveBook(book);
-    return status;
+    return book;
   }
   /** Присвоить объект клиента книге заказа */
   async assignClientToBook(
-    bookId: number,
+    book: BookEntity,
     client: PersonEntity,
-  ): Promise<PersonEntity> {
-    const book = await this.findBookToId(bookId);
-    if (!book) throw new Error('Заказ с таким id не существует.');
+  ): Promise<BookEntity> {
     book.client = client;
     await this.saveBook(book);
-    return client;
+    return book;
   }
   /** Присвоить объект автора книге заказа. */
   async assignAuthorToBook(
-    bookId: number,
+    book: BookEntity,
     author: PersonEntity,
-  ): Promise<PersonEntity> {
-    const book = await this.findBookToId(bookId);
-    if (!book) throw new Error('Заказ с таким id не существует.');
+  ): Promise<BookEntity> {
     book.author = author;
     await this.saveBook(book);
-    return author;
+    return book;
   }
 
   // Дополнительные поля документа.
   /** Присвоить цвет */
   async assignColor(
-    documentId: number,
+    document: DocumentEntity,
     color: SampleColorEntity | null,
-    options: Partial<Omit<DocumentColorEntity, 'id' | 'sample'>>,
-  ): Promise<DocumentColorEntity> {
-    const document = await this.findDocumentToId(documentId);
-    if (!document)
-      throw new Error('Документ с таким id не найден в базе данным');
+    options: Partial<Omit<DocumentColorEntity, 'id' | 'sample'>> = {},
+  ): Promise<DocumentEntity> {
     if (!document.color) {
       await this.createDocumentColor(document);
     }
+
     await this.docColorRepository.update(
       { id: document.color.id },
-      { ...options },
+      { ...document.color, ...options },
     );
+
+    document.color = await this.docColorRepository.findOne({
+      where: { id: document.color.id },
+    });
     document.color.sample = color;
-    return await this.docColorRepository.save(document.color);
+    await this.docColorRepository.save(document.color);
+    return document;
   }
 
   /** Создать документ - цвет объект. */
   async createDocumentColor(
     document: DocumentEntity,
   ): Promise<DocumentColorEntity> {
-    const color = this.docColorRepository.create();
+    const color = this.docColorRepository.create({ document });
+    await this.docColorRepository.save(color);
     document.color = color;
     await this.saveDocument(document);
     return document.color;
   }
   /** Присовеить патину */
   async assignPatina(
-    documentId: number,
+    document: DocumentEntity,
     patina: SamplePatinaEntity | null,
-    options: Partial<Omit<DocumentPatinaEntity, 'id' | 'sample'>>,
-  ): Promise<DocumentPatinaEntity> {
-    const document = await this.findDocumentToId(documentId);
-    if (!document)
-      throw new Error('Документ с таким id не найден в базе данным');
+    options: Partial<Omit<DocumentPatinaEntity, 'id' | 'sample'>> = {},
+  ): Promise<DocumentEntity> {
     if (!document.patina) {
       await this.createDocumentPatina(document);
     }
     await this.docPatinaRepository.update(
       { id: document.patina.id },
-      { ...options },
+      { ...document.patina, ...options },
     );
+    document.patina = await this.docPatinaRepository.findOne({
+      where: { id: document.patina.id },
+    });
     document.patina.sample = patina;
-    return await this.docPatinaRepository.save(document.patina);
+    await this.docPatinaRepository.save(document.patina);
+    return document;
   }
 
   /** Создать документ - патина объект. */
   async createDocumentPatina(
     document: DocumentEntity,
   ): Promise<DocumentPatinaEntity> {
-    const patina = this.docPatinaRepository.create();
+    const patina = this.docPatinaRepository.create({ document });
+    await this.docPatinaRepository.save(patina);
     document.patina = patina;
     await this.saveDocument(document);
     return document.patina;
   }
   /** Присвоить лак */
   async assignVarnish(
-    documentId: number,
+    document: DocumentEntity,
     varnish: SampleVarnishEntity | null,
-    options: Partial<Omit<DocumentVarnishEntity, 'id' | 'sample'>>,
-  ): Promise<DocumentVarnishEntity> {
-    const document = await this.findDocumentToId(documentId);
-    if (!document)
-      throw new Error('Документ с таким id не найден в базе данным');
+    options: Partial<Omit<DocumentVarnishEntity, 'id' | 'sample' | 'document'>> = {},
+  ): Promise<DocumentEntity> {
     if (!document.varnish) {
       await this.createDocumentVarnish(document);
     }
     await this.docVarnishRepository.update(
       { id: document.varnish.id },
-      { ...options },
+      { ...document.varnish, ...options },
     );
+    document.varnish = await this.docVarnishRepository.findOne({
+      where: { id: document.varnish.id },
+    });
     document.varnish.sample = varnish;
-    return await this.docVarnishRepository.save(document.varnish);
+    await this.docVarnishRepository.save(document.varnish);
+    return document;
   }
 
   /** Создать документ - лак объект. */
   async createDocumentVarnish(
     document: DocumentEntity,
   ): Promise<DocumentVarnishEntity> {
-    const varnish = this.docVarnishRepository.create();
+    const varnish = this.docVarnishRepository.create({ document });
+    await this.docVarnishRepository.save(varnish);
     document.varnish = varnish;
     await this.saveDocument(document);
     return document.varnish;
@@ -292,72 +311,77 @@ export class OrderService {
 
   /** Присвоить материал */
   async assignMaterial(
-    documentId: number,
+    document: DocumentEntity,
     material: SampleMaterialEntity | null,
-  ): Promise<SampleMaterialEntity> {
-    const document = await this.findDocumentToId(documentId);
-    if (!document)
-      throw new Error('Документ с таким id не найден в базе данным');
+  ): Promise<DocumentEntity> {
     document.material = material;
     await this.saveDocument(document);
-    return document.material;
+    return document;
   }
 
   /** Присвоить филёнку */
   async assignPanel(
-    documentId: number,
+    document: DocumentEntity,
     panel: SamplePanelEntity | null,
-    options: Partial<Omit<DocumentPanelEntity, 'id' | 'sample'>>,
-  ): Promise<DocumentPanelEntity> {
-    const document = await this.findDocumentToId(documentId);
-    if (!document)
-      throw new Error('Документ с таким id не найден в базе данным');
-
+    options: Partial<Omit<DocumentPanelEntity, 'id' | 'sample'>> = {},
+  ): Promise<DocumentEntity> {
     if (!document.panel) {
       await this.createDocumentPanel(document);
     }
+
     await this.docPanelRepository.update(
       { id: document.panel.id },
-      { ...options },
+      { ...document.panel, ...options, sample: panel },
     );
+
+    document.panel = await this.docPanelRepository.findOne({
+      where: { id: document.panel.id },
+    });
+
     document.panel.sample = panel;
-    return await this.docPanelRepository.save(document.panel);
+    await this.docPanelRepository.save(document.panel);
+    return document;
   }
 
   /** Создать документ - филёнка объект. */
   async createDocumentPanel(
     document: DocumentEntity,
   ): Promise<DocumentPanelEntity> {
-    const panel = this.docPanelRepository.create();
+    const panel = this.docPanelRepository.create({ document });
+    await this.docPanelRepository.save(panel);
     document.panel = panel;
     await this.saveDocument(document);
     return document.panel;
   }
+
   /** Присвоить профиль */
   async assignProfile(
-    documentId: number,
+    document: DocumentEntity,
     profile: SampleProfileEntity,
-    options: Partial<Omit<DocumentProfileEntity, 'id' | 'sample'>>,
-  ): Promise<DocumentProfileEntity> {
-    const document = await this.findDocumentToId(documentId);
-    if (!document)
-      throw new Error('Документ с таким id не найден в базе данным');
+    options: Partial<Omit<DocumentProfileEntity, 'id' | 'sample' | 'document'>> = {},
+  ): Promise<DocumentEntity> {
     if (!document.profile) {
       await this.createDocumentProfile(document);
     }
+
     await this.docProfileRepository.update(
       { id: document.profile.id },
-      { ...options },
+      { widths: [...(profile?.widths || [])], ...options },
     );
+    document.profile = await this.docProfileRepository.findOne({
+      where: { id: document.profile.id },
+    });
     document.profile.sample = profile;
-    return await this.docProfileRepository.save(document.profile);
+    await this.docProfileRepository.save(document.profile);
+    return document;
   }
 
   /** Создать документ - профиль объект */
   async createDocumentProfile(
     document: DocumentEntity,
   ): Promise<DocumentProfileEntity> {
-    const profile = this.docProfileRepository.create();
+    const profile = this.docProfileRepository.create({ document });
+    await this.docProfileRepository.save(profile);
     document.profile = profile;
     await this.saveDocument(document);
     return document.profile;
@@ -387,6 +411,10 @@ export class OrderService {
       .createQueryBuilder()
       .where('LOWER(name) = LOWER(:name) and deleted = false', { name })
       .getOne();
+  }
+
+  async findAllElementSamples(): Promise<SampleElementEntity[]> {
+    return await this.elementRepository.find();
   }
 
   /** Сохранить шаблон элемента */

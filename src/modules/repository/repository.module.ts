@@ -42,6 +42,7 @@ import { SectorEntity } from './sector/entities/sector.entity';
 import { SettingEntity } from './setting/entities/setting.entity';
 import { SampleVarnishEntity } from './varnish/entities/sample.varnish.entity';
 import { SampleWorkEntity } from './work/entities/sample.work.entity';
+import { SampleShirtEntity } from './panel/entities/sample.panel.shirt.entity';
 
 @Module({
   imports: [
@@ -77,9 +78,23 @@ import { SampleWorkEntity } from './work/entities/sample.work.entity';
       SettingEntity,
       SampleVarnishEntity,
       SampleWorkEntity,
+      SampleShirtEntity,
     ]),
   ],
   providers: [
+    MaterialService,
+    ProfileService,
+    SectorService,
+    WorkService,
+    ColorService,
+    PatinaService,
+    VarnishService,
+    PanelService,
+    PersonService,
+    SettingService,
+    OrderService,
+  ],
+  exports: [
     MaterialService,
     ProfileService,
     SectorService,

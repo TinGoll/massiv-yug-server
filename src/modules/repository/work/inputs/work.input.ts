@@ -9,6 +9,8 @@ export class WorkCreateInput {
   norm?: number;
 
   unit: Unit;
+  
+  salaryUnit?: Unit;
 
   data?: any;
 }
@@ -23,6 +25,8 @@ export class WorkUpdateInput {
   norm?: number;
 
   unit?: Unit;
+
+  salaryUnit?: Unit;
 
   data?: any;
 }

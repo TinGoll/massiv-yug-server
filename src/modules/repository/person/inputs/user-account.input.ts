@@ -1,5 +1,6 @@
 import { UserStatus } from 'src/core/@types/app.types';
-import { UserRole } from '../entities/person.entity';
+import { UserRole } from '../entities/person.user.account.entity';
+
 
 export class UserAccountCreateInput {
   // Роли

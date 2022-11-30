@@ -4,8 +4,14 @@ import { Repository } from 'typeorm';
 import { PatinaConverterColerEntity } from './entities/patina.converter.coler';
 import { PatinaConverterEntity } from './entities/patina.converters.entity';
 import { SamplePatinaEntity } from './entities/sample.patina.entity';
-import { PatinaColerCreateInput, PatinaColerUpdateInput } from './inputs/patina.coler.input';
-import { PatinaConverterCreateInput, PatinaConverterUpdateInput } from './inputs/patina.converter.input';
+import {
+  PatinaColerCreateInput,
+  PatinaColerUpdateInput,
+} from './inputs/patina.coler.input';
+import {
+  PatinaConverterCreateInput,
+  PatinaConverterUpdateInput,
+} from './inputs/patina.converter.input';
 import { PatinaCreateInput, PatinaUpdateInput } from './inputs/patina.input';
 
 @Injectable()
@@ -50,9 +56,10 @@ export class PatinaService {
   }
 
   async findPatinaToName(name: string): Promise<SamplePatinaEntity | null> {
-    return await this.patinaRepository.findOne({
-      where: { name, deleted: false },
-    });
+    return await this.patinaRepository
+      .createQueryBuilder()
+      .where('LOWER(name) = LOWER(:name) and deleted = false', { name })
+      .getOne();
   }
 
   async findColors(): Promise<SamplePatinaEntity[]> {

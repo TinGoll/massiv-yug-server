@@ -1,4 +1,3 @@
-
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -7,8 +6,18 @@ import {
   Column,
 } from 'typeorm';
 import { DocumentEntity } from './document.entity';
-import { SampleElementEntity } from './element.entity';
+import {
+  ComponentKey,
+  ElementSampleBody,
+  SampleElementEntity,
+} from './element.entity';
 
+export interface ComponentData<T extends object = object> {
+  /** Название компонента */
+  componentName: ComponentKey;
+  /** Обеъект с полями компонента. */
+  data: object | null;
+}
 
 /** Сущность */
 @Entity('order_document_elements')
@@ -20,22 +29,26 @@ export class ElementEntity {
   name: string;
 
   @Column({ type: 'jsonb', default: [] })
-  components: any;
+  components: ComponentData[];
+
+  @Column({ type: 'jsonb', default: null })
+  identifier: ElementSampleBody | null;
 
   @ManyToOne(() => DocumentEntity, {
     onDelete: 'CASCADE',
+    lazy: true,
   })
   @JoinColumn({
     name: 'documentId',
   })
   /** Документ */
-  document: DocumentEntity;
+  document: Promise<DocumentEntity>;
 
   @ManyToOne((sample) => SampleElementEntity, {
-    eager: true,
     onDelete: 'SET NULL',
+    lazy: true,
   })
   @JoinColumn({ name: 'sampleId' })
   /** Шаблон элемента */
-  sample: SampleElementEntity;
+  sample: SampleElementEntity | Promise<SampleElementEntity>;
 }

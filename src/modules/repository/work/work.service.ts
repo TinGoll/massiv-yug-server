@@ -45,9 +45,10 @@ export class WorkService {
   }
 
   async findToName(name: string): Promise<SampleWorkEntity | null> {
-    return await this.workRepository.findOne({
-      where: { name, deleted: false },
-    });
+    return await this.workRepository
+      .createQueryBuilder()
+      .where('LOWER(name) = LOWER(:name) and deleted = false', { name })
+      .getOne();
   }
 
   async findAll(): Promise<SampleWorkEntity[]> {

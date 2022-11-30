@@ -1,4 +1,3 @@
-
 import { Unit } from 'src/core/@types/app.types';
 import { SectorEntity } from '../../sector/entities/sector.entity';
 import {
@@ -10,7 +9,6 @@ import {
   ManyToMany,
   JoinTable,
 } from 'typeorm';
-
 
 @Entity('sample_works')
 export class SampleWorkEntity {
@@ -34,6 +32,9 @@ export class SampleWorkEntity {
 
   @Column({ type: 'varchar', default: 'шт.' })
   unit: Unit;
+
+  @Column({ type: 'varchar', default: 'шт.' })
+  salaryUnit: Unit;
 
   @Column({ type: 'jsonb', default: {} })
   data: any;

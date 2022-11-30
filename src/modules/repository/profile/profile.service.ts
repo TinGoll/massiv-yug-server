@@ -45,9 +45,10 @@ export class ProfileService {
   }
 
   async findToName(name: string): Promise<SampleProfileEntity | null> {
-    return await this.profileRepository.findOne({
-      where: { name, deleted: false },
-    });
+    return await this.profileRepository
+      .createQueryBuilder()
+      .where('LOWER(name) = LOWER(:name) and deleted = false', { name })
+      .getOne();
   }
 
   async findAll(): Promise<SampleProfileEntity[]> {
