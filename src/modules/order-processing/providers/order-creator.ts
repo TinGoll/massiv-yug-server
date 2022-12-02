@@ -9,6 +9,7 @@ import {
   DocumentOptions,
   ElementOptions,
 } from 'src/core/@types/app.types';
+import { Geometry } from 'src/core/common/models/geometry';
 import { IComponent } from 'src/core/ecs/components/component-interface';
 import { ColorService } from 'src/modules/repository/color/color.service';
 import { MaterialService } from 'src/modules/repository/material/material.service';
@@ -54,6 +55,14 @@ export class OrderCreator {
     private readonly materialService: MaterialService,
   ) {}
 
+  /**
+   * Открытие книги заказа.
+   * @param bookId
+   */
+  async openBook(bookId): Promise<BookEntity> {
+    return await this.orderService.findBookToId(bookId);
+  }
+
   async addBook(
     authorId: number,
     options: BookOptions = {},
@@ -87,18 +96,56 @@ export class OrderCreator {
     return document;
   }
 
+  /**
+   * Создать елемент - пустышку. Если при миграции заказа, обнаружится неизвестный элемент
+   * будет создана пустышка.
+   * @param documentId
+   * @param options
+   */
+  async addDummy(
+    documentId: number,
+    options: ElementOptions = {},
+  ): Promise<ElementEntity> {
+    const document = await this.orderService.findDocumentToId(documentId);
+    if (!document) throw new Error('Документ не найден.');
+    const dummy = await this.orderService.findSampleElementToName('No Name');
+    if (!dummy) return null;
+
+    const { components: optionComponents = [], ...opt } = options;
+
+    const element = this.orderService.newElement({
+      components: optionComponents,
+      ...opt,
+    });
+    element.identifier = null;
+    element.sample = dummy;
+
+    await this.orderService.saveElement(element);
+    document.elements = [...(document.elements || []), element];
+    await this.orderService.saveDocument(document);
+    return element;
+  }
+
   /** Добавление элемента в документ книги. */
   async addElement(
     documentId: number,
     identifier: string,
     options: ElementOptions = {},
   ): Promise<ElementEntity> {
+    // Получаем документ
     const document = await this.orderService.findDocumentToId(documentId);
+    // Если документ не найден, завершаем процедуру с ошибкой
     if (!document) throw new Error('Документ не найден.');
 
+    // Получаем кортеж из элемента и псефдоэлемента, по идентификатору
     const elementTuple = await this.getElementToIdentifier(identifier);
-    if (!elementTuple) throw new Error('Нет элемента с таким названием.');
+    // Если нет такого идентификатора возвращаем null;
+    if (!elementTuple) return null;
+    // С помощью деструктуризации, получаем елемент и псевдоэлемент.
     const [sample, identifierElement] = elementTuple;
+    // Получаем передаваемые компоненты из опций. Это едиственный метод изменения компонентов, при добавлении элемента
+    // Переданные данные не заменяют компонент, а изменяют данные.
+    const { components: optionComponents = [], ...opt } = options;
 
     // Создаем стартовый набор для компонентов.
     const elementComponents: ComponentData[] = sample.components.map(
@@ -109,6 +156,11 @@ export class OrderCreator {
         const identifierComponent = identifierElement.componentData.find(
           (df) => df.componentName === componentName,
         );
+
+        const optionComponent = optionComponents.find(
+          (df) => df.componentName === componentName,
+        );
+
         // Загружаем данные оригинального компонента. С помощью componentMapper, получаем Instance компонента.
         const cmpInstance =
           this.componentMapper.getInstance<IComponent>(componentName);
@@ -140,6 +192,18 @@ export class OrderCreator {
             }
           }
         }
+
+        // Если в optionComponent переопределен компонент, проводим такую же процедуру.
+        if (optionComponent) {
+          if (optionComponent.data === null) {
+            // data = null;
+          } else {
+            if (optionComponent.data) {
+              data = { ...data, ...optionComponent.data };
+            }
+          }
+        }
+
         const cmpItem: ComponentData = {
           componentName,
           data,
@@ -150,7 +214,7 @@ export class OrderCreator {
     const element = this.orderService.newElement({
       name: identifierElement.identifier,
       components: elementComponents,
-      ...options,
+      ...opt,
     });
     element.identifier = identifierElement;
     element.sample = sample;

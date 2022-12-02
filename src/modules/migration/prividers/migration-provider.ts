@@ -1,4 +1,7 @@
 import { Injectable } from '@nestjs/common';
+import { firstValueFrom, map } from 'rxjs';
+import { BookDocumentType } from 'src/core/@types/app.types';
+import { OrderCreator } from 'src/modules/order-processing/providers/order-creator';
 import { ColorService } from 'src/modules/repository/color/color.service';
 import { MaterialService } from 'src/modules/repository/material/material.service';
 import { OrderService } from 'src/modules/repository/order/order.service';
@@ -8,6 +11,7 @@ import { ProfileService } from 'src/modules/repository/profile/profile.service';
 import { SectorService } from 'src/modules/repository/sector/sector.service';
 import { VarnishService } from 'src/modules/repository/varnish/varnish.service';
 import { WorkService } from 'src/modules/repository/work/work.service';
+import { ItmOrder } from '../interfaces';
 import { createdMigrateColor } from '../migration-data/colors';
 import { createdMigrateMaterial } from '../migration-data/materials';
 import { migrationNomenclature } from '../migration-data/nomenclature';
@@ -33,6 +37,7 @@ export class MigrationProvider {
     private readonly orderService: OrderService,
     private readonly workService: WorkService,
     private readonly profileService: ProfileService,
+    private readonly orderCreator: OrderCreator,
   ) {
     this.migrateColor(false)
       .then(() => {
@@ -65,6 +70,8 @@ export class MigrationProvider {
       .then(() => {
         return this.migrationShirts(false);
       });
+
+    // this.migrateOrder(24621);
   }
 
   /** Миграция Цвета */
@@ -293,5 +300,99 @@ export class MigrationProvider {
       const newObj = await this.panelService.createShirt(obj2);
       console.log('Добавление', newObj);
     }
+  }
+
+  async migrateOrder(id: number) {
+    const itmOrder$ = this.itmHttpService
+      .get<ItmOrder>(`order/${id}`)
+      .pipe(map((responce) => responce.data));
+    const itmOrder = await firstValueFrom<ItmOrder, ItmOrder>(itmOrder$, {
+      defaultValue: null,
+    });
+
+    const candidate = await this.orderService.findBookToId(id);
+    if (candidate) {
+      return;
+    }
+
+    let book = await this.orderCreator.addBook(1, {
+      bookId: itmOrder.id,
+      nameFromClient: itmOrder.clientNumber,
+      note: itmOrder.note,
+    });
+
+    const document = await this.orderCreator.addDocument(book.id, {
+      documentType: (itmOrder.orderType as unknown) as BookDocumentType,
+      note: itmOrder.note
+    });
+
+    await this.orderCreator.assignColor(
+      document.id,
+      itmOrder.color?.type === 'Эмаль' ? 'Эмаль' : 'Морилка',
+      { previousName: itmOrder.color?.name, note: itmOrder.color?.note },
+    );
+
+    await this.orderCreator.assignPatina(document.id, 'Однокомпонентная', {
+      previousName: itmOrder.patina?.name,
+      note: itmOrder.patina?.note,
+    });
+
+    await this.orderCreator.assignVarnish(document.id, 'Акриловый', {
+      previousName: itmOrder.varnish?.name,
+      note: itmOrder.varnish?.note,
+    });
+
+    const panelColor = await this.colorService.findColorToName(
+      itmOrder.panel?.color?.name,
+    );
+    const panelMaterial = await this.materialService.findToName(
+      itmOrder.panel?.material?.name,
+    );
+
+    await this.orderCreator.assignPanel(document.id, itmOrder.panel.name, {
+      colorId: panelColor?.id,
+      materialId: panelMaterial?.id,
+    });
+
+    await this.orderCreator.assignMaterial(
+      document.id,
+      itmOrder.material?.name,
+    );
+
+    await this.orderCreator.assignProfile(
+      document.id,
+      itmOrder.profile?.name,
+      {},
+    );
+
+    for (const el of itmOrder.elements) {
+      let element = await this.orderCreator.addElement(document.id, el.name, {
+        components: [
+          {
+            componentName: 'component_geometry',
+            data: {
+              ...el.geometry,
+            },
+          },
+        ],
+      });
+      if (!element) {
+        element = await this.orderCreator.addDummy(document.id, {
+          name: el.name,
+          components: [
+            {
+              componentName: 'component_geometry',
+              data: {
+                ...el.geometry,
+              },
+            },
+          ],
+        });
+      }
+    }
+
+    book = await this.orderService.findBookToId(book.id);
+
+    console.log(book);
   }
 }

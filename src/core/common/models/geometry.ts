@@ -8,4 +8,5 @@ export class Geometry {
   square: number = 0;
   cubature: number = 0;
   perimeter: number = 0;
+  linearMeters: number = 0;
 }

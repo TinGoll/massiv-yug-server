@@ -128,6 +128,7 @@ export class OrderService {
         id,
       },
     });
+    if (!book) return null;
     book.documents = book.documents?.filter((d) => !d.deleted) || [];
     return book;
   }
@@ -281,7 +282,9 @@ export class OrderService {
   async assignVarnish(
     document: DocumentEntity,
     varnish: SampleVarnishEntity | null,
-    options: Partial<Omit<DocumentVarnishEntity, 'id' | 'sample' | 'document'>> = {},
+    options: Partial<
+      Omit<DocumentVarnishEntity, 'id' | 'sample' | 'document'>
+    > = {},
   ): Promise<DocumentEntity> {
     if (!document.varnish) {
       await this.createDocumentVarnish(document);
@@ -358,7 +361,9 @@ export class OrderService {
   async assignProfile(
     document: DocumentEntity,
     profile: SampleProfileEntity,
-    options: Partial<Omit<DocumentProfileEntity, 'id' | 'sample' | 'document'>> = {},
+    options: Partial<
+      Omit<DocumentProfileEntity, 'id' | 'sample' | 'document'>
+    > = {},
   ): Promise<DocumentEntity> {
     if (!document.profile) {
       await this.createDocumentProfile(document);

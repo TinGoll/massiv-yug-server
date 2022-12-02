@@ -10,9 +10,10 @@ export class GeometryComponent
     square: 0,
     cubature: 0,
     perimeter: 0,
+    linearMeters: 0,
   };
 
-  mm: 1000;
+  public mm = 1000;
   constructor(data: Partial<Geometry>) {
     super(GeometryComponent);
     this.data = { ...this.data, ...data };

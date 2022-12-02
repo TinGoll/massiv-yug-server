@@ -9,7 +9,7 @@ export class WorkComponent
   data: WorkComponentData[] = [];
   constructor(data: WorkComponentData[] = []) {
     super(WorkComponent);
-    this.data = [...data];
+    this.data = data;
   }
   getData(): WorkComponentData[] {
     return this.data;

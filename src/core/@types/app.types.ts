@@ -2,6 +2,7 @@
 // Цвет.
 
 import { type } from 'os';
+import { ComponentData } from 'src/modules/repository/order/entities/document.element.entity';
 import { Geometry } from '../common/models/geometry';
 
 /** Тип цвета */
@@ -114,6 +115,7 @@ export interface DocumentOptions {
 }
 export interface ElementOptions {
   name?: string;
+  components?: ComponentData[]
 }
 
 export interface AssignColorOptions {
