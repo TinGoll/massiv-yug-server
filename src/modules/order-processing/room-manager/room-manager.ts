@@ -18,7 +18,7 @@ export class RoomManager {
   private logger: Logger = new Logger('Room Manager');
 
   private interval$: Subscription;
-  private timePeriod = 5000;
+  private timePeriod = 1000;
   private timeSnapshot: number = Date.now();
   private readonly update$ = new BehaviorSubject<number>(this.timeSnapshot);
 
@@ -27,7 +27,7 @@ export class RoomManager {
     private readonly componentMapper: ComponentMapper,
   ) {
     this.start();
-    // this.openOrder(24621);
+    this.openOrder(24621);
   }
 
   /**

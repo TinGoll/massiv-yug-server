@@ -3,6 +3,7 @@ import { MYEntity } from 'src/core/ecs/engine/my-entity';
 import { GeometrySystem } from 'src/core/ecs/systems/geometry.system';
 import { PanelSystem } from 'src/core/ecs/systems/panel.system';
 import { ProfileSystem } from 'src/core/ecs/systems/profile.system';
+import { ResultSystem } from 'src/core/ecs/systems/result.system';
 import { BookEntity } from 'src/modules/repository/order/entities/book.entity';
 import { Component } from 'yug-entity-component-system';
 import { ComponentMapper } from '../../providers/component-mapper';
@@ -22,6 +23,7 @@ export class Room {
 
   async update(dt: number): Promise<void> {
     await this.engine.update(dt);
+    this.roomManager.stop()
   }
 
   /** Вызывается после создания команты. Переопределите, что бы использовать в своих целях. */
@@ -34,6 +36,8 @@ export class Room {
     this.engine.addSystem(new ProfileSystem());
     // Система расчета филёнок.
     this.engine.addSystem(new PanelSystem());
+    // Результаты.
+    this.engine.addSystem(new ResultSystem());
 
     // *************************************************
     // Сущности

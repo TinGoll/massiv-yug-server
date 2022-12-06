@@ -37,6 +37,7 @@ export class PanelUpdateInput {
   /** Отступ для рубашки */
   figoreaSize?: number;
 
+
   /** ссылка на схему */
   drawing?: string;
 

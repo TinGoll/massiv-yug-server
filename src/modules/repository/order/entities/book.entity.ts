@@ -49,8 +49,11 @@ export class BookEntity {
   @Column({ type: 'jsonb', default: {} })
   resultData: BookResultData;
 
+  @Column({ type: 'float', default: 0 })
+  cost: number;
+
   @Column({ type: 'jsonb', default: [] })
-  /** В заказ копируется все работы, и сохраняються для использования в этом заказе. */
+  /** В заказ копируется все работы. */
   works: SampleWorkEntity[];
 
   @ManyToOne(() => PersonEntity, { eager: true, onDelete: 'SET NULL' })

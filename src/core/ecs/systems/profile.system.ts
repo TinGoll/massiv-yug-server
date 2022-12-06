@@ -1,5 +1,5 @@
 import { Geometry } from 'src/core/common/models/geometry';
-import { Family, IteratingSystem } from 'yug-entity-component-system';
+import { Engine, Family, IteratingSystem } from 'yug-entity-component-system';
 import { GeometryComponent } from '../components/geometry.component';
 import { ProfileComponent } from '../components/profile.component';
 import { MYEngine } from '../engine/my-engine';
@@ -11,8 +11,8 @@ export class ProfileSystem extends IteratingSystem {
   }
 
   /** Переопределяем движок, на расширенный */
-  public getEngine(): MYEngine {
-    return <MYEngine>super.getEngine();
+  getEngine<T extends Engine = MYEngine>(): T | null {
+    return super.getEngine<T>();
   }
 
   protected async processEntity(
@@ -91,13 +91,13 @@ export class ProfileSystem extends IteratingSystem {
       }
 
       if (pr.name === 'Верхний') {
-        height = topW;
-        width = Parentwidth;
+        height = Parentwidth;
+        width = topW;
       }
 
       if (pr.name === 'Нижний') {
-        height = botW;
-        width = Parentwidth;
+        height = Parentwidth;
+        width = botW;
       }
       geometry.height = height;
       geometry.width = width;

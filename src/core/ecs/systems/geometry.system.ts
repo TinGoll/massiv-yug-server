@@ -1,4 +1,9 @@
-import { Entity, Family, IteratingSystem } from 'yug-entity-component-system';
+import {
+  Engine,
+  Entity,
+  Family,
+  IteratingSystem,
+} from 'yug-entity-component-system';
 import { GeometryComponent } from '../components/geometry.component';
 import { MYEngine } from '../engine/my-engine';
 
@@ -8,8 +13,13 @@ export class GeometrySystem extends IteratingSystem {
   }
 
   /** Переопределяем движок, на расширенный */
-  getEngine(): MYEngine {
-    return <MYEngine>super.getEngine();
+  getEngine<T extends Engine = MYEngine>(): T | null {
+    return super.getEngine<T>();
+  }
+
+  /** Код запускается перед обновлением, модно использовать для решения об отключении системы и. т. д. */
+  async beforeUpdate(): Promise<void> {
+    this.setProcessing(true);
   }
 
   protected async processEntity(

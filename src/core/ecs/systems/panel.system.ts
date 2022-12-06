@@ -1,47 +1,166 @@
 import { Panel } from 'src/core/@types/app.types';
-import { Entity, Family, IteratingSystem } from 'yug-entity-component-system';
+import {
+  Engine,
+  Entity,
+  Family,
+  IteratingSystem,
+} from 'yug-entity-component-system';
 import { GeometryComponent } from '../components/geometry.component';
 import { PanelComponent } from '../components/panel.component';
+import { ProfileComponent } from '../components/profile.component';
 import { MYEngine } from '../engine/my-engine';
 import { MYEntity } from '../engine/my-entity';
 
 export class PanelSystem extends IteratingSystem {
   constructor() {
-    super(PanelSystem, Family.all(GeometryComponent, PanelComponent).get());
+    super(
+      PanelSystem,
+      Family.all(GeometryComponent, PanelComponent, ProfileComponent).get(),
+    );
   }
 
   /** Переопределяем движок, на расширенный */
-  public getEngine(): MYEngine {
-    return <MYEngine>super.getEngine();
+  getEngine<T extends Engine = MYEngine>(): T | null {
+    return super.getEngine<T>();
   }
-
   protected async processEntity(
     entity: MYEntity,
     deltaTime: number,
   ): Promise<void> {
     const document = entity.documentEntity;
+    const documentProfileSample = document.profile?.sample;
+    const docPanel = document.panel;
+    const samplePanel = docPanel.sample;
 
+    // Компоненты
     const panelCmp = entity.getComponent<PanelComponent>(PanelComponent);
     const gmCmp = entity.getComponent<GeometryComponent>(GeometryComponent);
-    const docPanel = document.panel;
+    const prfCmp = entity.getComponent<ProfileComponent>(ProfileComponent);
 
-    // console.log(docPanel);
+    // Очищаем массив филенок, для нового расчета
+    panelCmp.data = { panels: [] };
 
-    if (panelCmp.data === null || !docPanel.sample) return;
-      const panel: Panel | null = {
+    // Если филенка не задана,
+    if (panelCmp.data === null || !samplePanel || !documentProfileSample) {
+      return;
+    }
+
+    // Находим нужный профиль
+    const leftProf = (prfCmp.data.profiles || []).find(
+      (prf) => prf.name === 'Верхний',
+    );
+    const topProf = (prfCmp.data.profiles || []).find(
+      (prf) => prf.name === 'Верхний',
+    );
+    const rightProf = (prfCmp.data.profiles || []).find(
+      (prf) => prf.name === 'Верхний',
+    );
+    const botProf = (prfCmp.data.profiles || []).find(
+      (prf) => prf.name === 'Верхний',
+    );
+
+    const parentHeight = gmCmp.data.height || 0;
+    const parentWidth = gmCmp.data.width || 0;
+    const parentAmount = gmCmp.data.amount || 0;
+
+    // Создаем предварительный объект компонента филенки.
+    const panel: Panel | null = {
+      geometry: {
+        square: 0,
+        cubature: 0,
+        perimeter: 0,
+        linearMeters: 0,
+      },
+      index: 1,
+      type: 'Филёнка',
+      shirt: null,
+      workData: [],
+    };
+
+    // Если шаблон филенки, содержит рубашку, добавляем ее в компонент.
+    if (samplePanel.shirt) {
+      panel.shirt = {
         geometry: {
           square: 0,
           cubature: 0,
           perimeter: 0,
           linearMeters: 0,
         },
-        index: 1,
-        type: 'Филёнка',
-        shirt: null,
         workData: [],
       };
-      // console.log(panel);
-  }
+    }
 
-  
+    // Получаем необходимые переменные
+    const leftProfWidth = leftProf?.geometry?.width || 0;
+    const topProfWidth = topProf?.geometry?.width || 0;
+    const rightProfWidth = rightProf?.geometry?.width || 0;
+    const botProfWidth = botProf?.geometry?.width || 0;
+    const grooveDepth = documentProfileSample.grooveDepth;
+
+    // Записываем новые данные в компонент
+    // Высота
+    panel.geometry.height =
+      parentHeight - (leftProfWidth + rightProfWidth) + grooveDepth * 2;
+
+    // Ширина
+    panel.geometry.width =
+      parentWidth - (topProfWidth + botProfWidth) + grooveDepth * 2;
+    // Количество
+    panel.geometry.amount = parentAmount;
+
+    // Площадь
+    panel.geometry.square =
+      (panel.geometry.height / gmCmp.mm) *
+      (panel.geometry.width / gmCmp.mm) *
+      panel.geometry.amount;
+
+    // Периметр
+    panel.geometry.perimeter =
+      ((panel.geometry.height / gmCmp.mm) * 2 +
+        (panel.geometry.width / gmCmp.mm) * 2) *
+      panel.geometry.amount;
+
+    // Погонные метры
+    panel.geometry.linearMeters =
+      (panel.geometry.height / gmCmp.mm) * panel.geometry.amount;
+
+    // Если есть рубашка, расчитываем.
+    if (panel.shirt) {
+      // TODO Расчет может быть не точным, уточнить формулу
+      const ShirtdepthOverlay = Number(samplePanel.shirt.depthOverlay);
+      const figoreaSize = Number(samplePanel.figoreaSize);
+      const Shirtindent = Number(samplePanel.shirt.indent);
+
+      panel.shirt.geometry.height = panel.geometry.height - figoreaSize * 2;
+      panel.shirt.geometry.width = panel.geometry.width - figoreaSize * 2;
+
+      panel.shirt.geometry.amount = panel.geometry.amount;
+
+      // Площадь
+      panel.shirt.geometry.square =
+        (panel.shirt.geometry.height / gmCmp.mm) *
+        (panel.shirt.geometry.width / gmCmp.mm) *
+        panel.shirt.geometry.amount;
+
+      // Периметр
+      panel.shirt.geometry.perimeter =
+        ((panel.shirt.geometry.height / gmCmp.mm) * 2 +
+          (panel.shirt.geometry.width / gmCmp.mm) * 2) *
+        panel.shirt.geometry.amount;
+      // погонные метры
+      panel.shirt.geometry.linearMeters =
+        (panel.shirt.geometry.height / gmCmp.mm) * panel.shirt.geometry.amount;
+
+      // если рубашка меньше сантиметра, удаляем.
+      if (panel.shirt.geometry.height < 10 || panel.shirt.geometry.width < 10)
+        panel.shirt = null;
+    }
+
+    if (
+      panel.geometry.height > grooveDepth * 2 &&
+      panel.geometry.width > grooveDepth * 2
+    ) {
+      panelCmp.data.panels = [panel];
+    }
+  }
 }

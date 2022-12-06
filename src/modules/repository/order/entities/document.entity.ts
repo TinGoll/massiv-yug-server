@@ -65,6 +65,9 @@ export class DocumentEntity {
   @Column({ type: 'varchar', length: 512, nullable: true })
   note: string;
 
+  @Column({ type: 'float', default: 0 })
+  cost: number;
+
   @ManyToOne(() => SampleMaterialEntity, { eager: true, onDelete: 'SET NULL' })
   @JoinColumn({ name: 'materialId' })
   /** Основной материал документа */
@@ -105,7 +108,7 @@ export class DocumentEntity {
   /** Книга документа */
   @ManyToOne(() => BookEntity, {
     onDelete: 'CASCADE',
-    lazy: true
+    lazy: true,
   })
   @JoinColumn({
     name: 'bookId',

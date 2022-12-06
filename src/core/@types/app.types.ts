@@ -99,8 +99,26 @@ export type DocumentGlossiness =
   | 'Глянец (70%)'
   | 'Сильный глянец (90%)';
 
-export interface BookResultData {}
-export interface DocumentResultData {}
+export interface BookResultData {
+  amountElements?: number;
+  squares?: {
+    all: number;
+    groups: Array<{
+      name: string;
+      amount: number;
+    }>;
+  };
+}
+export interface DocumentResultData {
+  amountElements?: number;
+  squares?: {
+    all: number;
+    groups: Array<{
+      name: string;
+      amount: number;
+    }>;
+  };
+}
 
 export interface BookOptions {
   bookId?: number;
@@ -115,7 +133,7 @@ export interface DocumentOptions {
 }
 export interface ElementOptions {
   name?: string;
-  components?: ComponentData[]
+  components?: ComponentData[];
 }
 
 export interface AssignColorOptions {
