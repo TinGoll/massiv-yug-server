@@ -1,4 +1,5 @@
 import { BookResultData, WorkData } from 'src/core/@types/app.types';
+import { OrderGraph } from 'src/core/common/graph/order-graph';
 import {
   Entity,
   Column,
@@ -48,6 +49,10 @@ export class BookEntity {
   /** Результативные данные */
   @Column({ type: 'jsonb', default: {} })
   resultData: BookResultData;
+
+  /** Результативные данные */
+  @Column({ type: 'jsonb', default: null, nullable: true })
+  graph?: OrderGraph;
 
   @Column({ type: 'float', default: 0 })
   cost: number;

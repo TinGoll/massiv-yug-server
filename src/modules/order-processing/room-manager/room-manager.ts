@@ -1,14 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { Logger } from '@nestjs/common/services';
-import {
-  BehaviorSubject,
-  concatMap,
-  interval,
-  Subscription,
-  Observable,
-  from,
-} from 'rxjs';
+import { BehaviorSubject, concatMap, interval, Subscription, from } from 'rxjs';
 import { ComponentMapper } from '../providers/component-mapper';
+import { GraphProvider } from '../providers/graph-provider';
 import { OrderCreator } from '../providers/order-creator';
 import { Room } from './rooms/room';
 
@@ -23,8 +17,9 @@ export class RoomManager {
   private readonly update$ = new BehaviorSubject<number>(this.timeSnapshot);
 
   constructor(
-    private readonly orderCreator: OrderCreator,
-    private readonly componentMapper: ComponentMapper,
+    public readonly orderCreator: OrderCreator,
+    public readonly componentMapper: ComponentMapper,
+    public readonly graphProvider: GraphProvider,
   ) {
     this.start();
     this.openOrder(24621);
@@ -81,6 +76,10 @@ export class RoomManager {
     const dt = now - this.timeSnapshot;
     this.timeSnapshot = now;
     return dt;
+  }
+
+  public getOrderCreator() {
+    return this.orderCreator;
   }
 
   public set(roomId: string | number, room: Room) {

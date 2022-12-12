@@ -1,7 +1,6 @@
 /******************************************************* */
 // Цвет.
 
-import { type } from 'os';
 import { ComponentData } from 'src/modules/repository/order/entities/document.element.entity';
 import { Geometry } from '../common/models/geometry';
 
@@ -48,18 +47,26 @@ export type BookDocumentType = 'Фасады' | 'Лестницы';
 export type PanelType = 'Филёнка' | 'Решётка' | 'Витрина';
 
 export interface WorkData {
-  workId: number;
-  name: string;
-  price: number;
-  norm: number;
-  unit: Unit;
-  salaryUnit: Unit;
+  // workId: number;
+  name?: string;
+  price?: number;
+  norm?: number;
+  unit?: Unit;
+  salaryUnit?: Unit;
   data?: any;
+  cost: number;
+  value: number;
 }
 
-export interface WorkComponentData {
+export type ArrayWorkData = WorkElementData[];
+
+export type WorkElementData = {
   workId: number;
   data?: WorkData;
+};
+
+export interface WorkComponentData {
+  workData: ArrayWorkData;
 }
 
 /** Данные компонента филёнка */
@@ -73,18 +80,18 @@ export interface Panel {
   type: PanelType;
   shirt: Shirt | null;
   geometry: Geometry;
-  workData: WorkData[];
+  workData: ArrayWorkData;
 }
 
 /** Поле рубашка, поля филёнка, в компоненте филёнка. */
 export interface Shirt {
   geometry: Geometry;
-  workData: WorkData[];
+  workData: ArrayWorkData;
 }
 /** Данные компонента профиль */
 export interface ProfileData {
   profiles: Array<Profile>;
-  workData: WorkData[];
+  workData: ArrayWorkData;
 }
 /** Профиль */
 export interface Profile {

@@ -1,5 +1,5 @@
-import { SampleWorkEntity } from "../../work/entities/sample.work.entity";
-import { SampleShirtEntity } from "../entities/sample.panel.shirt.entity";
+import { SampleWorkEntity } from '../../work/entities/sample.work.entity';
+import { SampleShirtEntity } from '../entities/sample.panel.shirt.entity';
 
 /** Набор полей необходимых для добавления цвета */
 export class PanelCreateInput {
@@ -37,11 +37,10 @@ export class PanelUpdateInput {
   /** Отступ для рубашки */
   figoreaSize?: number;
 
-
   /** ссылка на схему */
   drawing?: string;
 
   shirt?: SampleShirtEntity;
   /** Массив работ */
-  works?: SampleWorkEntity[];
+  works?: Promise<SampleWorkEntity[]> | SampleWorkEntity[];
 }

@@ -11,6 +11,10 @@ import { ProfileComponent } from '../components/profile.component';
 import { MYEngine } from '../engine/my-engine';
 import { MYEntity } from '../engine/my-entity';
 
+/**
+ * Система для расчета филёнок и рубашек.
+ * Система не расчитывает филёнки комбинированных фасадов.
+ */
 export class PanelSystem extends IteratingSystem {
   constructor() {
     super(
@@ -20,9 +24,10 @@ export class PanelSystem extends IteratingSystem {
   }
 
   /** Переопределяем движок, на расширенный */
-  getEngine<T extends Engine = MYEngine>(): T | null {
-    return super.getEngine<T>();
+  getMYEngine(): MYEngine {
+    return super.getEngine<MYEngine>();
   }
+
   protected async processEntity(
     entity: MYEntity,
     deltaTime: number,
@@ -77,6 +82,10 @@ export class PanelSystem extends IteratingSystem {
       workData: [],
     };
 
+    // Инициализируем работы для филенки.
+    const pWorks = await (samplePanel?.works || []);
+    panel.workData = pWorks.map((w) => ({ workId: w.id }));
+
     // Если шаблон филенки, содержит рубашку, добавляем ее в компонент.
     if (samplePanel.shirt) {
       panel.shirt = {
@@ -88,6 +97,10 @@ export class PanelSystem extends IteratingSystem {
         },
         workData: [],
       };
+
+      // Инициализация работ для рубашки.
+      const shWorks = await (samplePanel?.shirt?.works || []);
+      panel.shirt.workData = shWorks.map((w) => ({ workId: w.id }));
     }
 
     // Получаем необходимые переменные

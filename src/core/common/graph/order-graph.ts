@@ -1,7 +1,8 @@
-import { WorkComponentData } from 'src/core/@types/app.types';
+import { WorkComponentData, WorkElementData } from 'src/core/@types/app.types';
 import { Edge } from './edge';
 import { Graph } from './graph';
 import { OrderVertex } from './order-vertex';
+import SerializationOrderGraph from './serialization.graph';
 
 interface Strategy {
   vertexId: string | number;
@@ -10,7 +11,7 @@ interface Strategy {
 
 export interface VertexOptions {
   name: string;
-  workData: WorkComponentData[];
+  workData: WorkElementData[];
   sectorid?: number;
   startVertex?: boolean;
   endVertex?: boolean;
@@ -26,6 +27,7 @@ export class OrderGraph extends Graph<string> {
   getVertices(): OrderVertex<VertexOptions>[] {
     return <OrderVertex[]>this.vertices;
   }
+  // Создание новой вершины.
   add(options: VertexOptions): OrderVertex {
     const vertex = new OrderVertex<VertexOptions>(options);
     // if (!this.vertices.length) vertex.options.startVertex = true;
@@ -216,5 +218,23 @@ export class OrderGraph extends Graph<string> {
         b?.options.strategy.push({ vertexId: a.id, complited: false });
       }
     });
+  }
+
+  serialization() {}
+
+  /**
+   * Создание графа из json объекта базы данных.
+   * @param object
+   * @returns OrderGraph
+   */
+  public static deSerialization(
+    object: SerializationOrderGraph.Graph,
+  ): OrderGraph {
+    const vertices = object.vertices.map((v) =>
+      OrderVertex.deSerialization<VertexOptions>(v.id, v.options, ...v.edges),
+    );
+    const graph = new OrderGraph(vertices);
+    graph.isBuilt = object.isBuilt;
+    return graph;
   }
 }

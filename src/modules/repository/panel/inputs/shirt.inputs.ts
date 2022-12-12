@@ -21,5 +21,5 @@ export class ShirtUpdateInput {
   /** Отступ для рубашки */
   figoreaSize?: number;
   /** Массив работ */
-  works?: SampleWorkEntity[];
+  works?: Promise<SampleWorkEntity[]> | SampleWorkEntity[];
 }

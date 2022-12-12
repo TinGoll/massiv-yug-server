@@ -1,5 +1,4 @@
 import {
-  Engine,
   Entity,
   Family,
   IteratingSystem,
@@ -7,14 +6,17 @@ import {
 import { GeometryComponent } from '../components/geometry.component';
 import { MYEngine } from '../engine/my-engine';
 
+/**
+ * Система для расчета геометрических показателей.
+ */
 export class GeometrySystem extends IteratingSystem {
   constructor() {
     super(GeometrySystem, Family.one(GeometryComponent).get());
   }
 
   /** Переопределяем движок, на расширенный */
-  getEngine<T extends Engine = MYEngine>(): T | null {
-    return super.getEngine<T>();
+  getMYEngine(): MYEngine {
+    return super.getEngine<MYEngine>();
   }
 
   /** Код запускается перед обновлением, модно использовать для решения об отключении системы и. т. д. */

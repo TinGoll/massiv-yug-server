@@ -1,18 +1,21 @@
 import { Geometry } from 'src/core/common/models/geometry';
-import { Engine, Family, IteratingSystem } from 'yug-entity-component-system';
+import { Family, IteratingSystem } from 'yug-entity-component-system';
 import { GeometryComponent } from '../components/geometry.component';
 import { ProfileComponent } from '../components/profile.component';
 import { MYEngine } from '../engine/my-engine';
 import { MYEntity } from '../engine/my-entity';
 
+/**
+ * Система для расчета профиля.
+ */
 export class ProfileSystem extends IteratingSystem {
   constructor() {
     super(ProfileSystem, Family.all(GeometryComponent, ProfileComponent).get());
   }
 
   /** Переопределяем движок, на расширенный */
-  getEngine<T extends Engine = MYEngine>(): T | null {
-    return super.getEngine<T>();
+  getMYEngine(): MYEngine {
+    return super.getEngine<MYEngine>();
   }
 
   protected async processEntity(

@@ -20,10 +20,10 @@ export class DocumentPanelEntity {
   @Column({ type: 'varchar', length: 512, nullable: true })
   note: string;
 
-  @Column({ type: 'jsonb', default: [] })
+  @Column({ type: 'jsonb', nullable: true })
   workData: WorkComponentData[];
 
-  @Column({ type: 'jsonb', default: [] })
+  @Column({ type: 'jsonb', nullable: true })
   shirtWorkData: WorkComponentData[];
 
   @ManyToOne((type) => SampleColorEntity, { onDelete: 'SET NULL', eager: true })

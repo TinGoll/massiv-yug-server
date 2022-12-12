@@ -35,6 +35,7 @@ import { ProfileService } from 'src/modules/repository/profile/profile.service';
 import { SectorService } from 'src/modules/repository/sector/sector.service';
 import { SettingService } from 'src/modules/repository/setting/setting.service';
 import { VarnishService } from 'src/modules/repository/varnish/varnish.service';
+import { SampleWorkEntity } from 'src/modules/repository/work/entities/sample.work.entity';
 import { WorkService } from 'src/modules/repository/work/work.service';
 import { ComponentMapper } from './component-mapper';
 
@@ -72,6 +73,10 @@ export class OrderCreator {
     const status = await this.orderService.findStatusToId(1);
     book.id = bookId;
     book.status = status;
+
+    const works = await this.workService.findAll();
+    book.works = works;
+
     await this.orderService.saveBook(book);
     book.barcode = this.generateBarcode(book.id, '');
     return await this.orderService.saveBook(book);
@@ -374,7 +379,7 @@ export class OrderCreator {
   }
 
   generateBarcode(id: number, type: string): string {
-    let barcodeLength = 6;
+    let barcodeLength = 7;
     let lenght = `${id}`.length;
     let repeat = barcodeLength - lenght < 0 ? 0 : barcodeLength - lenght;
     let barcode = `${BOOK_BARCODE_PREFIX}${'0'.repeat(repeat)}${id}`;
@@ -400,5 +405,9 @@ export class OrderCreator {
     console.log('change cmp result', result);
 
     return await this.orderService.saveElement(element);
+  }
+
+  async getWorks(): Promise<SampleWorkEntity[]> {
+    return await this.workService.findAll();
   }
 }

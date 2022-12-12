@@ -35,7 +35,7 @@ export class SamplePanelEntity {
   drawing: string;
 
   /** Отступ для рубашки */
-  @Column({ type: "float", nullable: true })
+  @Column({ type: 'float', nullable: true })
   figoreaSize: number;
 
   @ManyToOne((shirt) => SampleShirtEntity, {
@@ -49,7 +49,7 @@ export class SamplePanelEntity {
   @Column('boolean', { default: false })
   deleted: boolean;
 
-  @ManyToMany(() => SampleWorkEntity, {})
+  @ManyToMany(() => SampleWorkEntity, { lazy: true })
   @JoinTable()
-  works: SampleWorkEntity[];
+  works: Promise<SampleWorkEntity[]> | SampleWorkEntity[];
 }

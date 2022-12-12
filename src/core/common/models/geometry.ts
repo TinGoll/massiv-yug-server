@@ -10,3 +10,5 @@ export class Geometry {
   perimeter: number = 0;
   linearMeters: number = 0;
 }
+
+

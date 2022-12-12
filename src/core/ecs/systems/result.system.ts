@@ -10,23 +10,26 @@ import { GeometryComponent } from '../components/geometry.component';
 import { MYEngine } from '../engine/my-engine';
 import { MYEntity } from '../engine/my-entity';
 
+/**
+ * Система для подсчета результатов.
+ */
 export class ResultSystem extends BaseSystem {
   constructor() {
     super(ResultSystem, Family.one(GeometryComponent).get());
   }
 
   /** Переопределяем движок, на расширенный */
-  getEngine<T extends Engine = MYEngine>(): T | null {
-    return super.getEngine<T>();
+  getMYEngine(): MYEngine {
+    return super.getEngine<MYEngine>();
   }
 
   protected async processEntities(
     entities: ImmutableArray<Entity>,
     deltaTime: number,
   ): Promise<void> {
-    console.time('FirstWay');
-    const ents = this.getEngine().getEntities();
-    const book = this.getEngine().bookEntity;
+    // console.time('FirstWay');
+    const ents = this.getMYEngine().getEntities();
+    const book = this.getMYEngine().bookEntity;
     const bookResult: BookResultData = {
       amountElements: 0,
       squares: {
@@ -76,8 +79,7 @@ export class ResultSystem extends BaseSystem {
       }
       bookResult.squares.all += Number(documentResult.squares.all);
     }
-    console.timeEnd('FirstWay');
-    console.log('bookResult', JSON.stringify(bookResult, null, 2));
-    
+    // console.timeEnd('FirstWay');
+    // console.log('bookResult', JSON.stringify(bookResult, null, 2));
   }
 }

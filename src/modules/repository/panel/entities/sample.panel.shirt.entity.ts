@@ -30,7 +30,7 @@ export class SampleShirtEntity {
   @Column('boolean', { default: false })
   deleted: boolean;
 
-  @ManyToMany(() => SampleWorkEntity, {  })
+  @ManyToMany(() => SampleWorkEntity, { lazy: true })
   @JoinTable()
-  works: SampleWorkEntity[];
+  works: Promise<SampleWorkEntity[]> | SampleWorkEntity[];
 }
