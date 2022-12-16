@@ -1,9 +1,26 @@
 import { Injectable } from '@nestjs/common';
 import { Logger } from '@nestjs/common/services';
-import { BehaviorSubject, concatMap, interval, Subscription, from } from 'rxjs';
+import { WsException } from '@nestjs/websockets/errors/ws-exception';
+import {
+  BehaviorSubject,
+  concatMap,
+  interval,
+  Subscription,
+  from,
+  Observable,
+  tap,
+  map,
+  of,
+} from 'rxjs';
+import { DocumentOptions } from 'src/core/@types/app.types';
+import { BookEntity } from 'src/modules/repository/order/entities/book.entity';
+import { DocumentEntity } from 'src/modules/repository/order/entities/document.entity';
+import { BookCreateInput } from 'src/modules/repository/order/inputs/book.input';
 import { ComponentMapper } from '../providers/component-mapper';
 import { GraphProvider } from '../providers/graph-provider';
 import { OrderCreator } from '../providers/order-creator';
+import Processing, { RoomKeyType } from './actions/processing-actions';
+import { RoomEventListener, RoomEventStateListener } from './interfaces';
 import { Room } from './rooms/room';
 
 @Injectable()
@@ -21,24 +38,117 @@ export class RoomManager {
     public readonly componentMapper: ComponentMapper,
     public readonly graphProvider: GraphProvider,
   ) {
-    this.start();
-    this.openOrder(24621);
+    // this.start();
+    // this.openOrder(24621);
+    // this.createOrder();
+  }
+
+  /**
+   * Добавить новый документ в книгу заказов
+   * @param bookId id книги
+   * @param options Набор опций для создания документа.
+   * @returns DocumentEntity
+   */
+  addDocument(
+    bookId: number,
+    options?: DocumentOptions,
+  ): Observable<DocumentEntity> {
+    const room = this.get(bookId);
+    if (!room) {
+      return of(null);
+    }
+    return from(room.addDocument(options)).pipe(
+      tap(() => {
+        room.update(0);
+      }),
+    );
   }
 
   /**
    * Открытие заказа в системе комнат, для обработки.
    * @param id
    */
-  openOrder(id: number): void {
-    const book = from(this.orderCreator.openBook(id)).subscribe((response) => {
-      if (response) {
-        const room = new Room(this, response, this.componentMapper);
-        /** Перед добавлением комнаты в менеджер комнат, вызываем спец-метод. */
-        room.afterCreation().then(() => this.set(id, room));
-      }
-      return book.unsubscribe();
-    });
-    // book.unsubscribe();
+  openOrder(
+    id: RoomKeyType,
+    listener?: RoomEventStateListener,
+  ): Observable<BookEntity> {
+    const candidate = this.get(id);
+    if (candidate) {
+      // Отправить подключенному пользователю состояние комнаты.
+      return of(candidate.book);
+    }
+    return from(this.orderCreator.openBook(id)).pipe(
+      map((book) => {
+        if (book) {
+          const room = new Room(this, book, this.componentMapper);
+          room.on('state', listener);
+          /** Перед добавлением комнаты в менеджер комнат, вызываем спец-метод. */
+          room.afterCreation().then(() => {
+            this.set(book.id, room);
+            // Ручное обновление.
+            room.update(0);
+          });
+          return room.book;
+        }
+        return null;
+      }),
+    );
+  }
+  /**
+   * Создание нового заказа.
+   */
+  createOrder(
+    option?: BookCreateInput,
+    listener?: RoomEventStateListener,
+  ): Observable<BookEntity> {
+    return from(this.orderCreator.addBook(1, option)).pipe(
+      map((book) => {
+        if (book) {
+          const room = new Room(this, book, this.componentMapper);
+          room.on('state', listener);
+          /** Перед добавлением комнаты в менеджер комнат, вызываем спец-метод. */
+          room.afterCreation().then(() => {
+            this.set(book.id, room);
+            // Ручное обновление.
+            room.update(0);
+          });
+          return room.book;
+        }
+        return null;
+      }),
+    );
+  }
+
+  /** Закрывает книгу заказа. */
+  closeRoom(id: RoomKeyType): void {
+    if (this.has(id)) {
+      const room = this.get(id);
+      room.dispose().then(() => this.delete(room.id));
+    }
+  }
+
+  /** Существует ли открытая книга в коллекции. */
+  isExists(id: number): boolean {
+    return this.has(id);
+  }
+
+  /**
+   * Основной метод управления заказом через систему комнат.
+   * @param authorId id автора события.
+   * @param act объект - событие.
+   */
+  async action(
+    authorId: number,
+    roomId: number,
+    act: Processing.Action,
+  ): Promise<void> {
+    const room = this.get(roomId);
+    if (!room) {
+      throw new WsException('Комната закрыта или не существует.');
+    }
+    await room.act(authorId, act);
+    // Обновление по событию.
+    await room.update(0);
   }
 
   /**
@@ -92,5 +202,9 @@ export class RoomManager {
 
   public delete(roomId: string | number) {
     return this.rooms.delete(String(roomId));
+  }
+
+  public has(roomId: string | number) {
+    return this.rooms.has(String(roomId));
   }
 }

@@ -321,7 +321,7 @@ export class MigrationProvider {
       note: itmOrder.note,
     });
 
-    const document = await this.orderCreator.addDocument(book.id, {
+    const document = await this.orderCreator.addDocument(book, {
       documentType: (itmOrder.orderType as unknown) as BookDocumentType,
       note: itmOrder.note
     });

@@ -60,8 +60,8 @@ export class OrderCreator {
    * Открытие книги заказа.
    * @param bookId
    */
-  async openBook(bookId): Promise<BookEntity> {
-    return await this.orderService.findBookToId(bookId);
+  async openBook(bookId: number | string): Promise<BookEntity> {
+    return await this.orderService.findBookToId(Number(bookId));
   }
 
   async addBook(
@@ -83,12 +83,10 @@ export class OrderCreator {
   }
 
   async addDocument(
-    bookId: number,
-    options: DocumentOptions = {},
+    book: BookEntity,
+    options?: DocumentOptions,
   ): Promise<DocumentEntity> {
-    const book = await this.orderService.findBookToId(bookId);
-    if (!book) throw new Error('Книги не существует.');
-
+    console.time('add-document');
     const document = await this.orderService.createDocument(options);
     book.documents = [...book.documents, document];
     await this.orderService.assignColor(document, null, {});
@@ -97,6 +95,7 @@ export class OrderCreator {
     await this.orderService.assignMaterial(document, null);
     await this.orderService.assignPanel(document, null, {});
     await this.orderService.assignProfile(document, null, {});
+    console.timeEnd('add-document');
     await this.orderService.saveBook(book);
     return document;
   }
@@ -403,8 +402,12 @@ export class OrderCreator {
     );
 
     console.log('change cmp result', result);
-
-    return await this.orderService.saveElement(element);
+    return element;
+    // Автосохранение после изменения отключено,
+    // так как сохранение будет производится после
+    // Обработки системами.
+    // Что бы включить, раскомментируй код нижу и закоментируй код выше)
+    // return await this.orderService.saveElement(element);
   }
 
   async getWorks(): Promise<SampleWorkEntity[]> {
