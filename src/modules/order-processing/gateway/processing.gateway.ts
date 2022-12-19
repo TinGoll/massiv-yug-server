@@ -120,6 +120,23 @@ export class ProcessingGateway
       .pipe(map((document) => ({ event, data: { document } })));
   }
 
+  /** События связанные с редактированием документов и элементов */
+  @SubscribeMessage(processingEvents.OPEN_ORDER)
+  orderAction(
+    client: Socket,
+    action: PayloadAction<Processing.Action>,
+  ): Observable<WsResponse<any>> {
+    const event = processingEvents.ORDER_ACTION;
+    return this.roomManager
+      .action(1, action.payload.roomId, action.payload)
+      .pipe(
+        map((data) => ({
+          event,
+          data,
+        })),
+      );
+  }
+
   /********************************************************************************* */
   // События, обработка комнат и клиентов
 

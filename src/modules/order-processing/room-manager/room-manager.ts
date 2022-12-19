@@ -11,6 +11,7 @@ import {
   tap,
   map,
   of,
+  mergeMap,
 } from 'rxjs';
 import { DocumentOptions } from 'src/core/@types/app.types';
 import { BookEntity } from 'src/modules/repository/order/entities/book.entity';
@@ -137,18 +138,22 @@ export class RoomManager {
    * @param authorId id автора события.
    * @param act объект - событие.
    */
-  async action(
+  action(
     authorId: number,
-    roomId: number,
+    roomId: RoomKeyType,
     act: Processing.Action,
-  ): Promise<void> {
+  ): Observable<any> {
     const room = this.get(roomId);
     if (!room) {
       throw new WsException('Комната закрыта или не существует.');
     }
-    await room.act(authorId, act);
+    return from(room.act(authorId, act)).pipe(
+      mergeMap((data) => {
+        return from(room.update(0));
+      }),
+    );
+
     // Обновление по событию.
-    await room.update(0);
   }
 
   /**

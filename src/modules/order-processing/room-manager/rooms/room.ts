@@ -1,5 +1,13 @@
 import { WsException } from '@nestjs/websockets';
-import { DocumentOptions, ElementOptions } from 'src/core/@types/app.types';
+import {
+  AssignColorOptions,
+  AssignPanelOptions,
+  AssignPatinaOptions,
+  AssignProfileOptions,
+  AssignVarnishOptions,
+  DocumentOptions,
+  ElementOptions,
+} from 'src/core/@types/app.types';
 import { IComponent } from 'src/core/ecs/components/component-interface';
 import { MYEngine } from 'src/core/ecs/engine/my-engine';
 import { MYEntity } from 'src/core/ecs/engine/my-entity';
@@ -132,6 +140,72 @@ export class Room {
           changeComponentAction.data,
         );
         break;
+      // Присвоить цвет документа
+      case 'assign-document-color':
+        const actionDocumentColor = <
+          Processing.AssignDocumentColor<AssignColorOptions>
+        >action;
+        await this.orderCreator.assignColor(
+          actionDocumentColor.documentId,
+          actionDocumentColor.assignedName,
+          actionDocumentColor.options,
+        );
+        break;
+      // Присвоить патину документа
+      case 'assign-document-patina':
+        const actionDocumentPatina = <
+          Processing.AssignDocumentPatina<AssignPatinaOptions>
+        >action;
+        await this.orderCreator.assignPatina(
+          actionDocumentColor.documentId,
+          actionDocumentColor.assignedName,
+          actionDocumentColor.options,
+        );
+        break;
+      // Присвоить лак документа
+      case 'assign-document-varnish':
+        const actionDocumentVarnish = <
+          Processing.AssignDocumentVarnish<AssignVarnishOptions>
+        >action;
+        await this.orderCreator.assignVarnish(
+          actionDocumentColor.documentId,
+          actionDocumentColor.assignedName,
+          actionDocumentColor.options,
+        );
+        break;
+      // Присвоить материал документа
+      case 'assign-document-material':
+        const actionDocumentMaterial = <Processing.AssignDocumentMaterial>(
+          action
+        );
+        await this.orderCreator.assignMaterial(
+          actionDocumentColor.documentId,
+          actionDocumentColor.assignedName,
+        );
+        break;
+      // Присвоить профиль документа
+      case 'assign-document-profile':
+        const actionDocumentProfile = <
+          Processing.AssignDocumentProfile<AssignProfileOptions>
+        >action;
+        await this.orderCreator.assignProfile(
+          actionDocumentColor.documentId,
+          actionDocumentColor.assignedName,
+          actionDocumentColor.options,
+        );
+        break;
+      // Присвоить филёнку документа
+      case 'assign-document-panel':
+        const actionDocumentPanel = <
+          Processing.AssignDocumentPanel<AssignPanelOptions>
+        >action;
+        await this.orderCreator.assignPanel(
+          actionDocumentColor.documentId,
+          actionDocumentColor.assignedName,
+          actionDocumentColor.options,
+        );
+        break;
+
       default:
         break;
     }
