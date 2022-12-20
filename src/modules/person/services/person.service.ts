@@ -44,9 +44,20 @@ export class PersonService {
   /**
    * Создание нового пользователя
    * @param input PersonCreateInput
+   * Добавлено поле телефона, для удобства
    */
-  async create(input: PersonCreateInput): Promise<PersonEntity> {
-    return await this.personRepository.save({ ...input });
+  async create(
+    input: PersonCreateInput & { phone?: string },
+  ): Promise<PersonEntity> {
+    const { phone, ...data } = input;
+    const person = this.personRepository.create({ ...data });
+    if (phone) {
+      const phoneEntity = await this.phoneRepository.save({
+        number: phone,
+      });
+      person.phones = [phoneEntity];
+    }
+    return await this.personRepository.save(person);
   }
   /**
    * Изменение пользователя

@@ -398,7 +398,6 @@ export class OrderCreator {
       element.components,
       data,
     );
-
     console.log('change cmp result', result);
     return element;
     // Автосохранение после изменения отключено,

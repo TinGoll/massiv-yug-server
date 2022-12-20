@@ -21,7 +21,7 @@ export class UserController {
   @Post('create')
   @HttpCode(201)
   create(
-    @Body() personCreateInput: PersonCreateInput,
+    @Body() personCreateInput: PersonCreateInput & {phone?: string},
   ): Observable<UserAccount> {
     return this.userService.create(personCreateInput);
   }
@@ -45,7 +45,6 @@ export class UserController {
   findAllUsers(
     @Req() request: { user: UserAccount },
   ): Observable<UserAccount[]> {
-    console.log(request.user);
     return this.userService.findAll();
   }
 }

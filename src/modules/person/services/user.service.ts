@@ -60,7 +60,9 @@ export class UserService {
       );
   }
 
-  create(input: PersonCreateInput): Observable<UserAccount> {
+  create(
+    input: PersonCreateInput & { phone?: string },
+  ): Observable<UserAccount> {
     return this.loginExists(input.login).pipe(
       switchMap((exists) => {
         if (!exists) {
@@ -107,8 +109,6 @@ export class UserService {
     password: string,
     hash?: string,
   ): Observable<boolean> {
-    console.log(password, hash, this.authService);
-
     return this.authService.comparePassword(password, String(hash));
   }
 

@@ -14,6 +14,7 @@ export class PersonCreateInput {
 
   @IsString()
   login: string;
+  
   @IsNotEmpty()
   password: string;
 }
