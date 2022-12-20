@@ -9,7 +9,7 @@ import {
   DocumentOptions,
   ElementOptions,
 } from 'src/core/@types/app.types';
-import { Geometry } from 'src/core/common/models/geometry';
+
 import { IComponent } from 'src/core/ecs/components/component-interface';
 import { ColorService } from 'src/modules/repository/color/color.service';
 import { MaterialService } from 'src/modules/repository/material/material.service';
@@ -30,7 +30,6 @@ import {
 import { OrderService } from 'src/modules/repository/order/order.service';
 import { PanelService } from 'src/modules/repository/panel/panel.service';
 import { PatinaService } from 'src/modules/repository/patina/patina.service';
-import { PersonService } from 'src/modules/repository/person/person.service';
 import { ProfileService } from 'src/modules/repository/profile/profile.service';
 import { SectorService } from 'src/modules/repository/sector/sector.service';
 import { SettingService } from 'src/modules/repository/setting/setting.service';
@@ -45,7 +44,6 @@ export class OrderCreator {
     private readonly componentMapper: ComponentMapper,
     private readonly orderService: OrderService,
     private readonly settingService: SettingService,
-    private readonly personService: PersonService,
     private readonly panelService: PanelService,
     private readonly varnishService: VarnishService,
     private readonly patinaService: PatinaService,

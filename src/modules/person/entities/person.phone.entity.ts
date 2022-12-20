@@ -18,9 +18,10 @@ export class PersonPhone {
 
   @ManyToOne(() => PersonEntity, {
     onDelete: 'CASCADE',
+    lazy: true,
   })
   @JoinColumn({
     name: 'personId',
   })
-  person: PersonEntity;
+  person: Promise<PersonEntity> | PersonEntity;
 }

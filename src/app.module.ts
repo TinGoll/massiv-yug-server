@@ -11,7 +11,9 @@ import { RepositoryModule } from './modules/repository/repository.module';
 import { MigrationModule } from './modules/migration/migration.module';
 import { OrderProcessingModule } from './modules/order-processing/order-processing.module';
 import { RequestModule } from './modules/request/request.module';
-
+import { PersonModule } from './modules/person/person.module';
+import { AuthModule } from './modules/auth/auth.module';
+import { FinancialModule } from './modules/financial/financial.module';
 
 @Module({
   imports: [
@@ -25,12 +27,12 @@ import { RequestModule } from './modules/request/request.module';
     //   sortSchema: true,
     //   playground: true,
     // }),
-    ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', '..', 'client', 'build'),
-      renderPath: '/',
-      serveStaticOptions: {},
-      exclude: ['/api/*'],
-    }),
+    // ServeStaticModule.forRoot({
+    //   rootPath: join(__dirname, '..', '..', 'client', 'build'),
+    //   renderPath: '/',
+    //   serveStaticOptions: {},
+    //   exclude: ['/api/*'],
+    // }),
     HttpModule.registerAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
@@ -61,6 +63,9 @@ import { RequestModule } from './modules/request/request.module';
     MigrationModule,
     OrderProcessingModule,
     RequestModule,
+    PersonModule,
+    AuthModule,
+    FinancialModule,
   ],
   controllers: [],
   providers: [],

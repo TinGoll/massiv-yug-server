@@ -47,7 +47,7 @@ export class ClientAccount {
   @Column({ type: 'jsonb', default: {} })
   extraData: ClientExtraData;
 
-  @OneToOne(() => PersonEntity, (person) => person.clientAccount)
+  @OneToOne(() => PersonEntity, (person) => person.clientAccount, {lazy: true})
   @JoinColumn({ name: 'personId' })
-  person: PersonEntity;
+  person: Promise<PersonEntity> | PersonEntity;
 }

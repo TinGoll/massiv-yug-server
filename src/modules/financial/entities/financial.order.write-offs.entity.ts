@@ -1,15 +1,16 @@
 import {
+  Column,
   CreateDateColumn,
   Entity,
   JoinColumn,
-  OneToOne,
+  ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { PersonEntity } from './person.entity';
+import { FinancialAccount } from '../../person/entities/personal.account.entity';
 
-@Entity('personal_accounts')
-export class FinancialAccount {
+@Entity('financial_order_write_offs')
+export class FinancialWriteOffs {
   /** Уникальный идентификатор */
   @PrimaryGeneratedColumn()
   id: number;
@@ -19,11 +20,9 @@ export class FinancialAccount {
   /** Дата изменения */
   @UpdateDateColumn()
   updatedAt: Date;
-
-  /** Владелец счета */
-  @OneToOne(() => PersonEntity, (person) => person.clientAccount, {
-    lazy: true,
-  })
-  @JoinColumn({ name: 'personId' })
-  person: Promise<PersonEntity> | PersonEntity;
+  /** Сумма списания */
+  @Column({ type: 'float' })
+  amount: number;
+  /** Заказ */
+  order: any;
 }

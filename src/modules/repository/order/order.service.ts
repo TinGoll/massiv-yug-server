@@ -25,13 +25,13 @@ import {
   BookStatusCreateInput,
   BookStatusUpdateInput,
 } from './inputs/book.status.input';
-import { PersonEntity } from '../person/entities/person.entity';
 import { SampleColorEntity } from '../color/entities/sample.color.entity';
 import { SamplePatinaEntity } from '../patina/entities/sample.patina.entity';
 import { SampleVarnishEntity } from '../varnish/entities/sample.varnish.entity';
 import { SampleMaterialEntity } from '../material/entities/sample.material.entity';
 import { SamplePanelEntity } from '../panel/entities/sample.panel.entity';
 import { SampleProfileEntity } from '../profile/entities/sample.profile.entity';
+import { PersonEntity } from 'src/modules/person/entities/person.entity';
 
 @Injectable()
 export class OrderService {

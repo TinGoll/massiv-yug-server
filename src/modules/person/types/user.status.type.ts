@@ -1,1 +1,1 @@
-export type UserStatus = 'fired' | 'active';
+export type UserStatus = 'fired' | 'active' | "banned";

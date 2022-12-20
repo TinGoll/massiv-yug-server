@@ -1,26 +1,18 @@
-import { UserStatus } from 'src/core/@types/app.types';
-import { UserRole } from '../entities/person.user.account.entity';
-
+import { IsInt, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class UserAccountCreateInput {
-  // Роли
-  userRoles?: UserRole[];
-
+  @IsString()
   login: string;
-
+  @IsNotEmpty()
   password: string;
-
-  status?: UserStatus;
 }
 
 export class UserAccountUpdateInput {
+  @IsInt()
   id: number;
-  // Роли
-  userRoles?: UserRole[];
 
+  @IsOptional()
   login?: string;
-
+  @IsOptional()
   password?: string;
-
-  status?: UserStatus;
 }

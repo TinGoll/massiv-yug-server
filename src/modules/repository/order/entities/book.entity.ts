@@ -10,10 +10,11 @@ import {
   JoinColumn,
   OneToMany,
 } from 'typeorm';
-import { PersonEntity } from '../../person/entities/person.entity';
+
 import { SampleWorkEntity } from '../../work/entities/sample.work.entity';
 import { BookStatusEntity } from './book.status.entity';
 import { DocumentEntity } from './document.entity';
+import { PersonEntity } from 'src/modules/person/entities/person.entity';
 
 export const BOOK_BARCODE_PREFIX: number = 22;
 
