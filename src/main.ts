@@ -6,6 +6,9 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     logger: ['error', 'debug', 'verbose', 'warn'],
     abortOnError: true,
+    cors: {
+      origin: '*',
+    },
   });
   const config = app.get(ConfigService);
   const port = config.get<number>('API_PORT') || 3000;
