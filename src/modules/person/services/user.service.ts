@@ -4,11 +4,9 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
 import { Observable, from, map, switchMap, tap } from 'rxjs';
 import { AuthService } from 'src/modules/auth/services/auth.service';
 import { PersonEntity } from '../entities/person.entity';
-import { UserAccount } from '../entities/person.user.account.entity';
 import { LoginUserInput } from '../inputs/login.user.input';
 import { PersonCreateInput } from '../inputs/person.input';
 import { PersonService } from './person.service';
@@ -62,7 +60,7 @@ export class UserService {
 
   create(
     input: PersonCreateInput & { phone?: string },
-  ): Observable<UserAccount> {
+  ): Observable<PersonEntity> {
     return this.loginExists(input.login).pipe(
       switchMap((exists) => {
         if (!exists) {

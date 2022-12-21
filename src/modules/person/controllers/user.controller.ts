@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common';
 import { map, Observable } from 'rxjs';
 import { JwtAuthGuard } from 'src/modules/auth/guards/jwt-auth.guard';
-import { UserAccount } from '../entities/person.user.account.entity';
+import { PersonEntity } from '../entities/person.entity';
 import { LoginUserInput } from '../inputs/login.user.input';
 import { PersonCreateInput } from '../inputs/person.input';
 import { UserService } from '../services/user.service';
@@ -22,7 +22,7 @@ export class UserController {
   @HttpCode(201)
   create(
     @Body() personCreateInput: PersonCreateInput & {phone?: string},
-  ): Observable<UserAccount> {
+  ): Observable<PersonEntity> {
     return this.userService.create(personCreateInput);
   }
 
@@ -43,8 +43,8 @@ export class UserController {
   @Get()
   @HttpCode(200)
   findAllUsers(
-    @Req() request: { user: UserAccount },
-  ): Observable<UserAccount[]> {
+    @Req() request: { user: PersonEntity },
+  ): Observable<PersonEntity[]> {
     return this.userService.findAll();
   }
 }
