@@ -186,9 +186,11 @@ export class ProcessingGateway
 
   // Присоеденился новый клиент к текущему пространству
   handleConnection(client: Socket, ...args: any[]) {
-    // this.logger.verbose(
-    //   `handleConnection: ${JSON.stringify(client.handshake.headers, null, 2)}`,
-    // );
+    this.logger.verbose(
+      `handleConnection: ${JSON.stringify(client.handshake.headers, null, 2)}`,
+    );
+    console.log(client.handshake.auth);
+    
   }
   // Клиент отсоеденился.
   handleDisconnect(client: Socket) {
