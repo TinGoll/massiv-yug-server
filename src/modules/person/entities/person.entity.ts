@@ -66,10 +66,13 @@ export class PersonEntity {
   @Column({ type: 'varchar', length: 128 })
   login: string;
 
-  // Пароль доступа, хранится в зашифрованном виде. 
+  // Пароль доступа, хранится в зашифрованном виде.
   // По умолчанию, пароль не попадает в выборку.
   @Column({ select: false })
   password?: string;
+
+  @Column()
+  gender: 'Male' | 'Female';
 
   // Статус пользователя,
   @Column({

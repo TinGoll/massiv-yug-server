@@ -39,7 +39,7 @@ export class UserService {
       )
       .pipe(
         switchMap((user) =>
-          this.validatePasvord(loginUserInput.password, user?.password).pipe(
+          this.validatePassword(loginUserInput.password, user?.password).pipe(
             switchMap((passwordMatches) => {
               if (passwordMatches) {
                 return this.findOne(user?.id!).pipe(
@@ -85,6 +85,29 @@ export class UserService {
     );
   }
 
+  /** Проверка авторизации и обновление токена. */
+  authorizationCheck(user: PersonEntity): Observable<{
+    token: string;
+    user: PersonEntity | null;
+  }> {
+    return this.findOne(user.id)
+      .pipe(
+        tap((user) => {
+          if (!user) {
+            throw new UnauthorizedException();
+          }
+          return user;
+        }),
+      )
+      .pipe(
+        switchMap((user) => {
+          return this.authService
+            .generateJwt(user!)
+            .pipe(map((token) => ({ token, user })));
+        }),
+      );
+  }
+
   findAll(): Observable<PersonEntity[]> {
     return from(this.personService.findAll());
   }
@@ -103,7 +126,7 @@ export class UserService {
     return from(this.personService.findByLogin(login));
   }
 
-  private validatePasvord(
+  private validatePassword(
     password: string,
     hash?: string,
   ): Observable<boolean> {

@@ -13,15 +13,18 @@ import { PersonEntity } from '../entities/person.entity';
 import { LoginUserInput } from '../inputs/login.user.input';
 import { PersonCreateInput } from '../inputs/person.input';
 import { UserService } from '../services/user.service';
+import { ConfigService } from '@nestjs/config';
 
 @Controller('api/users')
 export class UserController {
+  private expires_in = '120';
+
   constructor(private readonly userService: UserService) {}
 
   @Post('create')
   @HttpCode(201)
   create(
-    @Body() personCreateInput: PersonCreateInput & {phone?: string},
+    @Body() personCreateInput: PersonCreateInput & { phone?: string },
   ): Observable<PersonEntity> {
     return this.userService.create(personCreateInput);
   }
@@ -34,7 +37,7 @@ export class UserController {
         access_token: response.token,
         user: response.user,
         token_type: 'JWT',
-        expires_in: 10000,
+        // expires_in: this.expires_in, // Убрал отправку времени жизни окена, для безопастности.
       })),
     );
   }
@@ -46,5 +49,21 @@ export class UserController {
     @Req() request: { user: PersonEntity },
   ): Observable<PersonEntity[]> {
     return this.userService.findAll();
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('authorization-check')
+  @HttpCode(200)
+  authorizationCheck(
+    @Req() request: { user: PersonEntity },
+  ): Observable<object> {
+    return this.userService.authorizationCheck(request.user).pipe(
+      map((response) => ({
+        access_token: response.token,
+        user: response.user,
+        token_type: 'JWT',
+        // expires_in: this.expires_in, // Убрал отправку времени жизни окена, для безопастности.
+      })),
+    );
   }
 }

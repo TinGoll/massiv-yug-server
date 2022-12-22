@@ -14,9 +14,11 @@ export class PersonCreateInput {
 
   @IsString()
   login: string;
-  
+
   @IsNotEmpty()
   password: string;
+
+  gender: 'Male' | 'Female';
 }
 /** Набор полей необходимых для обновления человка */
 export class PersonUpdateInput {
@@ -32,4 +34,6 @@ export class PersonUpdateInput {
   /** Отчество */
   @IsOptional()
   middleName?: string;
+
+  gender: 'Male' | 'Female';
 }
