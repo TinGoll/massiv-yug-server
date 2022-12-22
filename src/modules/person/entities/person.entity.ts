@@ -71,7 +71,7 @@ export class PersonEntity {
   @Column({ select: false })
   password?: string;
 
-  @Column()
+  @Column({nullable:  true})
   gender: 'Male' | 'Female';
 
   // Статус пользователя,
