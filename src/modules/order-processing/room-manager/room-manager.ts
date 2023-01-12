@@ -14,6 +14,7 @@ import {
   mergeMap,
 } from 'rxjs';
 import { DocumentOptions } from 'src/core/@types/app.types';
+import { PersonEntity } from 'src/modules/person/entities/person.entity';
 import { BookEntity } from 'src/modules/repository/order/entities/book.entity';
 import { DocumentEntity } from 'src/modules/repository/order/entities/document.entity';
 import { BookCreateInput } from 'src/modules/repository/order/inputs/book.input';
@@ -99,10 +100,11 @@ export class RoomManager {
    * Создание нового заказа.
    */
   createOrder(
+    author: PersonEntity,
     option?: BookCreateInput,
     listener?: RoomEventStateListener,
   ): Observable<BookEntity> {
-    return from(this.orderCreator.addBook(1, option)).pipe(
+    return from(this.orderCreator.addBook(author, option)).pipe(
       map((book) => {
         if (book) {
           const room = new Room(this, book, this.componentMapper);

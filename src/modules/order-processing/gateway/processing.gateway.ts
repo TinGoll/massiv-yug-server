@@ -1,4 +1,4 @@
-import { Logger } from '@nestjs/common';
+import { Logger, UseGuards } from '@nestjs/common';
 import {
   OnGatewayConnection,
   OnGatewayDisconnect,
@@ -8,8 +8,13 @@ import {
   WebSocketServer,
   WsResponse,
 } from '@nestjs/websockets';
-import { map, Observable, of, tap } from 'rxjs';
+import { map, max, Observable, of, tap, catchError } from 'rxjs';
 import { Namespace, Socket } from 'socket.io';
+import {
+  AllowNullUserGuard,
+  JwtAuthGuard,
+} from 'src/modules/auth/guards/jwt-auth.guard';
+import { AuthService } from 'src/modules/auth/services/auth.service';
 
 import Processing, {
   RoomKeyType,
@@ -32,7 +37,10 @@ export class ProcessingGateway
   // Логер
   private logger: Logger = new Logger('ProcessingGateway');
 
-  constructor(private readonly roomManager: RoomManager) {}
+  constructor(
+    private readonly roomManager: RoomManager,
+    private readonly authService: AuthService,
+  ) {}
 
   /********************************************************************************* */
   /************************ События для работы с заказом *************************** */
@@ -45,8 +53,12 @@ export class ProcessingGateway
     action: PayloadAction<Processing.CreateOrderAction>,
   ): Observable<WsResponse<Processing.CreateOrderResponse>> {
     const event = processingEvents.CREATE_ORDER;
+
+    this.logger.debug(action)
+
     return this.roomManager
       .createOrder(
+        client.data.user,
         action.payload?.option,
         // Подписка на получения состояния комнаты
         (roomId, state) =>
@@ -184,13 +196,35 @@ export class ProcessingGateway
     });
   }
 
+  @UseGuards(JwtAuthGuard)
   // Присоеденился новый клиент к текущему пространству
   handleConnection(client: Socket, ...args: any[]) {
-    this.logger.verbose(
-      `handleConnection: ${JSON.stringify(client.handshake.headers, null, 2)}`,
-    );
-    console.log(client.handshake.auth);
-    
+    const token = (client.handshake.headers.authorization || '').split(' ')[1];
+
+    try {
+      this.authService
+        .decodedToken(token)
+        .pipe(map((data) => data.user))
+        .pipe(
+          tap((user) => {
+            client.data.user = user;
+            return user;
+          }),
+        )
+        .subscribe({
+          error(err) {
+            client.emit('unauthorized', { error: 'unauthorized' });
+            client.disconnect();
+          },
+        });
+    } catch (error) {
+      // client.disconnect();
+    }
+
+    // this.logger.verbose(
+    //   `handleConnection: ${JSON.stringify(client.handshake.headers, null, 2)}`,
+    // );
+    // console.log(client.handshake.auth);
   }
   // Клиент отсоеденился.
   handleDisconnect(client: Socket) {

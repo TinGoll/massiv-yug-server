@@ -7,10 +7,10 @@ import { RoomManager } from './room-manager/room-manager';
 import { GraphProvider } from './providers/graph-provider';
 import { ProcessingGateway } from './gateway/processing.gateway';
 import { ProcessingController } from './controllers/processing.controller';
-
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
-  imports: [RepositoryModule],
+  imports: [RepositoryModule, AuthModule],
   providers: [
     TestEngine,
     ComponentMapper,

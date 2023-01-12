@@ -11,6 +11,7 @@ import {
 } from 'src/core/@types/app.types';
 
 import { IComponent } from 'src/core/ecs/components/component-interface';
+import { PersonEntity } from 'src/modules/person/entities/person.entity';
 import { ColorService } from 'src/modules/repository/color/color.service';
 import { MaterialService } from 'src/modules/repository/material/material.service';
 import {
@@ -63,7 +64,7 @@ export class OrderCreator {
   }
 
   async addBook(
-    authorId: number,
+    author: PersonEntity,
     options: BookOptions = {},
   ): Promise<BookEntity> {
     const { bookId, clientId, ...input } = options;
@@ -71,6 +72,7 @@ export class OrderCreator {
     const status = await this.orderService.findStatusToId(1);
     book.id = bookId;
     book.status = status;
+    book.author = author;
 
     const works = await this.workService.findAll();
     book.works = works;
