@@ -315,7 +315,7 @@ export class MigrationProvider {
       return;
     }
 
-    let book = await this.orderCreator.addBook(1, {
+    let book = await this.orderCreator.addBook(null, {
       bookId: itmOrder.id,
       nameFromClient: itmOrder.clientNumber,
       note: itmOrder.note,
