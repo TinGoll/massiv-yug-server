@@ -15,6 +15,7 @@ import {
   JwtAuthGuard,
 } from 'src/modules/auth/guards/jwt-auth.guard';
 import { AuthService } from 'src/modules/auth/services/auth.service';
+import { PersonEntity } from 'src/modules/person/entities/person.entity';
 
 import Processing, {
   RoomKeyType,
@@ -54,7 +55,7 @@ export class ProcessingGateway
   ): Observable<WsResponse<Processing.CreateOrderResponse>> {
     const event = processingEvents.CREATE_ORDER;
 
-    this.logger.debug(action)
+    this.logger.debug(action);
 
     return this.roomManager
       .createOrder(
@@ -133,14 +134,14 @@ export class ProcessingGateway
   }
 
   /** События связанные с редактированием документов и элементов */
-  @SubscribeMessage(processingEvents.OPEN_ORDER)
+  @SubscribeMessage(processingEvents.ORDER_ACTION)
   orderAction(
     client: Socket,
     action: PayloadAction<Processing.Action>,
   ): Observable<WsResponse<any>> {
     const event = processingEvents.ORDER_ACTION;
     return this.roomManager
-      .action(1, action.payload.roomId, action.payload)
+      .action(client.data.user, action.payload.roomId, action.payload)
       .pipe(
         map((data) => ({
           event,
@@ -183,7 +184,9 @@ export class ProcessingGateway
     server.adapter.on('join-room', (roomId, id) => {
       if (roomId !== id) {
         this.logger.verbose(
-          `Пользователь ${id} присоеденился к комнате: ${roomId}`,
+          `Пользователь ${
+            server.sockets.get(id)?.data?.user.login
+          } присоеденился к комнате: ${roomId}`,
         );
       }
     });
@@ -191,7 +194,11 @@ export class ProcessingGateway
     // Клиент покинул комнату.
     server.adapter.on('leave-room', (roomId, id) => {
       if (this.roomManager.has(roomId)) {
-        this.logger.verbose(`Пользователь ${id} ливнул из комнаты: ${roomId}`);
+        this.logger.verbose(
+          `Пользователь ${
+            server.sockets.get(id)?.data?.user.login
+          } покинул комнату: ${roomId}`,
+        );
       }
     });
   }
@@ -227,7 +234,9 @@ export class ProcessingGateway
     // console.log(client.handshake.auth);
   }
   // Клиент отсоеденился.
-  handleDisconnect(client: Socket) {
-    this.logger.verbose(`handleDisconnect: ${client.id}`);
+  handleDisconnect(client: Socket<any, any, any, { user: PersonEntity }>) {
+    this.logger.verbose(
+      `handleDisconnect: ${client.data?.user?.login || client.id}`,
+    );
   }
 }

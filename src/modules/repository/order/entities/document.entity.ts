@@ -1,6 +1,8 @@
 import {
   BookDocumentType,
+  DocumentExtraData,
   DocumentGlossiness,
+  DocumentResultData,
 } from 'src/core/@types/app.types';
 import {
   Column,
@@ -22,7 +24,6 @@ import { DocumentPatinaEntity } from './document.patina.entity';
 import { DocumentProfileEntity } from './document.profile.entity';
 import { DocumentVarnishEntity } from './document.varnish.entity';
 
-interface DocumentResultData {}
 
 @Entity('order_documents')
 export class DocumentEntity {
@@ -58,6 +59,16 @@ export class DocumentEntity {
   })
   glossiness: DocumentGlossiness;
 
+  @Column({
+    type: 'jsonb',
+    default: {
+      extraSetting: null,
+      isThermalseam: false,
+      isDrilling: false,
+    },
+  })
+  extraData: DocumentExtraData;
+
   @Column({ type: 'jsonb', default: {} })
   resultData: DocumentResultData;
 
@@ -89,6 +100,7 @@ export class DocumentEntity {
 
   @OneToOne(() => DocumentColorEntity, (color) => color.document, {
     eager: true,
+    onDelete: 'SET NULL',
   })
   /** Цвет документа */
   color: DocumentColorEntity;

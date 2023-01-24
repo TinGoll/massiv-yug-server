@@ -28,6 +28,7 @@ import {
   ElementSampleBody,
   SampleElementEntity,
 } from 'src/modules/repository/order/entities/element.entity';
+import { BookUpdateInput } from 'src/modules/repository/order/inputs/book.input';
 import { OrderService } from 'src/modules/repository/order/order.service';
 import { PanelService } from 'src/modules/repository/panel/panel.service';
 import { PatinaService } from 'src/modules/repository/patina/patina.service';
@@ -78,8 +79,24 @@ export class OrderCreator {
     book.works = works;
 
     await this.orderService.saveBook(book);
+    if (book.documentType) {
+      await this.addDocument(book, { documentType: book.documentType });
+    }
     book.barcode = this.generateBarcode(book.id, '');
+
     return await this.orderService.saveBook(book);
+  }
+
+  async updateBook(
+    book: BookEntity,
+    input: BookUpdateInput,
+  ): Promise<BookEntity> {
+    const updatedBook = await this.orderService.updateBook(input);
+    const { id, ...keys } = input;
+    for (const key in keys) {
+      book[key] = updatedBook[key];
+    }
+    return book;
   }
 
   async addDocument(
@@ -88,7 +105,7 @@ export class OrderCreator {
   ): Promise<DocumentEntity> {
     console.time('add-document');
     const document = await this.orderService.createDocument(options);
-    book.documents = [...book.documents, document];
+    book.documents = [...(book.documents || []), document];
     await this.orderService.assignColor(document, null, {});
     await this.orderService.assignPatina(document, null, {});
     await this.orderService.assignVarnish(document, null, {});
@@ -98,6 +115,14 @@ export class OrderCreator {
     console.timeEnd('add-document');
     await this.orderService.saveBook(book);
     return document;
+  }
+
+  async assignClient(
+    book: BookEntity,
+    person: PersonEntity | null,
+  ): Promise<BookEntity> {
+    book.client = person;
+    return await this.orderService.saveBook(book);
   }
 
   /**

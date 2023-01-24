@@ -15,6 +15,7 @@ import { FinancialAccount } from './entities/personal.account.entity';
 import { PersonService } from './services/person.service';
 import { UserService } from './services/user.service';
 import { UserController } from './controllers/user.controller';
+import { ClientController } from './controllers/client.controller';
 
 @Module({
   imports: [
@@ -33,6 +34,6 @@ import { UserController } from './controllers/user.controller';
     AuthModule,
   ],
   providers: [PersonService, UserService],
-  controllers: [PersonController, UserController],
+  controllers: [PersonController, UserController, ClientController],
 })
 export class PersonModule {}

@@ -1,4 +1,4 @@
-import { BookResultData, WorkData } from 'src/core/@types/app.types';
+import { BookDocumentType, BookResultData, WorkData } from 'src/core/@types/app.types';
 import { OrderGraph } from 'src/core/common/graph/order-graph';
 import {
   Entity,
@@ -34,6 +34,10 @@ export class BookEntity {
   /** Отметка об удалении */
   @Column('boolean', { default: false })
   deleted: boolean;
+
+   //Даник решил добавить тип еще и в книгу.
+  @Column({ type: 'varchar', length: 64, nullable: true })
+  documentType: BookDocumentType;
 
   /** Номер / название клиента */
   @Column({ type: 'varchar', length: 256, nullable: true })

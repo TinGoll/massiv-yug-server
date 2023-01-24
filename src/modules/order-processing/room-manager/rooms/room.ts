@@ -19,10 +19,12 @@ import { PresentationSystem } from 'src/core/ecs/systems/presentation.system';
 import { ProfileSystem } from 'src/core/ecs/systems/profile.system';
 import { ResultSystem } from 'src/core/ecs/systems/result.system';
 import { WorkSystem } from 'src/core/ecs/systems/work.system';
+import { PersonEntity } from 'src/modules/person/entities/person.entity';
 import { BookEntity } from 'src/modules/repository/order/entities/book.entity';
 import { ElementEntity } from 'src/modules/repository/order/entities/document.element.entity';
 import { DocumentEntity } from 'src/modules/repository/order/entities/document.entity';
 import { ComponentKey } from 'src/modules/repository/order/entities/element.entity';
+import { BookUpdateInput } from 'src/modules/repository/order/inputs/book.input';
 import { Component, Entity } from 'yug-entity-component-system';
 import { ComponentMapper } from '../../providers/component-mapper';
 import { OrderCreator } from '../../providers/order-creator';
@@ -52,6 +54,10 @@ export class Room {
     this.id = book.id;
     this.engine = new MYEngine(book, this);
     this.orderCreator = roomManager.orderCreator;
+  }
+
+  async assignClient(person: PersonEntity): Promise<BookEntity> {
+    return await this.orderCreator.assignClient(this.book, person);
   }
 
   /** Добавить документ в комнату */
@@ -120,9 +126,21 @@ export class Room {
    * @param authorId id автора события.
    * @param action объект - событие.
    */
-  async act(authorId: number, action: Processing.Action): Promise<void> {
+  async act(author: PersonEntity, action: Processing.Action): Promise<void> {
     switch (action.event) {
       // Событие добавления элемента в документ
+      case 'update-book':
+        const updateBookAction = <Processing.UpdateBook<BookUpdateInput>>action;
+        await this.orderCreator.updateBook(this.book, updateBookAction.input);
+        console.log(this.book);
+        
+        break;
+      case 'assign-book-client':
+        const assignClientAction = <Processing.AssignBookClient<PersonEntity>>(
+          action
+        );
+        await this.assignClient(assignClientAction.client);
+        break;
       case 'add-element':
         const addElementAction = <Processing.AddElementAction>action;
         await this.addElement(
@@ -205,7 +223,6 @@ export class Room {
           actionDocumentColor.options,
         );
         break;
-
       default:
         break;
     }

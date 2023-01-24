@@ -62,7 +62,7 @@ export class PatinaService {
       .getOne();
   }
 
-  async findColors(): Promise<SamplePatinaEntity[]> {
+  async findPatinas(): Promise<SamplePatinaEntity[]> {
     return await this.patinaRepository.find();
   }
 

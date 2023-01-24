@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { PersonAddress } from '../entities/person.address.entity';
@@ -9,6 +9,8 @@ import { PersonEmail } from '../entities/person.email.entity';
 import { PersonEntity } from '../entities/person.entity';
 import { PersonPhone } from '../entities/person.phone.entity';
 import { FinancialAccount } from '../entities/personal.account.entity';
+import { PersonRole } from '../enums/person-role.enum';
+import { UserRole } from '../enums/user-role.enum';
 import { AddressCreateInput } from '../inputs/address.input';
 import { BankCreateInput } from '../inputs/bank.input';
 import { CardCreateInput } from '../inputs/card.input';
@@ -17,7 +19,11 @@ import {
   ClientAccountUpdateInput,
 } from '../inputs/client-account.input';
 import { EmailCreateInput } from '../inputs/email.input';
-import { PersonCreateInput, PersonUpdateInput } from '../inputs/person.input';
+import {
+  ClientCreateInput,
+  PersonCreateInput,
+  PersonUpdateInput,
+} from '../inputs/person.input';
 import { PhoneCreateInput } from '../inputs/phone.input';
 
 @Injectable()
@@ -40,6 +46,67 @@ export class PersonService {
     @InjectRepository(FinancialAccount)
     private readonly financialAccount: Repository<FinancialAccount>,
   ) {}
+
+  // Создание клиента
+  async createClient(input: ClientCreateInput): Promise<PersonEntity> {
+    if (!input) {
+      throw new HttpException('Некорректные данные', HttpStatus.BAD_REQUEST);
+    }
+    const { phone, clientAccountInput, bankInput, ...data } = input;
+    const person = this.personRepository.create({ ...data });
+
+    if (phone) {
+      const phoneEntity = await this.phoneRepository.save({
+        number: phone,
+      });
+      person.phones = [phoneEntity];
+    }
+
+    if (bankInput) {
+      const bankAccounts = await this.bankRepository.save(bankInput);
+      person.bankAccounts = [bankAccounts];
+    }
+
+    if (clientAccountInput) {
+      const clientAccount = await this.clientRepository.save(
+        clientAccountInput,
+      );
+      person.clientAccount = clientAccount;
+    }
+
+    person.personRoles = [PersonRole.CLIENT];
+
+    return await this.personRepository.save(person);
+  }
+
+  // Получить всех клиентов.
+  async allClients(): Promise<PersonEntity[]> {
+    const persons = await this.personRepository.find({
+      where: { deleted: false },
+      relations: {
+        clientAccount: true,
+        bankAccounts: true,
+        phones: true,
+      },
+    });
+    const clients = persons.filter((p) =>
+      (p.personRoles || []).find((r) => r === PersonRole.CLIENT),
+    );
+
+    return await Promise.all(
+      clients.map(async (cl) => {
+        const clientAccount = await cl.clientAccount;
+        const bankAccounts = await cl.bankAccounts;
+        const phones = await cl.phones;
+        return {
+          ...cl,
+          clientAccount,
+          bankAccounts,
+          phones,
+        };
+      }),
+    );
+  }
 
   /**
    * Создание нового пользователя

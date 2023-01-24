@@ -56,7 +56,14 @@ export class OrderService {
     private readonly docPanelRepository: Repository<DocumentPanelEntity>,
     @InjectRepository(DocumentProfileEntity)
     private readonly docProfileRepository: Repository<DocumentProfileEntity>,
-  ) {}
+  ) {
+    // Создание стандартных статусов.
+    this.getAllStatuses().then((res) => {
+      if (!res.length) {
+        this.createDefaultStatuses();
+      }
+    });
+  }
 
   /** Создать новый статус книги */
   async createStatus(input: BookStatusCreateInput): Promise<BookStatusEntity> {
@@ -67,6 +74,17 @@ export class OrderService {
     await this.statusRepository.save(status);
     return status;
   }
+
+  async createDefaultStatuses(): Promise<void> {
+    const sts: BookStatusCreateInput[] = [
+      { name: 'На оформлении', index: 1 },
+      { name: 'В работе', index: 2 },
+    ];
+    for (const st of sts) {
+      await this.createStatus(st);
+    }
+  }
+
   /** Обновить статус книги */
   async updateStatus(input: BookStatusUpdateInput): Promise<BookStatusEntity> {
     await this.statusRepository.update({ id: input.id }, { ...input });

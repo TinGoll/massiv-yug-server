@@ -14,6 +14,7 @@ async function bootstrap() {
         callback(null, true);
       } else {
         console.log('blocked cors for:', origin);
+        callback(null, true);
         // callback(new Error('Not allowed by CORS'));
       }
     },

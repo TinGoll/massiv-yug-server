@@ -5,6 +5,8 @@ import { ComponentKey } from 'src/modules/repository/order/entities/element.enti
 import { BookCreateInput } from 'src/modules/repository/order/inputs/book.input';
 
 const events = [
+  'update-book',
+  'update-document',
   'create-order',
   'add-element',
   'change-component',
@@ -123,6 +125,20 @@ declare module Processing {
     documentId: number;
     assignedName: string | null;
     options: T;
+  }
+  export interface AssignBookClient<T> extends Action {
+    event: 'assign-book-client';
+    client: T;
+  }
+
+  export interface UpdateBook<T> extends Action {
+    event: 'update-book';
+    input: T;
+  }
+  export interface UpdateDocument<T> extends Action {
+    event: 'update-document';
+    documentId: number;
+    input: T;
   }
 }
 

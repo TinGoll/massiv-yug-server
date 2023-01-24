@@ -141,7 +141,7 @@ export class RoomManager {
    * @param act объект - событие.
    */
   action(
-    authorId: number,
+    author: PersonEntity,
     roomId: RoomKeyType,
     act: Processing.Action,
   ): Observable<any> {
@@ -149,7 +149,7 @@ export class RoomManager {
     if (!room) {
       throw new WsException('Комната закрыта или не существует.');
     }
-    return from(room.act(authorId, act)).pipe(
+    return from(room.act(author, act)).pipe(
       mergeMap((data) => {
         return from(room.update(0));
       }),

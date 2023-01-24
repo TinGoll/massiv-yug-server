@@ -127,6 +127,12 @@ export interface DocumentResultData {
   };
 }
 
+export interface DocumentExtraData {
+  extraSetting: string | null;
+  isThermalseam: boolean;
+  isDrilling: boolean;
+}
+
 export interface BookOptions {
   bookId?: number;
   clientId?: number;

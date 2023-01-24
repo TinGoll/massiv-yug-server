@@ -1,4 +1,6 @@
 import { IsInt, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { BankCreateInput } from './bank.input';
+import { ClientAccountCreateInput, ClientAccountUpdateInput } from './client-account.input';
 
 /** Набор полей необходимых для добавления человка */
 export class PersonCreateInput {
@@ -20,6 +22,14 @@ export class PersonCreateInput {
 
   gender: 'Male' | 'Female';
 }
+
+/** Набор полей необходимых для добавления человка */
+export class ClientCreateInput extends PersonCreateInput {
+  phone?: string;
+  bankInput?: BankCreateInput;
+  clientAccountInput?: ClientAccountCreateInput;
+}
+
 /** Набор полей необходимых для обновления человка */
 export class PersonUpdateInput {
   /** id человека */
