@@ -326,47 +326,48 @@ export class MigrationProvider {
       note: itmOrder.note
     });
 
-    await this.orderCreator.assignColor(
-      document.id,
-      itmOrder.color?.type === 'Эмаль' ? 'Эмаль' : 'Морилка',
-      { previousName: itmOrder.color?.name, note: itmOrder.color?.note },
-    );
+    // Переделать!!!
+    // await this.orderCreator.assignColor(
+    //   document,
+    //   itmOrder.color?.type === 'Эмаль' ? 'Эмаль' : 'Морилка',
+    //   { previousName: itmOrder.color?.name, note: itmOrder.color?.note },
+    // );
 
-    await this.orderCreator.assignPatina(document.id, 'Однокомпонентная', {
-      previousName: itmOrder.patina?.name,
-      note: itmOrder.patina?.note,
-    });
+    // await this.orderCreator.assignPatina(document, 'Однокомпонентная', {
+    //   previousName: itmOrder.patina?.name,
+    //   note: itmOrder.patina?.note,
+    // });
 
-    await this.orderCreator.assignVarnish(document.id, 'Акриловый', {
-      previousName: itmOrder.varnish?.name,
-      note: itmOrder.varnish?.note,
-    });
+    // await this.orderCreator.assignVarnish(document, 'Акриловый', {
+    //   previousName: itmOrder.varnish?.name,
+    //   note: itmOrder.varnish?.note,
+    // });
 
-    const panelColor = await this.colorService.findColorToName(
-      itmOrder.panel?.color?.name,
-    );
-    const panelMaterial = await this.materialService.findToName(
-      itmOrder.panel?.material?.name,
-    );
+    // const panelColor = await this.colorService.findColorToName(
+    //   itmOrder.panel?.color?.name,
+    // );
+    // const panelMaterial = await this.materialService.findToName(
+    //   itmOrder.panel?.material?.name,
+    // );
 
-    await this.orderCreator.assignPanel(document.id, itmOrder.panel.name, {
-      colorId: panelColor?.id,
-      materialId: panelMaterial?.id,
-    });
+    // await this.orderCreator.assignPanel(document, itmOrder.panel.name, {
+    //   colorId: panelColor?.id,
+    //   materialId: panelMaterial?.id,
+    // });
 
-    await this.orderCreator.assignMaterial(
-      document.id,
-      itmOrder.material?.name,
-    );
+    // await this.orderCreator.assignMaterial(
+    //   document,
+    //   itmOrder.material?.name,
+    // );
 
-    await this.orderCreator.assignProfile(
-      document.id,
-      itmOrder.profile?.name,
-      {},
-    );
+    // await this.orderCreator.assignProfile(
+    //   document,
+    //   itmOrder.profile?.name,
+    //   {},
+    // );
 
     for (const el of itmOrder.elements) {
-      let element = await this.orderCreator.addElement(document.id, el.name, {
+      let element = await this.orderCreator.addElement(document, el.name, {
         components: [
           {
             componentName: 'component_geometry',

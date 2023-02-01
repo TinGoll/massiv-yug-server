@@ -25,6 +25,7 @@ import { ElementEntity } from 'src/modules/repository/order/entities/document.el
 import { DocumentEntity } from 'src/modules/repository/order/entities/document.entity';
 import { ComponentKey } from 'src/modules/repository/order/entities/element.entity';
 import { BookUpdateInput } from 'src/modules/repository/order/inputs/book.input';
+import { DocumentUpdateInput } from 'src/modules/repository/order/inputs/document.input';
 import { Component, Entity } from 'yug-entity-component-system';
 import { ComponentMapper } from '../../providers/component-mapper';
 import { OrderCreator } from '../../providers/order-creator';
@@ -56,6 +57,10 @@ export class Room {
     this.orderCreator = roomManager.orderCreator;
   }
 
+  getDocument(id: number): DocumentEntity | null {
+    return (this.book.documents || []).find((d) => d.id === id) || null;
+  }
+
   async assignClient(person: PersonEntity): Promise<BookEntity> {
     return await this.orderCreator.assignClient(this.book, person);
   }
@@ -67,18 +72,12 @@ export class Room {
 
   /** Добавить документ в комнату */
   async addElement(
-    documentId: number,
+    document: DocumentEntity,
     identifier: string,
     options?: ElementOptions,
   ): Promise<void> {
-    const document = (this.book.documents || []).find(
-      (d) => d.id === documentId,
-    );
-    if (document) {
-      throw new WsException('Документ не найден.');
-    }
     const element = await this.orderCreator.addElement(
-      document.id,
+      document,
       identifier,
       options,
     );
@@ -127,27 +126,41 @@ export class Room {
    * @param action объект - событие.
    */
   async act(author: PersonEntity, action: Processing.Action): Promise<void> {
+    let document: DocumentEntity | null = null;
     switch (action.event) {
       // Событие добавления элемента в документ
       case 'update-book':
         const updateBookAction = <Processing.UpdateBook<BookUpdateInput>>action;
         await this.orderCreator.updateBook(this.book, updateBookAction.input);
-        console.log(this.book);
-        
         break;
+      // Событие обновления документа
+      case 'update-document':
+        const updateDocumentAction = <
+          Processing.UpdateDocument<DocumentUpdateInput>
+        >action;
+        await this.orderCreator.updateDocument(
+          this.book,
+          updateDocumentAction.input,
+        );
+        break;
+      // Присвоить клиента
       case 'assign-book-client':
         const assignClientAction = <Processing.AssignBookClient<PersonEntity>>(
           action
         );
         await this.assignClient(assignClientAction.client);
         break;
+      // Создать элемент заказа
       case 'add-element':
         const addElementAction = <Processing.AddElementAction>action;
-        await this.addElement(
-          addElementAction.documentId,
-          addElementAction.identifier,
-          addElementAction.options,
-        );
+        document = this.getDocument(addElementAction.documentId);
+        if (document) {
+          await this.addElement(
+            document,
+            addElementAction.identifier,
+            addElementAction.options,
+          );
+        }
         break;
       // Изменение компонента сущности.
       case 'change-component':
@@ -163,65 +176,101 @@ export class Room {
         const actionDocumentColor = <
           Processing.AssignDocumentColor<AssignColorOptions>
         >action;
-        await this.orderCreator.assignColor(
-          actionDocumentColor.documentId,
-          actionDocumentColor.assignedName,
-          actionDocumentColor.options,
-        );
+        document = this.getDocument(actionDocumentColor.documentId);
+        if (document) {
+          await this.orderCreator.assignColor(
+            document,
+            actionDocumentColor.color,
+            actionDocumentColor.options,
+          );
+        }
+
         break;
       // Присвоить патину документа
       case 'assign-document-patina':
         const actionDocumentPatina = <
           Processing.AssignDocumentPatina<AssignPatinaOptions>
         >action;
-        await this.orderCreator.assignPatina(
-          actionDocumentColor.documentId,
-          actionDocumentColor.assignedName,
-          actionDocumentColor.options,
-        );
+        document = this.getDocument(actionDocumentPatina.documentId);
+
+        if (document) {
+          await this.orderCreator.assignPatina(
+            document,
+            actionDocumentPatina.patina,
+            actionDocumentPatina.options,
+          );
+        }
+
         break;
       // Присвоить лак документа
       case 'assign-document-varnish':
         const actionDocumentVarnish = <
           Processing.AssignDocumentVarnish<AssignVarnishOptions>
         >action;
-        await this.orderCreator.assignVarnish(
-          actionDocumentColor.documentId,
-          actionDocumentColor.assignedName,
-          actionDocumentColor.options,
-        );
+        document = this.getDocument(actionDocumentVarnish.documentId);
+        if (document) {
+          await this.orderCreator.assignVarnish(
+            document,
+            actionDocumentVarnish.varnish,
+            actionDocumentVarnish.options,
+          );
+        }
+
         break;
       // Присвоить материал документа
       case 'assign-document-material':
         const actionDocumentMaterial = <Processing.AssignDocumentMaterial>(
           action
         );
-        await this.orderCreator.assignMaterial(
-          actionDocumentColor.documentId,
-          actionDocumentColor.assignedName,
-        );
+        document = this.getDocument(actionDocumentMaterial.documentId);
+        if (document) {
+          await this.orderCreator.assignMaterial(
+            document,
+            actionDocumentMaterial.material,
+          );
+        }
+
         break;
       // Присвоить профиль документа
       case 'assign-document-profile':
         const actionDocumentProfile = <
           Processing.AssignDocumentProfile<AssignProfileOptions>
         >action;
-        await this.orderCreator.assignProfile(
-          actionDocumentColor.documentId,
-          actionDocumentColor.assignedName,
-          actionDocumentColor.options,
-        );
+        document = this.getDocument(actionDocumentProfile.documentId);
+        if (document) {
+          await this.orderCreator.assignProfile(
+            document,
+            actionDocumentProfile.profile,
+            actionDocumentProfile.options,
+          );
+        }
+
         break;
       // Присвоить филёнку документа
       case 'assign-document-panel':
         const actionDocumentPanel = <
           Processing.AssignDocumentPanel<AssignPanelOptions>
         >action;
-        await this.orderCreator.assignPanel(
-          actionDocumentColor.documentId,
-          actionDocumentColor.assignedName,
-          actionDocumentColor.options,
-        );
+        document = this.getDocument(actionDocumentPanel.documentId);
+        if (document) {
+          await this.orderCreator.assignPanel(
+            document,
+            actionDocumentPanel.panel,
+            actionDocumentPanel.options,
+          );
+        }
+        break;
+      case 'assign-document-panel-material':
+        const actionDocumentPanelMaterial = <
+          Processing.AssignDocumentPanelMaterial
+        >action;
+        document = this.getDocument(actionDocumentPanelMaterial.documentId);
+        if (document) {
+          await this.orderCreator.assignPanelMaterial(
+            document,
+            actionDocumentPanelMaterial.material,
+          );
+        }
         break;
       default:
         break;
@@ -236,11 +285,26 @@ export class Room {
    */
   async update(dt: number): Promise<void> {
     await this.engine.update(dt);
-    this.roomManager.stop();
+    // this.roomManager.stop();
     console.log('update: ' + this.id);
-
+    // Собираем обработанные данные.
+    await this.buildState();
     // УБРАТЬ
     await this.state();
+  }
+
+  // Сборка состояния.
+  async buildState(): Promise<void> {
+    for (const entity of this.engine.getEntities()) {
+      for (const component of entity.elementEntity.components) {
+        const cmp = entity.getComponent<any>(
+          this.componentMapper.get(component.componentName),
+        ) as IComponent;
+        if (cmp && cmp.data) {
+          component.data = cmp.data;
+        }
+      }
+    }
   }
 
   /** Вызывается после создания команты. Переопределите, что бы использовать в своих целях. */

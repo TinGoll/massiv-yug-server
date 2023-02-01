@@ -62,7 +62,9 @@ export class ComponentMapper {
   >(key: ComponentKey, ...args: J): T | null {
     const Cmp = this.get(key);
     if (!Cmp) return null;
-    return <T>new Cmp(...args);
+    const cmp = <T>new Cmp(...args);
+    (<IComponent<object>>cmp).key = key;
+    return cmp;
   }
 
   serialization<T extends Component>(

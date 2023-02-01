@@ -1,5 +1,6 @@
 import { Controller, Get, Post, HttpCode, Body } from '@nestjs/common';
 import { from, Observable } from 'rxjs';
+import { OrderCreator } from 'src/modules/order-processing/providers/order-creator';
 import { ColorService } from '../color/color.service';
 import { SampleColorEntity } from '../color/entities/sample.color.entity';
 import { ColorCreateInput } from '../color/inputs/color.input';
@@ -88,7 +89,7 @@ export class RepositoryController {
     return from(this.profileService.findAll());
   }
 
-  @Get('/profiles')
+  @Post('/profiles')
   @HttpCode(201)
   createProfile(
     @Body() input: ProfileCreateInput,
@@ -102,8 +103,8 @@ export class RepositoryController {
     return from(this.varnishService.findAll());
   }
 
-  @Get('/varnishes')
-  @HttpCode(200)
+  @Post('/varnishes')
+  @HttpCode(201)
   createVarnish(
     @Body() input: VarnishCreateInput,
   ): Observable<SampleVarnishEntity> {

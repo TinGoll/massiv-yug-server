@@ -131,6 +131,7 @@ export interface DocumentExtraData {
   extraSetting: string | null;
   isThermalseam: boolean;
   isDrilling: boolean;
+  texture: string | null;
 }
 
 export interface BookOptions {

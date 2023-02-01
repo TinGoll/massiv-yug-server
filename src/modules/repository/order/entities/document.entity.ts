@@ -65,6 +65,7 @@ export class DocumentEntity {
       extraSetting: null,
       isThermalseam: false,
       isDrilling: false,
+      texture: null,
     },
   })
   extraData: DocumentExtraData;

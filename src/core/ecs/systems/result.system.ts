@@ -77,8 +77,23 @@ export class ResultSystem extends BaseSystem {
           }
         }
       }
+      document.resultData = documentResult;
+      for (const grp of document.resultData.squares.groups || []) {
+        const index = bookResult.squares.groups.findIndex(
+          (g) => g.name === grp.name,
+        );
+        if (index === -1) {
+          bookResult.squares.groups.push({
+            name: grp.name,
+            amount: Number(grp.amount),
+          });
+        } else {
+          bookResult.squares.groups[index].amount += Number(grp.amount);
+        }
+      }
       bookResult.squares.all += Number(documentResult.squares.all);
     }
+    book.resultData = bookResult;
     // console.timeEnd('FirstWay');
     // console.log('bookResult', JSON.stringify(bookResult, null, 2));
   }

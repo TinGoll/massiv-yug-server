@@ -1,8 +1,14 @@
 import { DocumentOptions, ElementOptions } from 'src/core/@types/app.types';
+import { SampleColorEntity } from 'src/modules/repository/color/entities/sample.color.entity';
+import { SampleMaterialEntity } from 'src/modules/repository/material/entities/sample.material.entity';
 import { BookEntity } from 'src/modules/repository/order/entities/book.entity';
 import { DocumentEntity } from 'src/modules/repository/order/entities/document.entity';
 import { ComponentKey } from 'src/modules/repository/order/entities/element.entity';
 import { BookCreateInput } from 'src/modules/repository/order/inputs/book.input';
+import { SamplePanelEntity } from 'src/modules/repository/panel/entities/sample.panel.entity';
+import { SamplePatinaEntity } from 'src/modules/repository/patina/entities/sample.patina.entity';
+import { SampleProfileEntity } from 'src/modules/repository/profile/entities/sample.profile.entity';
+import { SampleVarnishEntity } from 'src/modules/repository/varnish/entities/sample.varnish.entity';
 
 const events = [
   'update-book',
@@ -18,6 +24,7 @@ const events = [
   'assign-document-profile',
   'assign-document-panel',
   'assign-document-note',
+  'assign-document-panel-material',
 ] as const;
 
 export type RoomKeyType = number | string;
@@ -75,56 +82,54 @@ declare module Processing {
     data: Partial<T>;
   }
 
-  /**
-   *  'assign-color',
-  'assign-patina',
-  'assign-varnish',
-  'assign-material',
-  'assign-profile',
-  'assign-note',
-   */
-
   // События для изменения шапки здокумента
   export interface AssignDocumentColor<T> extends Action {
     event: 'assign-document-color';
     documentId: number;
-    assignedName: string | null;
-    options: T;
+    color: SampleColorEntity | null;
+    options?: T;
   }
   export interface AssignDocumentPatina<T> extends Action {
     event: 'assign-document-patina';
     documentId: number;
-    assignedName: string | null;
-    options: T;
+    patina: SamplePatinaEntity | null;
+    options?: T;
   }
   export interface AssignDocumentVarnish<T> extends Action {
     event: 'assign-document-varnish';
     documentId: number;
-    assignedName: string | null;
-    options: T;
+    varnish: SampleVarnishEntity | null;
+    options?: T;
   }
   export interface AssignDocumentMaterial extends Action {
     event: 'assign-document-material';
     documentId: number;
-    assignedName: string | null;
+    material: SampleMaterialEntity | null;
   }
   export interface AssignDocumentProfile<T> extends Action {
     event: 'assign-document-profile';
     documentId: number;
-    assignedName: string | null;
-    options: T;
+    profile: SampleProfileEntity | null;
+    options?: T;
   }
   export interface AssignDocumentPanel<T> extends Action {
     event: 'assign-document-panel';
     documentId: number;
-    assignedName: string | null;
-    options: T;
+    panel: SamplePanelEntity | null;
+    options?: T;
   }
+
+  export interface AssignDocumentPanelMaterial extends Action {
+    event: 'assign-document-panel-material';
+    documentId: number;
+    material: SampleMaterialEntity | null;
+  }
+
   export interface AssignDocumentNote<T> extends Action {
     event: 'assign-document-note';
     documentId: number;
     assignedName: string | null;
-    options: T;
+    options?: T;
   }
   export interface AssignBookClient<T> extends Action {
     event: 'assign-book-client';

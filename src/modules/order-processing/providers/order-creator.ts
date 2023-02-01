@@ -13,6 +13,8 @@ import {
 import { IComponent } from 'src/core/ecs/components/component-interface';
 import { PersonEntity } from 'src/modules/person/entities/person.entity';
 import { ColorService } from 'src/modules/repository/color/color.service';
+import { SampleColorEntity } from 'src/modules/repository/color/entities/sample.color.entity';
+import { SampleMaterialEntity } from 'src/modules/repository/material/entities/sample.material.entity';
 import { MaterialService } from 'src/modules/repository/material/material.service';
 import {
   BookEntity,
@@ -29,12 +31,17 @@ import {
   SampleElementEntity,
 } from 'src/modules/repository/order/entities/element.entity';
 import { BookUpdateInput } from 'src/modules/repository/order/inputs/book.input';
+import { DocumentUpdateInput } from 'src/modules/repository/order/inputs/document.input';
 import { OrderService } from 'src/modules/repository/order/order.service';
+import { SamplePanelEntity } from 'src/modules/repository/panel/entities/sample.panel.entity';
 import { PanelService } from 'src/modules/repository/panel/panel.service';
+import { SamplePatinaEntity } from 'src/modules/repository/patina/entities/sample.patina.entity';
 import { PatinaService } from 'src/modules/repository/patina/patina.service';
+import { SampleProfileEntity } from 'src/modules/repository/profile/entities/sample.profile.entity';
 import { ProfileService } from 'src/modules/repository/profile/profile.service';
 import { SectorService } from 'src/modules/repository/sector/sector.service';
 import { SettingService } from 'src/modules/repository/setting/setting.service';
+import { SampleVarnishEntity } from 'src/modules/repository/varnish/entities/sample.varnish.entity';
 import { VarnishService } from 'src/modules/repository/varnish/varnish.service';
 import { SampleWorkEntity } from 'src/modules/repository/work/entities/sample.work.entity';
 import { WorkService } from 'src/modules/repository/work/work.service';
@@ -99,6 +106,21 @@ export class OrderCreator {
     return book;
   }
 
+  async updateDocument(
+    book: BookEntity,
+    input: DocumentUpdateInput,
+  ): Promise<BookEntity> {
+    const updatedDocument = await this.orderService.updateDocument(input);
+    const document = (book.documents || []).find((d) => d.id === input.id);
+    const { id, ...keys } = input;
+    for (const key in keys) {
+      if (document) {
+        document[key] = updatedDocument[key];
+      }
+    }
+    return book;
+  }
+
   async addDocument(
     book: BookEntity,
     options?: DocumentOptions,
@@ -157,14 +179,10 @@ export class OrderCreator {
 
   /** Добавление элемента в документ книги. */
   async addElement(
-    documentId: number,
+    document: DocumentEntity,
     identifier: string,
     options: ElementOptions = {},
   ): Promise<ElementEntity> {
-    // Получаем документ
-    const document = await this.orderService.findDocumentToId(documentId);
-    // Если документ не найден, завершаем процедуру с ошибкой
-    if (!document) throw new Error('Документ не найден.');
 
     // Получаем кортеж из элемента и псефдоэлемента, по идентификатору
     const elementTuple = await this.getElementToIdentifier(identifier);
@@ -289,13 +307,10 @@ export class OrderCreator {
 
   /** Присвоить цвет документу заказа */
   async assignColor(
-    documentId: number,
-    name: string,
+    document: DocumentEntity,
+    color: SampleColorEntity | null,
     options: AssignColorOptions = {},
   ): Promise<DocumentEntity> {
-    const document = await this.orderService.findDocumentToId(documentId);
-    if (!document) throw new Error('Документ не найден.');
-    const color = await this.colorService.findColorToName(name);
     const { converterId, data, ...opt } = options;
     let converter;
     if (converterId) {
@@ -313,13 +328,10 @@ export class OrderCreator {
 
   /** Присвоить Патину документу заказа */
   async assignPatina(
-    documentId: number,
-    name: string,
+    document: DocumentEntity,
+    patina: SamplePatinaEntity | null,
     options: AssignPatinaOptions = {},
   ): Promise<DocumentEntity> {
-    const document = await this.orderService.findDocumentToId(documentId);
-    if (!document) throw new Error('Документ не найден.');
-    const patina = await this.patinaService.findPatinaToName(name);
     const { converterId, ...opt } = options;
     let converter;
     if (converterId) {
@@ -330,19 +342,15 @@ export class OrderCreator {
       ...opt,
       converter,
     });
-
     return document;
   }
 
   /** Присвоить Лак документу заказа */
   async assignVarnish(
-    documentId: number,
-    name: string,
+    document: DocumentEntity,
+    varnish: SampleVarnishEntity | null,
     options: AssignVarnishOptions = {},
   ): Promise<DocumentEntity> {
-    const document = await this.orderService.findDocumentToId(documentId);
-    if (!document) throw new Error('Документ не найден.');
-    const varnish = await this.varnishService.findToName(name);
     await this.orderService.assignVarnish(document, varnish, {
       ...options,
     });
@@ -351,26 +359,20 @@ export class OrderCreator {
 
   /** Присвоить Материал документу заказа */
   async assignMaterial(
-    documentId: number,
-    name: string,
+    document: DocumentEntity,
+    material: SampleMaterialEntity | null,
   ): Promise<DocumentEntity> {
-    const document = await this.orderService.findDocumentToId(documentId);
-    if (!document) throw new Error('Документ не найден.');
-    const material = await this.materialService.findToName(name);
     await this.orderService.assignMaterial(document, material);
     return document;
   }
 
   /** Присвоить Филёнку документу заказа */
   async assignPanel(
-    documentId: number,
-    name: string,
+    document: DocumentEntity,
+    panel: SamplePanelEntity,
     options: AssignPanelOptions = {},
   ): Promise<DocumentEntity> {
-    const document = await this.orderService.findDocumentToId(documentId);
-    if (!document) throw new Error('Документ не найден.');
     const { colorId, materialId, ...opt } = options;
-    const panel = await this.panelService.findToName(name);
     let color;
     let material;
     if (colorId) {
@@ -387,15 +389,23 @@ export class OrderCreator {
     return document;
   }
 
+  /** Присвоить Филёнку документу заказа */
+  async assignPanelMaterial(
+    document: DocumentEntity,
+    material: SampleMaterialEntity,
+  ): Promise<DocumentEntity> {
+    await this.orderService.assignPanel(document, document.panel.sample, {
+      material,
+    });
+    return document;
+  }
+
   /** Присвоить Профиль документу заказа */
   async assignProfile(
-    documentId: number,
-    name: string,
+    document: DocumentEntity,
+    profile: SampleProfileEntity,
     options: AssignProfileOptions = {},
   ): Promise<DocumentEntity> {
-    const document = await this.orderService.findDocumentToId(documentId);
-    if (!document) throw new Error('Документ не найден.');
-    const profile = await this.profileService.findToName(name);
     await this.orderService.assignProfile(document, profile, {
       ...options,
     });

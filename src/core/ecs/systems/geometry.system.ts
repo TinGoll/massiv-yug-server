@@ -47,5 +47,8 @@ export class GeometrySystem extends IteratingSystem {
     );
     gmCmp.data.linearMeters = Number(((height / mm) * amount).toFixed(toFixed));
     // console.log(JSON.stringify(gmCmp, null, 2));
+
+    console.log("GeometrySystem", entity.componentsArray);
+    
   }
 }
