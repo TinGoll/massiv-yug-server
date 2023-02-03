@@ -15,6 +15,9 @@ const events = [
   'update-document',
   'create-order',
   'add-element',
+  'add-document',
+  'remove-element',
+  'remove-document',
   'change-component',
   'assign-book-client',
   'assign-document-color',
@@ -58,11 +61,7 @@ declare module Processing {
     book: BookEntity;
   }
 
-  export interface AddDocumentAction {
-    bookId: number;
-    option?: DocumentOptions;
-  }
-
+ 
   export interface AddDocumentResponse {
     document: DocumentEntity;
   }
@@ -72,6 +71,11 @@ declare module Processing {
     documentId: number;
     identifier: string;
     options?: ElementOptions;
+  }
+
+  export interface AddDocumentAction extends Action {
+    event: 'add-document';
+    options?: DocumentOptions;
   }
 
   export interface ChangeComponentAction<T extends object = object>

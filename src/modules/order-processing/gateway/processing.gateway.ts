@@ -8,7 +8,16 @@ import {
   WebSocketServer,
   WsResponse,
 } from '@nestjs/websockets';
-import { map, max, Observable, of, tap, catchError } from 'rxjs';
+import {
+  map,
+  max,
+  Observable,
+  of,
+  tap,
+  catchError,
+  switchMap,
+  iif,
+} from 'rxjs';
 import { Namespace, Socket } from 'socket.io';
 import {
   AllowNullUserGuard,
@@ -62,6 +71,7 @@ export class ProcessingGateway
         client.data.user,
         action.payload?.option,
         // Подписка на получения состояния комнаты
+        // РЕАЛИЗОВАТЬ ОТПИСКУ ПРИ ВЫХОДЕ ИЗ КОМНАТЫ
         (roomId, state) =>
           this.notification(roomId, processingEvents.ORDER_STATE, state),
       )
@@ -82,21 +92,20 @@ export class ProcessingGateway
     action: PayloadAction<Processing.OpenOrderAction>,
   ): Observable<WsResponse<Processing.OpenOrderResponse>> {
     const event = processingEvents.OPEN_ORDER;
+
+    if (!client.rooms.has(String(action.payload))) {
+      // Подписываем клиента на новую комнату.
+      client.join(String(action.payload));
+    }
     return this.roomManager
       .openOrder(
         action.payload,
         // Подписка на получения состояния комнаты
+        // РЕАЛИЗОВАТЬ ОТПИСКУ ПРИ ВЫХОДЕ ИЗ КОМНАТЫ
         (roomId, state) =>
           this.notification(roomId, processingEvents.ORDER_STATE, state),
       )
-      .pipe(
-        map((book) => ({ event, data: { book, roomId: book.id } })),
-        tap((response) => {
-          // Присоеденяем клиента к комнате.
-          client.join(String(response?.data?.roomId));
-          return response;
-        }),
-      );
+      .pipe(map((book) => ({ event, data: { book, roomId: book.id } })));
   }
   // Закрытие книги.
   // Книга закрывается только для текущего клиента.
@@ -116,37 +125,39 @@ export class ProcessingGateway
     });
   }
 
-  /**
-   * Добавление нового документа в книгу закзов
-   * @param client Сокет Клиент
-   * @param action Набор опций для создания документа.
-   * @returns AddDocumentResponse
-   */
-  @SubscribeMessage(processingEvents.ADD_DOCUMENT)
-  addDocument(
-    client: Socket,
-    action: PayloadAction<Processing.AddDocumentAction>,
-  ): Observable<WsResponse<Processing.AddDocumentResponse>> {
-    const event = processingEvents.ADD_DOCUMENT;
-    return this.roomManager
-      .addDocument(action?.payload?.bookId!, action?.payload?.option)
-      .pipe(map((document) => ({ event, data: { document } })));
-  }
-
   /** События связанные с редактированием документов и элементов */
   @SubscribeMessage(processingEvents.ORDER_ACTION)
-  orderAction(
-    client: Socket,
-    action: PayloadAction<Processing.Action>,
-  ): Observable<WsResponse<any>> {
+  orderAction(client: Socket, action: PayloadAction<Processing.Action>): any {
     const event = processingEvents.ORDER_ACTION;
-    return this.roomManager
-      .action(client.data.user, action.payload.roomId, action.payload)
+    return of(this.roomManager.isExists(action.payload.roomId))
       .pipe(
-        map((data) => ({
-          event,
-          data,
-        })),
+        switchMap((isExists) =>
+          iif(
+            () => isExists,
+            of([client.data.user, action.payload.roomId, action.payload]),
+            this.openOrder(client, {
+              payload: action.payload.roomId,
+            }).pipe(
+              map((openResponse) => {
+                return [
+                  client.data.user,
+                  action.payload.roomId,
+                  action.payload,
+                ];
+              }),
+            ),
+          ),
+        ),
+      )
+      .pipe(
+        switchMap((args: [PersonEntity, RoomKeyType, Processing.Action]) => {
+          return this.roomManager.action(...args).pipe(
+            map((data) => ({
+              event,
+              data,
+            })),
+          );
+        }),
       );
   }
 

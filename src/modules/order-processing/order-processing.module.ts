@@ -8,6 +8,7 @@ import { GraphProvider } from './providers/graph-provider';
 import { ProcessingGateway } from './gateway/processing.gateway';
 import { ProcessingController } from './controllers/processing.controller';
 import { AuthModule } from '../auth/auth.module';
+import { OrderFinder } from './providers/order-finder';
 
 @Module({
   imports: [RepositoryModule, AuthModule],
@@ -18,6 +19,7 @@ import { AuthModule } from '../auth/auth.module';
     RoomManager,
     GraphProvider,
     ProcessingGateway,
+    OrderFinder,
   ],
   exports: [OrderCreator],
   controllers: [ProcessingController],

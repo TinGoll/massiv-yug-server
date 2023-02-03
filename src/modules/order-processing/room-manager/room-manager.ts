@@ -74,6 +74,7 @@ export class RoomManager {
     id: RoomKeyType,
     listener?: RoomEventStateListener,
   ): Observable<BookEntity> {
+    console.log('Открытие комнаты');
     const candidate = this.get(id);
     if (candidate) {
       // Отправить подключенному пользователю состояние комнаты.
@@ -85,11 +86,10 @@ export class RoomManager {
           const room = new Room(this, book, this.componentMapper);
           room.on('state', listener);
           /** Перед добавлением комнаты в менеджер комнат, вызываем спец-метод. */
-          room.afterCreation().then(() => {
-            this.set(book.id, room);
-            // Ручное обновление.
-            room.update(0);
-          });
+          this.set(book.id, room);
+          room.afterCreation();
+          // Ручное обновление.
+          room.update(0);
           return room.book;
         }
         return null;
@@ -110,11 +110,10 @@ export class RoomManager {
           const room = new Room(this, book, this.componentMapper);
           room.on('state', listener);
           /** Перед добавлением комнаты в менеджер комнат, вызываем спец-метод. */
-          room.afterCreation().then(() => {
-            this.set(book.id, room);
-            // Ручное обновление.
-            room.update(0);
-          });
+          this.set(book.id, room);
+          room.afterCreation();
+          // Ручное обновление.
+          room.update(0);
           return room.book;
         }
         return null;
@@ -131,7 +130,7 @@ export class RoomManager {
   }
 
   /** Существует ли открытая книга в коллекции. */
-  isExists(id: number): boolean {
+  isExists(id: number | string): boolean {
     return this.has(id);
   }
 
@@ -146,7 +145,10 @@ export class RoomManager {
     act: Processing.Action,
   ): Observable<any> {
     const room = this.get(roomId);
+
     if (!room) {
+      console.log('Комната закрыта или не существует.');
+
       throw new WsException('Комната закрыта или не существует.');
     }
     return from(room.act(author, act)).pipe(

@@ -183,7 +183,6 @@ export class OrderCreator {
     identifier: string,
     options: ElementOptions = {},
   ): Promise<ElementEntity> {
-
     // Получаем кортеж из элемента и псефдоэлемента, по идентификатору
     const elementTuple = await this.getElementToIdentifier(identifier);
     // Если нет такого идентификатора возвращаем null;

@@ -1,8 +1,4 @@
-import {
-  Entity,
-  Family,
-  IteratingSystem,
-} from 'yug-entity-component-system';
+import { Entity, Family, IteratingSystem } from 'yug-entity-component-system';
 import { GeometryComponent } from '../components/geometry.component';
 import { MYEngine } from '../engine/my-engine';
 
@@ -47,8 +43,5 @@ export class GeometrySystem extends IteratingSystem {
     );
     gmCmp.data.linearMeters = Number(((height / mm) * amount).toFixed(toFixed));
     // console.log(JSON.stringify(gmCmp, null, 2));
-
-    console.log("GeometrySystem", entity.componentsArray);
-    
   }
 }

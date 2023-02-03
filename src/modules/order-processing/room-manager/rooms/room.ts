@@ -162,6 +162,10 @@ export class Room {
           );
         }
         break;
+         case 'add-document':
+        const addDocumentAction = <Processing.AddDocumentAction>action;
+        this.addDocument(addDocumentAction.options)
+        break;
       // Изменение компонента сущности.
       case 'change-component':
         const changeComponentAction = <Processing.ChangeComponentAction>action;
@@ -308,7 +312,7 @@ export class Room {
   }
 
   /** Вызывается после создания команты. Переопределите, что бы использовать в своих целях. */
-  async afterCreation(): Promise<void> {
+  afterCreation(): void {
     // *************************************************
     // Системы
     // Система расчета геометрии

@@ -5,7 +5,7 @@ export declare type PayloadAction<
   E = never,
 > = {
   payload: P;
-  type: T;
+  type?: T;
 } & ([M] extends [never]
   ? {}
   : {
