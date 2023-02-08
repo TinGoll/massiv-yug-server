@@ -77,19 +77,71 @@ export class OrderFinder {
 
   private filter(
     data: BookEntity[] = [],
-    params?: string,
+    findString?: string,
   ): Observable<BookEntity[]> {
-    if (!params) {
-      return of(data);
+    if (!findString) {
+      return of([]);
     }
-    return of(
-      data.filter((book) => {
-        // прописать условия фильтрации.
-        let check = false;
-        if (book.id === Number(params)) {
-          check = true;
-        }
-        return check;
+    return of(data).pipe(
+      map((books) => {
+        const params = findString
+          .replace(/\s+/g, ' ')
+          .trim()
+          .toLocaleLowerCase()
+          .split(' ');
+        if (!params.length) return books;
+
+        const primary: BookEntity[] = books.filter((book) => {
+          let check: boolean = false;
+          for (const param of params) {
+            if (book.id === Number(param)) {
+              check = true;
+              break;
+            }
+            if (
+              (book.nameFromClient || '')
+                .toLocaleLowerCase()
+                .includes(param.toLocaleLowerCase())
+            ) {
+              check = true;
+              break;
+            }
+          }
+          return check;
+        });
+
+        const second: BookEntity[] = books.filter((book) => {
+          let check: boolean = false;
+          for (const param of params) {
+            if (book.client) {
+              const client = book.client;
+              if (
+                (client.login || '').toLocaleLowerCase().includes(param) ||
+                (client.firstName || '').toLocaleLowerCase().includes(param)
+              ) {
+                check = true;
+                break;
+              }
+            }
+            if (book.author) {
+              const author = book.author;
+              if (
+                (author.login || '').toLocaleLowerCase().includes(param) ||
+                (author.firstName || '').toLocaleLowerCase().includes(param)
+              ) {
+                check = true;
+                break;
+              }
+            }
+          }
+          if (check) {
+            const exists = primary.find((b) => b.id === book.id);
+            if (exists) check = false;
+          }
+          return check;
+        });
+
+        return [...primary, ...second].slice(0, 26);
       }),
     );
   }
