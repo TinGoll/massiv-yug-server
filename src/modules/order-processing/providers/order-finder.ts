@@ -89,6 +89,7 @@ export class OrderFinder {
           .trim()
           .toLocaleLowerCase()
           .split(' ');
+          
         if (!params.length) return books;
 
         const primary: BookEntity[] = books.filter((book) => {

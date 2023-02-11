@@ -1,5 +1,6 @@
 .env
 pgdata
+telegraf_data.json
 
 # compiled output
 /dist

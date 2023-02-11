@@ -14,6 +14,7 @@ import { RequestModule } from './modules/request/request.module';
 import { PersonModule } from './modules/person/person.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { FinancialModule } from './modules/financial/financial.module';
+import { TelegramModule } from './modules/telegram/telegram.module';
 
 @Module({
   imports: [
@@ -66,6 +67,7 @@ import { FinancialModule } from './modules/financial/financial.module';
     PersonModule,
     AuthModule,
     FinancialModule,
+    TelegramModule,
   ],
   controllers: [],
   providers: [],
