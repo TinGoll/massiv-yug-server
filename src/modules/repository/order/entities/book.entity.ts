@@ -15,6 +15,7 @@ import { SampleWorkEntity } from '../../work/entities/sample.work.entity';
 import { BookStatusEntity } from './book.status.entity';
 import { DocumentEntity } from './document.entity';
 import { PersonEntity } from 'src/modules/person/entities/person.entity';
+import { HistoryEntity } from 'src/modules/order-processing/entities/history.entity';
 
 export const BOOK_BARCODE_PREFIX: number = 22;
 
@@ -35,7 +36,7 @@ export class BookEntity {
   @Column('boolean', { default: false })
   deleted: boolean;
 
-   //Даник решил добавить тип еще и в книгу.
+  //Даник решил добавить тип еще и в книгу.
   @Column({ type: 'varchar', length: 64, nullable: true })
   documentType: BookDocumentType;
 
@@ -71,7 +72,7 @@ export class BookEntity {
   client: PersonEntity;
 
   @ManyToOne(() => PersonEntity, { eager: true, onDelete: 'SET NULL' })
-  @JoinColumn({ name: 'authortId' })
+  @JoinColumn({ name: 'authorId' })
   author: PersonEntity;
 
   @ManyToOne(() => BookStatusEntity, { eager: true, onDelete: 'SET NULL' })
@@ -83,4 +84,7 @@ export class BookEntity {
     eager: true,
   })
   documents: DocumentEntity[];
+
+  @OneToMany((type) => HistoryEntity, (history) => history.book, {lazy: true})
+  history: HistoryEntity[] | Promise<HistoryEntity[]>;
 }

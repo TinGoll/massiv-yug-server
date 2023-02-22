@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DeleteResult, Repository } from 'typeorm';
 import { BookEntity } from './entities/book.entity';
 import { BookStatusEntity } from './entities/book.status.entity';
 import { DocumentColorEntity } from './entities/document.color.entity';
@@ -191,6 +191,18 @@ export class OrderService {
     return id;
   }
 
+  /** Удалить элемент заказа */
+  async removeElement(id: number): Promise<DeleteResult> {
+    const deleteResult = await this.docElementRepository
+      .createQueryBuilder('order_document_elements')
+      .delete()
+      .from(ElementEntity)
+      .where('id = :id', { id })
+      .execute();
+
+    return deleteResult;
+  }
+
   /** Получить документы книги. */
   async getBookDocuments(bookId: number): Promise<DocumentEntity[]> {
     return await this.documentRepository.find({
@@ -236,15 +248,17 @@ export class OrderService {
   async assignColor(
     document: DocumentEntity,
     color: SampleColorEntity | null,
-    options: Partial<Omit<DocumentColorEntity, 'id' | 'sample'>> = {},
+    options: Partial<DocumentColorEntity> = {},
   ): Promise<DocumentEntity> {
+    const { id, sample, document: doc, ...opt } = options;
+
     if (!document.color) {
       await this.createDocumentColor(document);
     }
 
     await this.docColorRepository.update(
       { id: document.color.id },
-      { ...document.color, ...options },
+      { ...document.color, ...opt },
     );
 
     document.color = await this.docColorRepository.findOne({
@@ -261,6 +275,7 @@ export class OrderService {
   ): Promise<DocumentColorEntity> {
     const color = this.docColorRepository.create({ document });
     await this.docColorRepository.save(color);
+
     document.color = color;
     await this.saveDocument(document);
     return document.color;
@@ -269,14 +284,15 @@ export class OrderService {
   async assignPatina(
     document: DocumentEntity,
     patina: SamplePatinaEntity | null,
-    options: Partial<Omit<DocumentPatinaEntity, 'id' | 'sample'>> = {},
+    options: Partial<DocumentPatinaEntity> = {},
   ): Promise<DocumentEntity> {
+    const { id, sample, document: doc, ...opt } = options;
     if (!document.patina) {
       await this.createDocumentPatina(document);
     }
     await this.docPatinaRepository.update(
       { id: document.patina.id },
-      { ...document.patina, ...options },
+      { ...document.patina, ...opt },
     );
     document.patina = await this.docPatinaRepository.findOne({
       where: { id: document.patina.id },
@@ -300,16 +316,15 @@ export class OrderService {
   async assignVarnish(
     document: DocumentEntity,
     varnish: SampleVarnishEntity | null,
-    options: Partial<
-      Omit<DocumentVarnishEntity, 'id' | 'sample' | 'document'>
-    > = {},
+    options: Partial<DocumentVarnishEntity> = {},
   ): Promise<DocumentEntity> {
+    const { id, sample, document: doc, ...opt } = options;
     if (!document.varnish) {
       await this.createDocumentVarnish(document);
     }
     await this.docVarnishRepository.update(
       { id: document.varnish.id },
-      { ...document.varnish, ...options },
+      { ...document.varnish, ...opt },
     );
     document.varnish = await this.docVarnishRepository.findOne({
       where: { id: document.varnish.id },
@@ -344,15 +359,16 @@ export class OrderService {
   async assignPanel(
     document: DocumentEntity,
     panel: SamplePanelEntity | null,
-    options: Partial<Omit<DocumentPanelEntity, 'id' | 'sample'>> = {},
+    options: Partial<DocumentPanelEntity> = {},
   ): Promise<DocumentEntity> {
+    const { id, sample, document: doc, ...opt } = options;
     if (!document.panel) {
       await this.createDocumentPanel(document);
     }
 
     await this.docPanelRepository.update(
       { id: document.panel.id },
-      { ...document.panel, ...options, sample: panel },
+      { ...document.panel, ...opt, sample: panel },
     );
 
     document.panel = await this.docPanelRepository.findOne({
@@ -379,17 +395,16 @@ export class OrderService {
   async assignProfile(
     document: DocumentEntity,
     profile: SampleProfileEntity,
-    options: Partial<
-      Omit<DocumentProfileEntity, 'id' | 'sample' | 'document'>
-    > = {},
+    options: Partial<DocumentProfileEntity> = {},
   ): Promise<DocumentEntity> {
+    const { id, sample, document: doc, ...opt } = options;
     if (!document.profile) {
       await this.createDocumentProfile(document);
     }
 
     await this.docProfileRepository.update(
       { id: document.profile.id },
-      { widths: [...(profile?.widths || [])], ...options },
+      { widths: [...(profile?.widths || [])], ...opt },
     );
     document.profile = await this.docProfileRepository.findOne({
       where: { id: document.profile.id },
@@ -437,7 +452,11 @@ export class OrderService {
   }
 
   async findAllElementSamples(): Promise<SampleElementEntity[]> {
-    return await this.elementRepository.find();
+    return await this.elementRepository.find({
+      order: {
+        index: 'DESC',
+      },
+    });
   }
 
   /** Сохранить шаблон элемента */
@@ -503,5 +522,10 @@ export class OrderService {
   /** Получить объект репозитория документа книги. */
   getDocumentRepository(): Repository<DocumentEntity> {
     return this.documentRepository;
+  }
+
+  /** Получить объект репозитория документа книги. */
+  getDocumentElementRepository(): Repository<ElementEntity> {
+    return this.docElementRepository;
   }
 }

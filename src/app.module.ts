@@ -15,6 +15,7 @@ import { PersonModule } from './modules/person/person.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { FinancialModule } from './modules/financial/financial.module';
 import { TelegramModule } from './modules/telegram/telegram.module';
+import { StatisticsModule } from './modules/statistics/statistics.module';
 
 @Module({
   imports: [
@@ -68,6 +69,7 @@ import { TelegramModule } from './modules/telegram/telegram.module';
     AuthModule,
     FinancialModule,
     TelegramModule,
+    StatisticsModule,
   ],
   controllers: [],
   providers: [],

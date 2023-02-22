@@ -12,6 +12,7 @@ import {
   map,
   of,
   mergeMap,
+  catchError,
 } from 'rxjs';
 import { DocumentOptions } from 'src/core/@types/app.types';
 import { PersonEntity } from 'src/modules/person/entities/person.entity';
@@ -24,6 +25,7 @@ import { OrderCreator } from '../providers/order-creator';
 import Processing, { RoomKeyType } from './actions/processing-actions';
 import { RoomEventListener, RoomEventStateListener } from './interfaces';
 import { Room } from './rooms/room';
+import { HistoryService } from '../services/history.service';
 
 @Injectable()
 export class RoomManager {
@@ -39,6 +41,7 @@ export class RoomManager {
     public readonly orderCreator: OrderCreator,
     public readonly componentMapper: ComponentMapper,
     public readonly graphProvider: GraphProvider,
+    public readonly historyService: HistoryService,
   ) {
     // this.start();
     // this.openOrder(24621);
@@ -71,6 +74,7 @@ export class RoomManager {
    * @param id
    */
   openOrder(
+    author: PersonEntity,
     id: RoomKeyType,
     listener?: RoomEventStateListener,
   ): Observable<BookEntity> {
@@ -80,21 +84,37 @@ export class RoomManager {
       // Отправить подключенному пользователю состояние комнаты.
       return of(candidate.book);
     }
-    return from(this.orderCreator.openBook(id)).pipe(
-      map((book) => {
-        if (book) {
-          const room = new Room(this, book, this.componentMapper);
-          room.on('state', listener);
-          /** Перед добавлением комнаты в менеджер комнат, вызываем спец-метод. */
-          this.set(book.id, room);
-          room.afterCreation();
-          // Ручное обновление.
-          room.update(0);
-          return room.book;
-        }
-        return null;
-      }),
-    );
+    return from(this.orderCreator.openBook(id))
+      .pipe(
+        map((book) => {
+          if (book) {
+            const room = new Room(this, book, this.componentMapper);
+            room.on('state', listener);
+            /** Перед добавлением комнаты в менеджер комнат, вызываем спец-метод. */
+            this.set(book.id, room);
+            room.afterCreation();
+            // Ручное обновление.
+            room.update(0);
+            return room.book;
+          }
+          return null;
+        }),
+        catchError((error) => {
+          console.error('Error in open book operation:', error);
+          return of(null);
+        }),
+      )
+      .pipe(
+        tap((book) => {
+          this.historyService
+            .push(author, book, 'open', 'Открытие заказа')
+            .subscribe();
+        }),
+        catchError((error) => {
+          console.error('Error in push history operation:', error);
+          return of(null);
+        }),
+      );
   }
   /**
    * Создание нового заказа.
@@ -104,21 +124,32 @@ export class RoomManager {
     option?: BookCreateInput,
     listener?: RoomEventStateListener,
   ): Observable<BookEntity> {
-    return from(this.orderCreator.addBook(author, option)).pipe(
-      map((book) => {
-        if (book) {
-          const room = new Room(this, book, this.componentMapper);
-          room.on('state', listener);
-          /** Перед добавлением комнаты в менеджер комнат, вызываем спец-метод. */
-          this.set(book.id, room);
-          room.afterCreation();
-          // Ручное обновление.
-          room.update(0);
-          return room.book;
-        }
-        return null;
-      }),
-    );
+    return from(this.orderCreator.addBook(author, option))
+      .pipe(
+        map((book) => {
+          if (book) {
+            const room = new Room(this, book, this.componentMapper);
+            room.on('state', listener);
+            /** Перед добавлением комнаты в менеджер комнат, вызываем спец-метод. */
+            this.set(book.id, room);
+            room.afterCreation();
+            // Ручное обновление.
+            room.update(0);
+            return room.book;
+          }
+          return null;
+        }),
+      )
+      .pipe(
+        tap((book) => {
+          this.historyService
+            .push(author, book, 'create', 'Создание заказа')
+            .subscribe();
+          this.historyService
+            .push(author, book, 'open', 'Открытие заказа')
+            .subscribe();
+        }),
+      );
   }
 
   /** Закрывает книгу заказа. */
@@ -148,7 +179,6 @@ export class RoomManager {
 
     if (!room) {
       console.log('Комната закрыта или не существует.');
-
       throw new WsException('Комната закрыта или не существует.');
     }
     return from(room.act(author, act)).pipe(

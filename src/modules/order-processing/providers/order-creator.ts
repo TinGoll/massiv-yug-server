@@ -121,19 +121,52 @@ export class OrderCreator {
     return book;
   }
 
+  async removeDocument(
+    book: BookEntity,
+    document: DocumentEntity,
+  ): Promise<void> {
+    await this.orderService.removeDocument(document.id);
+    book.documents = (book.documents || []).filter(
+      (doc) => doc.id !== document.id,
+    );
+  }
+
   async addDocument(
     book: BookEntity,
     options?: DocumentOptions,
+    defaultData?: Partial<DocumentEntity>,
   ): Promise<DocumentEntity> {
     console.time('add-document');
     const document = await this.orderService.createDocument(options);
     book.documents = [...(book.documents || []), document];
-    await this.orderService.assignColor(document, null, {});
-    await this.orderService.assignPatina(document, null, {});
-    await this.orderService.assignVarnish(document, null, {});
-    await this.orderService.assignMaterial(document, null);
-    await this.orderService.assignPanel(document, null, {});
-    await this.orderService.assignProfile(document, null, {});
+
+    await this.orderService.assignColor(
+      document,
+      defaultData?.color?.sample || null,
+      { ...(defaultData?.color || {}) },
+    );
+    await this.orderService.assignPatina(
+      document,
+      defaultData?.patina?.sample || null,
+      defaultData?.patina || {},
+    );
+    await this.orderService.assignVarnish(
+      document,
+      defaultData?.varnish?.sample || null,
+      defaultData?.varnish || {},
+    );
+    await this.orderService.assignMaterial(document, defaultData?.material);
+    await this.orderService.assignPanel(
+      document,
+      defaultData?.panel?.sample || null,
+      defaultData?.panel || {},
+    );
+    await this.orderService.assignProfile(
+      document,
+      defaultData?.profile?.sample || null,
+      defaultData?.profile || {},
+    );
+
     console.timeEnd('add-document');
     await this.orderService.saveBook(book);
     return document;
@@ -175,6 +208,20 @@ export class OrderCreator {
     document.elements = [...(document.elements || []), element];
     await this.orderService.saveDocument(document);
     return element;
+  }
+
+  async removeElement(
+    book: BookEntity,
+    document: DocumentEntity,
+    elementId: number,
+  ): Promise<void> {
+    const result = await this.orderService.removeElement(elementId);
+    
+    console.log('Delete Result', result);
+
+    document.elements = (document.elements || []).filter(
+      (el) => el.id !== elementId,
+    );
   }
 
   /** Добавление элемента в документ книги. */
@@ -298,6 +345,7 @@ export class OrderCreator {
             return iAcc;
           }, []);
           acc.push(...identifiers);
+
           return acc;
         }, []),
       ),

@@ -61,7 +61,6 @@ declare module Processing {
     book: BookEntity;
   }
 
- 
   export interface AddDocumentResponse {
     document: DocumentEntity;
   }
@@ -73,9 +72,21 @@ declare module Processing {
     options?: ElementOptions;
   }
 
-  export interface AddDocumentAction extends Action {
+  export interface AddDocumentAction<D extends object = object> extends Action {
     event: 'add-document';
     options?: DocumentOptions;
+    defaultData?: Partial<D>;
+  }
+
+  export interface RemoveDocument extends Action {
+    event: 'remove-document';
+    documentId: number;
+  }
+
+  export interface RemoveElement extends Action {
+    event: 'remove-element';
+    documentId: number;
+    elementId: number;
   }
 
   export interface ChangeComponentAction<T extends object = object>

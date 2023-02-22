@@ -66,8 +66,11 @@ export class Room {
   }
 
   /** Добавить документ в комнату */
-  async addDocument(options?: DocumentOptions): Promise<DocumentEntity> {
-    return await this.orderCreator.addDocument(this.book, options);
+  async addDocument(
+    options?: DocumentOptions,
+    defaultData?: Partial<DocumentEntity>,
+  ): Promise<DocumentEntity> {
+    return await this.orderCreator.addDocument(this.book, options, defaultData);
   }
 
   /** Добавить документ в комнату */
@@ -128,6 +131,12 @@ export class Room {
   async act(author: PersonEntity, action: Processing.Action): Promise<void> {
     let document: DocumentEntity | null = null;
     switch (action.event) {
+      // Удаление документа.
+      case 'remove-document':
+        const removeDocumentAction = <Processing.RemoveDocument>action;
+        document = this.getDocument(removeDocumentAction.documentId);
+        await this.orderCreator.removeDocument(this.book, document);
+        break;
       // Событие добавления элемента в документ
       case 'update-book':
         const updateBookAction = <Processing.UpdateBook<BookUpdateInput>>action;
@@ -162,9 +171,24 @@ export class Room {
           );
         }
         break;
-         case 'add-document':
+      // Создать элемент заказа
+      case 'remove-element':
+        const removeElementAction = <Processing.RemoveElement>action;
+        document = this.getDocument(removeElementAction.documentId);
+        if (document) {
+          await this.orderCreator.removeElement(
+            this.book,
+            document,
+            removeElementAction.elementId,
+          );
+        }
+        break;
+      case 'add-document':
         const addDocumentAction = <Processing.AddDocumentAction>action;
-        this.addDocument(addDocumentAction.options)
+        await this.addDocument(
+          addDocumentAction.options,
+          addDocumentAction.defaultData,
+        );
         break;
       // Изменение компонента сущности.
       case 'change-component':

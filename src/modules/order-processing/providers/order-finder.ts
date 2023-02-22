@@ -64,8 +64,6 @@ export class OrderFinder {
       }),
     ).pipe(
       tap((books) => {
-        this.logger.debug(JSON.stringify(books[0], null, 2));
-
         this.lastUpdateTime = Date.now();
         this.refreshForce = false;
         this.cache = books;
@@ -89,31 +87,52 @@ export class OrderFinder {
           .trim()
           .toLocaleLowerCase()
           .split(' ');
-          
+
         if (!params.length) return books;
+
+        console.time('FirstWay');
 
         const primary: BookEntity[] = books.filter((book) => {
           let check: boolean = false;
+
           for (const param of params) {
+            check = false;
             if (book.id === Number(param)) {
               check = true;
+              continue;
+            }
+            if (!check) {
               break;
             }
+          }
+
+          return check;
+        });
+
+        console.timeEnd('FirstWay');
+
+
+        console.time('SecondWay');
+        const second: BookEntity[] = books.filter((book) => {
+          let check: boolean = false;
+          const documents = book.documents || [];
+          for (const param of params) {
+            check = false;
+
+            if (String(book.id).includes(param)) {
+              check = true;
+              continue;
+            }
+
             if (
               (book.nameFromClient || '')
                 .toLocaleLowerCase()
                 .includes(param.toLocaleLowerCase())
             ) {
               check = true;
-              break;
+              continue;
             }
-          }
-          return check;
-        });
 
-        const second: BookEntity[] = books.filter((book) => {
-          let check: boolean = false;
-          for (const param of params) {
             if (book.client) {
               const client = book.client;
               if (
@@ -121,7 +140,7 @@ export class OrderFinder {
                 (client.firstName || '').toLocaleLowerCase().includes(param)
               ) {
                 check = true;
-                break;
+                continue;
               }
             }
             if (book.author) {
@@ -131,16 +150,81 @@ export class OrderFinder {
                 (author.firstName || '').toLocaleLowerCase().includes(param)
               ) {
                 check = true;
-                break;
+                continue;
               }
             }
+            if (book.note) {
+              if ((book.note || '').toLocaleLowerCase().includes(param)) {
+                check = true;
+                continue;
+              }
+            }
+
+            if (book.documentType) {
+              if (book.documentType.toLocaleLowerCase().includes(param)) {
+                check = true;
+                continue;
+              }
+            }
+
+            let checkDocs = false;
+            for (const doc of documents) {
+              checkDocs = false;
+              if (
+                doc.material?.name &&
+                doc.material.name.toLocaleLowerCase().includes(param)
+              ) {
+                checkDocs = true;
+                continue;
+              }
+
+              if (
+                doc.glossiness &&
+                doc.glossiness.toLocaleLowerCase().includes(param)
+              ) {
+                checkDocs = true;
+                continue;
+              }
+              if (
+                doc.profile?.sample &&
+                doc.profile.sample.name.toLocaleLowerCase().includes(param)
+              ) {
+                checkDocs = true;
+                continue;
+              }
+
+              if (
+                doc.color?.sample &&
+                doc.color.sample.name.toLocaleLowerCase().includes(param)
+              ) {
+                checkDocs = true;
+                continue;
+              }
+
+              if (
+                doc.patina?.sample &&
+                doc.patina.sample.name.toLocaleLowerCase().includes(param)
+              ) {
+                checkDocs = true;
+                continue;
+              }
+              break;
+            }
+
+            check = checkDocs;
+            if (!check) {
+              break;
+            }
           }
+
           if (check) {
             const exists = primary.find((b) => b.id === book.id);
             if (exists) check = false;
           }
           return check;
         });
+
+        console.timeEnd('SecondWay');
 
         return [...primary, ...second].slice(0, 26);
       }),

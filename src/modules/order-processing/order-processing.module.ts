@@ -9,9 +9,19 @@ import { ProcessingGateway } from './gateway/processing.gateway';
 import { ProcessingController } from './controllers/processing.controller';
 import { AuthModule } from '../auth/auth.module';
 import { OrderFinder } from './providers/order-finder';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { HistoryEntity } from './entities/history.entity';
+import { HistoryService } from './services/history.service';
+import { NomenclatureProvider } from './providers/nomenclature-provider';
+import { StatisticsModule } from '../statistics/statistics.module';
 
 @Module({
-  imports: [RepositoryModule, AuthModule],
+  imports: [
+    RepositoryModule,
+    AuthModule,
+    TypeOrmModule.forFeature([HistoryEntity]),
+    StatisticsModule,
+  ],
   providers: [
     TestEngine,
     ComponentMapper,
@@ -20,8 +30,10 @@ import { OrderFinder } from './providers/order-finder';
     GraphProvider,
     ProcessingGateway,
     OrderFinder,
+    HistoryService,
+    NomenclatureProvider,
   ],
-  exports: [OrderCreator],
+  exports: [OrderCreator, HistoryService],
   controllers: [ProcessingController],
 })
 export class OrderProcessingModule {}

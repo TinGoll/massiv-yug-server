@@ -1,5 +1,10 @@
-
-import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
 const componentKeys = [
   'component_geometry',
@@ -8,7 +13,6 @@ const componentKeys = [
   'component_profile',
 ] as const;
 export type ComponentKey = typeof componentKeys[number];
-
 
 export interface ComponentDefaultData {
   /** Название компонента */
@@ -37,6 +41,9 @@ export class SampleElementEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
+  @Column({ type: 'int', default: 0 })
+  index: number;
+
   /** Дата создания */
   @CreateDateColumn()
   createdAt: Date;
@@ -49,11 +56,10 @@ export class SampleElementEntity {
   @Column({ type: 'varchar', length: 256 })
   name: string;
 
-
   @Column({ type: 'jsonb', default: [] })
   /**
    * Поле, содержит только названия компонентов.
-   * Наличие ключа компонента в этом поле, говорит о том, что 
+   * Наличие ключа компонента в этом поле, говорит о том, что
    * компонент присутвует в данном элементе,
    * однако, может быть "выключен" с помощью переопределения.
    */
@@ -61,7 +67,7 @@ export class SampleElementEntity {
 
   @Column({ type: 'jsonb', default: [] })
   /**
-   * Поле состоит из массива ключей компонента и данных компонента по умолчанию. 
+   * Поле состоит из массива ключей компонента и данных компонента по умолчанию.
    * Пустой объект в данном случае, обозначает, что компонент не модифицируется
    * null - компонент выключен, для данного элемента
    */

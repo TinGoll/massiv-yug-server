@@ -8,21 +8,9 @@ import {
   WebSocketServer,
   WsResponse,
 } from '@nestjs/websockets';
-import {
-  map,
-  max,
-  Observable,
-  of,
-  tap,
-  catchError,
-  switchMap,
-  iif,
-} from 'rxjs';
+import { map, Observable, of, tap, switchMap, iif } from 'rxjs';
 import { Namespace, Socket } from 'socket.io';
-import {
-  AllowNullUserGuard,
-  JwtAuthGuard,
-} from 'src/modules/auth/guards/jwt-auth.guard';
+import { JwtAuthGuard } from 'src/modules/auth/guards/jwt-auth.guard';
 import { AuthService } from 'src/modules/auth/services/auth.service';
 import { PersonEntity } from 'src/modules/person/entities/person.entity';
 
@@ -99,6 +87,7 @@ export class ProcessingGateway
     }
     return this.roomManager
       .openOrder(
+        client.data.user,
         action.payload,
         // Подписка на получения состояния комнаты
         // РЕАЛИЗОВАТЬ ОТПИСКУ ПРИ ВЫХОДЕ ИЗ КОМНАТЫ
