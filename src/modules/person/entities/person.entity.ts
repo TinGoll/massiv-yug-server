@@ -6,6 +6,7 @@ import {
   UpdateDateColumn,
   OneToOne,
   OneToMany,
+  JoinColumn,
 } from 'typeorm';
 import { PersonRole } from '../enums/person-role.enum';
 import { UserRole } from '../enums/user-role.enum';
@@ -71,7 +72,7 @@ export class PersonEntity {
   @Column({ select: false })
   password?: string;
 
-  @Column({nullable:  true})
+  @Column({ nullable: true })
   gender: 'Male' | 'Female';
 
   // Статус пользователя,
@@ -81,6 +82,9 @@ export class PersonEntity {
     default: 'active',
   })
   status: UserStatus;
+
+  @Column({ type: 'jsonb', default: {}, nullable: true })
+  settings: object;
 
   // Подключаемые таблицы
   @OneToMany(() => PersonAddress, (bankAccount) => bankAccount.person, {
