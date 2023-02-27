@@ -1,4 +1,8 @@
-import { BookDocumentType, BookResultData, WorkData } from 'src/core/@types/app.types';
+import {
+  BookDocumentType,
+  BookResultData,
+  WorkData,
+} from 'src/core/@types/app.types';
 import { OrderGraph } from 'src/core/common/graph/order-graph';
 import {
   Entity,
@@ -16,6 +20,7 @@ import { BookStatusEntity } from './book.status.entity';
 import { DocumentEntity } from './document.entity';
 import { PersonEntity } from 'src/modules/person/entities/person.entity';
 import { HistoryEntity } from 'src/modules/order-processing/entities/history.entity';
+import { BookState } from './book.state';
 
 export const BOOK_BARCODE_PREFIX: number = 22;
 
@@ -67,6 +72,14 @@ export class BookEntity {
   /** В заказ копируется все работы. */
   works: SampleWorkEntity[];
 
+  @Column({
+    type: 'enum',
+    enum: BookState,
+    default: BookState.EDITING,
+    nullable: true,
+  })
+  state: BookState;
+
   @ManyToOne(() => PersonEntity, { eager: true, onDelete: 'SET NULL' })
   @JoinColumn({ name: 'clientId' })
   client: PersonEntity;
@@ -85,6 +98,6 @@ export class BookEntity {
   })
   documents: DocumentEntity[];
 
-  @OneToMany((type) => HistoryEntity, (history) => history.book, {lazy: true})
+  @OneToMany((type) => HistoryEntity, (history) => history.book, { lazy: true })
   history: HistoryEntity[] | Promise<HistoryEntity[]>;
 }

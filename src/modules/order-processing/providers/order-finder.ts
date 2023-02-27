@@ -54,6 +54,7 @@ export class OrderFinder {
           author: true,
           client: true,
           status: true,
+          state: true,
         },
         select: {
           id: true,

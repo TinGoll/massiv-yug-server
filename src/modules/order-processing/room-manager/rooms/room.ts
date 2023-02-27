@@ -198,7 +198,6 @@ export class Room {
         console.log(changeComponentAction);
 
         for (const cmpData of changeComponentAction.data) {
-
           await this.changeComponent(
             changeComponentAction.elementId,
             cmpData.componentKey,
@@ -326,8 +325,37 @@ export class Room {
       .find((e) => e.id === options.id);
     // Если сущность не найдена, завершаем с ошибкой.
     if (entity) {
+      entity.needToSave = false; // Нужно ли сохранить в базу данных
+      // Если изменили комментарий.
       if (options.note) {
-        entity.elementEntity.note = options.note;
+        if (
+          String(entity.elementEntity.note).toLowerCase() !==
+          String(options.note).toLowerCase()
+        ) {
+          entity.needToSave = true; // Нужно ли сохранить в базу данных
+          entity.elementEntity.note = options.note;
+        }
+      }
+      // если изменили номенклатуру.
+      if (options.name) {
+        if (
+          String(entity.elementEntity.name).toLowerCase() !==
+          String(options.name).toLowerCase()
+        ) {
+          entity.needToSave = true; // Нужно ли сохранить в базу данных
+          // Получаем стартовый набор для элемента.
+          const [sample, identifierElement, elementComponents = []] =
+            (await this.orderCreator.createElementStarter(
+              options.name,
+              entity.elementEntity.components,
+            )) || [null, null, null];
+          if (sample && identifierElement) {
+            entity.elementEntity.identifier = identifierElement;
+            entity.elementEntity.sample = sample;
+            entity.elementEntity.name = identifierElement.identifier;
+            entity.elementEntity.components = elementComponents;
+          }
+        }
       }
     }
   }

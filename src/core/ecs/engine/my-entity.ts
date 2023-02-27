@@ -6,6 +6,7 @@ import { DocumentEntity } from 'src/modules/repository/order/entities/document.e
 
 /** Рассширенный клас Entity движка */
 export class MYEntity extends Entity {
+  public needToSave?: boolean = false;
   constructor(
     readonly elementEntity: ElementEntity,
     readonly documentEntity: DocumentEntity,

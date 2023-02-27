@@ -46,6 +46,7 @@ import { VarnishService } from 'src/modules/repository/varnish/varnish.service';
 import { SampleWorkEntity } from 'src/modules/repository/work/entities/sample.work.entity';
 import { WorkService } from 'src/modules/repository/work/work.service';
 import { ComponentMapper } from './component-mapper';
+import { BookState } from 'src/modules/repository/order/entities/book.state';
 
 @Injectable()
 export class OrderCreator {
@@ -69,6 +70,54 @@ export class OrderCreator {
    */
   async openBook(bookId: number | string): Promise<BookEntity> {
     return await this.orderService.findBookToId(Number(bookId));
+  }
+
+  /**
+   * Переключение состояния книги заказа.
+   * @param book Книга заказа
+   * @returns истина в случае успеха, ложь в случае неудачи.
+   */
+  async nextBookState(book: BookEntity): Promise<boolean> {
+    const state = book.state;
+    try {
+      if (state === BookState.EDITING) {
+        book.state = BookState.CALCULATION_OF_BLANKS;
+      }
+      if (state === BookState.CALCULATION_OF_BLANKS) {
+        book.state = BookState.PLANNING;
+      }
+      if (state === BookState.PLANNING) {
+        book.state = BookState.IN_WORK;
+      }
+      if (state === BookState.IN_WORK || state === null) {
+        book.state = BookState.COMPLETE;
+      }
+      if (book.state !== state) {
+        await this.orderService.saveBook(book);
+      }
+      return true;
+    } catch (error) {
+      book.state = state;
+      return false;
+    }
+  }
+
+  /**
+   * Установка состояния книги.
+   * @param book Книга заказа
+   * @param state новое состояние.
+   * @returns истина в случае успеха, ложь в случае неудачи.
+   */
+  async setBookState(book: BookEntity, state: BookState): Promise<boolean> {
+    const previusState = book.state;
+    try {
+      book.state = state;
+      await this.orderService.saveBook(book);
+      return true;
+    } catch (error) {
+      book.state = previusState;
+      return false;
+    }
   }
 
   async addBook(
@@ -216,7 +265,7 @@ export class OrderCreator {
     elementId: number,
   ): Promise<void> {
     const result = await this.orderService.removeElement(elementId);
-    
+
     console.log('Delete Result', result);
 
     document.elements = (document.elements || []).filter(
@@ -224,21 +273,19 @@ export class OrderCreator {
     );
   }
 
-  /** Добавление элемента в документ книги. */
-  async addElement(
-    document: DocumentEntity,
+  /** Получение стартовых данных, для создания элемента */
+  async createElementStarter(
     identifier: string,
-    options: ElementOptions = {},
-  ): Promise<ElementEntity> {
+    optionComponents: ComponentData<object>[] = [],
+  ): Promise<
+    [SampleElementEntity, ElementSampleBody, ComponentData<object>[]]
+  > {
     // Получаем кортеж из элемента и псефдоэлемента, по идентификатору
     const elementTuple = await this.getElementToIdentifier(identifier);
     // Если нет такого идентификатора возвращаем null;
     if (!elementTuple) return null;
     // С помощью деструктуризации, получаем елемент и псевдоэлемент.
     const [sample, identifierElement] = elementTuple;
-    // Получаем передаваемые компоненты из опций. Это едиственный метод изменения компонентов, при добавлении элемента
-    // Переданные данные не заменяют компонент, а изменяют данные.
-    const { components: optionComponents = [], ...opt } = options;
 
     // Создаем стартовый набор для компонентов.
     const elementComponents: ComponentData[] = sample.components.map(
@@ -304,6 +351,32 @@ export class OrderCreator {
         return cmpItem;
       },
     );
+
+    return [sample, identifierElement, elementComponents];
+  }
+
+  /** Добавление элемента в документ книги. */
+  async addElement(
+    document: DocumentEntity,
+    identifier: string,
+    options: ElementOptions = {},
+  ): Promise<ElementEntity> {
+    // Получаем передаваемые компоненты из опций. Это едиственный метод изменения компонентов, при добавлении элемента
+    // Переданные данные не заменяют компонент, а изменяют данные.
+    const { components: optionComponents = [], ...opt } = options;
+    // Получаем необходимые объекты, для создания компонента.
+    const elementTuple = await this.createElementStarter(
+      identifier, // Наззвание
+      optionComponents, // Стартовые данные компонентов.
+    );
+    // Если данных нет, выходим и возвращаем null;
+    if (!elementTuple) {
+      return null;
+    }
+    // Если данные существуют, деструктуризируем кортеж.
+    // Первый элемент, шаблон элемента
+    const [sample, identifierElement, elementComponents] = elementTuple;
+    // Создаем сущность элемента и присваиваем полученые знчения.
     const element = this.orderService.newElement({
       name: identifierElement.identifier,
       components: elementComponents,
@@ -311,9 +384,11 @@ export class OrderCreator {
     });
     element.identifier = identifierElement;
     element.sample = sample;
-
+    // Сохраняем сущность в БД.
     await this.orderService.saveElement(element);
+    // Добавляем новую сущность в документ.
     document.elements = [...(document.elements || []), element];
+    // Сохраняем документ.
     await this.orderService.saveDocument(document);
 
     return element;
