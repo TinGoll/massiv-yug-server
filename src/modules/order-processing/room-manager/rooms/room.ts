@@ -36,6 +36,7 @@ import {
   UnsubscribeFunction,
 } from '../interfaces';
 import { RoomManager } from '../room-manager';
+import { ElementUpdateInput } from 'src/modules/repository/order/inputs/element.input';
 
 interface MultipleEvent {
   [key: string | symbol]: Array<(...args: any[]) => void>;
@@ -193,11 +194,22 @@ export class Room {
       // Изменение компонента сущности.
       case 'change-component':
         const changeComponentAction = <Processing.ChangeComponentAction>action;
-        await this.changeComponent(
-          changeComponentAction.elementId,
-          changeComponentAction.componentKey,
-          changeComponentAction.data,
-        );
+
+        console.log(changeComponentAction);
+
+        for (const cmpData of changeComponentAction.data) {
+
+          await this.changeComponent(
+            changeComponentAction.elementId,
+            cmpData.componentKey,
+            cmpData.componentData,
+          );
+        }
+
+        if (changeComponentAction.options) {
+          await this.changeElement(changeComponentAction.options);
+        }
+
         break;
       // Присвоить цвет документа
       case 'assign-document-color':
@@ -302,6 +314,21 @@ export class Room {
         break;
       default:
         break;
+    }
+  }
+
+  /** Обновление елемента */
+  async changeElement(options: ElementUpdateInput) {
+    // Находим сущность по id
+    const entity = this.engine
+      .getEntities()
+      .toArray()
+      .find((e) => e.id === options.id);
+    // Если сущность не найдена, завершаем с ошибкой.
+    if (entity) {
+      if (options.note) {
+        entity.elementEntity.note = options.note;
+      }
     }
   }
 

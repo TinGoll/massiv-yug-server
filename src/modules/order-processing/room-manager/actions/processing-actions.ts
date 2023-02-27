@@ -5,6 +5,7 @@ import { BookEntity } from 'src/modules/repository/order/entities/book.entity';
 import { DocumentEntity } from 'src/modules/repository/order/entities/document.entity';
 import { ComponentKey } from 'src/modules/repository/order/entities/element.entity';
 import { BookCreateInput } from 'src/modules/repository/order/inputs/book.input';
+import { ElementUpdateInput } from 'src/modules/repository/order/inputs/element.input';
 import { SamplePanelEntity } from 'src/modules/repository/panel/entities/sample.panel.entity';
 import { SamplePatinaEntity } from 'src/modules/repository/patina/entities/sample.patina.entity';
 import { SampleProfileEntity } from 'src/modules/repository/profile/entities/sample.profile.entity';
@@ -89,12 +90,14 @@ declare module Processing {
     elementId: number;
   }
 
-  export interface ChangeComponentAction<T extends object = object>
-    extends Action {
+  export interface ChangeComponentAction extends Action {
     event: 'change-component';
     elementId: number;
-    componentKey: ComponentKey;
-    data: Partial<T>;
+    options?: ElementUpdateInput;
+    data: Array<{
+      componentKey: ComponentKey;
+      componentData: object;
+    }>;
   }
 
   // События для изменения шапки здокумента

@@ -25,6 +25,9 @@ export class ElementEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
+  @Column({ type: 'varchar', length: 256, nullable: true })
+  note: string;
+
   @Column({ type: 'varchar', length: 256 })
   name: string;
 
