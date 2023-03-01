@@ -311,6 +311,16 @@ export class Room {
           );
         }
         break;
+      case 'next-book-state':
+        await this.orderCreator.nextBookState(this.book);
+        break;
+      case 'set-book-state':
+        const actionSetBookState = <Processing.SetBookState>action;
+        await this.orderCreator.setBookState(
+          this.book,
+          actionSetBookState.state,
+        );
+        break;
       default:
         break;
     }

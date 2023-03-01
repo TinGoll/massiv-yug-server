@@ -2,6 +2,7 @@ import { DocumentOptions, ElementOptions } from 'src/core/@types/app.types';
 import { SampleColorEntity } from 'src/modules/repository/color/entities/sample.color.entity';
 import { SampleMaterialEntity } from 'src/modules/repository/material/entities/sample.material.entity';
 import { BookEntity } from 'src/modules/repository/order/entities/book.entity';
+import { BookState } from 'src/modules/repository/order/entities/book.state';
 import { DocumentEntity } from 'src/modules/repository/order/entities/document.entity';
 import { ComponentKey } from 'src/modules/repository/order/entities/element.entity';
 import { BookCreateInput } from 'src/modules/repository/order/inputs/book.input';
@@ -29,6 +30,8 @@ const events = [
   'assign-document-panel',
   'assign-document-note',
   'assign-document-panel-material',
+  'next-book-state',
+  'set-book-state',
 ] as const;
 
 export type RoomKeyType = number | string;
@@ -149,6 +152,7 @@ declare module Processing {
     assignedName: string | null;
     options?: T;
   }
+
   export interface AssignBookClient<T> extends Action {
     event: 'assign-book-client';
     client: T;
@@ -158,10 +162,20 @@ declare module Processing {
     event: 'update-book';
     input: T;
   }
+
   export interface UpdateDocument<T> extends Action {
     event: 'update-document';
     documentId: number;
     input: T;
+  }
+
+  export interface NextBookState extends Action {
+    event: 'next-book-state';
+  }
+
+  export interface SetBookState extends Action {
+    event: 'set-book-state';
+    state: BookState;
   }
 }
 
