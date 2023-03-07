@@ -4,6 +4,7 @@ import { GeometryComponent } from '../components/geometry.component';
 import { ProfileComponent } from '../components/profile.component';
 import { MYEngine } from '../engine/my-engine';
 import { MYEntity } from '../engine/my-entity';
+import { BookState } from 'src/modules/repository/order/entities/book.state';
 
 /**
  * Система для расчета профиля.
@@ -16,6 +17,16 @@ export class ProfileSystem extends IteratingSystem {
   /** Переопределяем движок, на расширенный */
   getMYEngine(): MYEngine {
     return super.getEngine<MYEngine>();
+  }
+
+  /** Код запускается перед обновлением, можно использовать для решения об отключении системы и. т. д. */
+  async beforeUpdate(): Promise<void> {
+    const book = this.getMYEngine().bookEntity;
+    if (book && book.state === BookState.EDITING) {
+      this.setProcessing(true);
+    } else {
+      this.setProcessing(false);
+    }
   }
 
   protected async processEntity(

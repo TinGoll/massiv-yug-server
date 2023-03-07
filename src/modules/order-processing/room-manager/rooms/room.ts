@@ -42,9 +42,14 @@ interface MultipleEvent {
   [key: string | symbol]: Array<(...args: any[]) => void>;
 }
 
+interface EngineUserData {
+  documentsToSave?: DocumentEntity[];
+  needToSave?: boolean;
+}
+
 export class Room {
   public readonly id: number | string;
-  private engine: MYEngine;
+  private engine: MYEngine<EngineUserData>;
   private orderCreator: OrderCreator;
   private multipleEvents: MultipleEvent = {};
 
@@ -54,7 +59,7 @@ export class Room {
     public readonly componentMapper: ComponentMapper,
   ) {
     this.id = book.id;
-    this.engine = new MYEngine(book, this);
+    this.engine = new MYEngine<EngineUserData>(book, this);
     this.orderCreator = roomManager.orderCreator;
   }
 
@@ -194,8 +199,6 @@ export class Room {
       // Изменение компонента сущности.
       case 'change-component':
         const changeComponentAction = <Processing.ChangeComponentAction>action;
-
-        console.log(changeComponentAction);
 
         for (const cmpData of changeComponentAction.data) {
           await this.changeComponent(
@@ -370,6 +373,35 @@ export class Room {
     }
   }
 
+  /**
+   * Сохранение заказа в базу данных.
+   * Сохраняется только книга, документы и элементы,
+   * которые помечены на сохранение
+   */
+  async save(): Promise<void> {
+    const bookNeedToSave = Boolean(this.engine.userData?.needToSave);
+    const documents = this.engine.userData?.documentsToSave || [];
+    const entities = this.engine.getEntities();
+    for (const entity of entities) {
+      if (entity.needToSave) {
+        entity.needToSave = false;
+        await this.orderCreator.updateElement(entity.elementEntity);
+      }
+    }
+
+    for (const document of documents) {
+      await this.orderCreator
+        .getDocumentRepository()
+        .update({ id: document.id }, document);
+    }
+
+    if (bookNeedToSave) {
+      await this.orderCreator
+        .getBookRepository()
+        .update({ id: this.book.id }, this.book);
+    }
+  }
+
   // *************************************************
   /**
    * Функция обновления комнаты.
@@ -383,6 +415,7 @@ export class Room {
     // Собираем обработанные данные.
     await this.buildState();
     // УБРАТЬ
+    console.log('ОТПРАВЛЯЕМ СОСТОЯНИЕ НА КЛИЕНТ');
     await this.state();
   }
 

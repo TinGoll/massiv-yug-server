@@ -8,6 +8,7 @@ import { Entity, Family, IteratingSystem } from 'yug-entity-component-system';
 import { GeometryComponent } from '../components/geometry.component';
 import { WorkComponent } from '../components/work.component';
 import { MYEngine } from '../engine/my-engine';
+import { BookState } from 'src/modules/repository/order/entities/book.state';
 
 /**
  * Система для просчета работ.
@@ -25,6 +26,16 @@ export class WorkSystem extends IteratingSystem {
   /** Переопределяем движок, на расширенный */
   getMYEngine(): MYEngine {
     return super.getEngine<MYEngine>();
+  }
+
+  /** Код запускается перед обновлением, можно использовать для решения об отключении системы и. т. д. */
+  async beforeUpdate(): Promise<void> {
+    const book = this.getMYEngine().bookEntity;
+    if (book && book.state === BookState.CALCULATION_OF_BLANKS) {
+      this.setProcessing(true);
+    } else {
+      this.setProcessing(false);
+    }
   }
 
   /** Получаем книгу заказа, комнату и Order Creator, один раз, при создании комнаты. */
@@ -78,8 +89,6 @@ export class WorkSystem extends IteratingSystem {
       wd.data.cost = Number((wd.data.value * (price || 0)).toFixed(toFixed));
     }
   }
-
- 
 
   /** Получить работу из книги */
   async getWork(id: number): Promise<SampleWorkEntity | null> {

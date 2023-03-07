@@ -5,7 +5,8 @@ import { MYEntity } from './my-entity';
 
 /** Расширение движка */
 export class MYEngine<T extends object = Record<symbol, any>> extends Engine {
-  public UserData: T;
+  public userData: T;
+  
   constructor(readonly bookEntity: BookEntity, readonly room: Room) {
     super();
   }

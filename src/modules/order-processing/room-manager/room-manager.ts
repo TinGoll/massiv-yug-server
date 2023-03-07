@@ -178,16 +178,14 @@ export class RoomManager {
     const room = this.get(roomId);
 
     if (!room) {
-      console.log('Комната закрыта или не существует.');
       throw new WsException('Комната закрыта или не существует.');
     }
     return from(room.act(author, act)).pipe(
-      mergeMap((data) => {
-        return from(room.update(0));
+      concatMap((data) => {
+        // После обнолвения комнаты и отправки состояния на клиенты, сохраняем книгу заказа
+        return from(room.update(0)).pipe(concatMap(() => from(room.save())));
       }),
     );
-
-    // Обновление по событию.
   }
 
   /**
@@ -206,7 +204,9 @@ export class RoomManager {
   /**
    * Метод вызывается, после того как отработал метод update
    */
-  postUpdate(): void {}
+  postUpdate(): void {
+    console.log('postUpdate');
+  }
 
   /** Запуск генератора тактов. */
   start(): void {

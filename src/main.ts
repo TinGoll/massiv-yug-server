@@ -1,6 +1,8 @@
 import { NestFactory } from '@nestjs/core';
 import { ConfigService } from '@nestjs/config';
 import { AppModule } from './app.module';
+import * as cluster from 'cluster';
+import * as os from 'os';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -30,4 +32,5 @@ async function bootstrap() {
     console.log('\x1b[33m%s\x1b[0m', `Server started on port ${port}`);
   });
 }
+
 bootstrap();

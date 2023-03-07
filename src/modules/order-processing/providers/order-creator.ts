@@ -170,6 +170,14 @@ export class OrderCreator {
     return book;
   }
 
+  /** Обновление элемента в базе даных. */
+  async updateElement(element: ElementEntity): Promise<ElementEntity> {
+    await this.orderService
+      .getDocumentElementRepository()
+      .update({ id: element.id }, element);
+    return element;
+  }
+
   async removeDocument(
     book: BookEntity,
     document: DocumentEntity,
@@ -568,5 +576,15 @@ export class OrderCreator {
 
   async getWorks(): Promise<SampleWorkEntity[]> {
     return await this.workService.findAll();
+  }
+
+  /**  */
+  getDocumentRepository() {
+    return this.orderService.getDocumentRepository();
+  }
+
+  /**  */
+  getBookRepository() {
+    return this.orderService.getBookRepository();
   }
 }
