@@ -1,7 +1,10 @@
 /******************************************************* */
 // Цвет.
 
-import { ComponentData } from 'src/modules/repository/order/entities/document.element.entity';
+import {
+  ComponentData,
+  ElementEntity,
+} from 'src/modules/repository/order/entities/document.element.entity';
 import { Geometry } from '../common/models/geometry';
 
 /** Тип цвета */
@@ -63,6 +66,8 @@ export type ArrayWorkData = WorkElementData[];
 export type WorkElementData = {
   workId: number;
   data?: WorkData;
+  geometry?: Geometry;
+  name?: string;
 };
 
 export interface WorkComponentData {
@@ -81,12 +86,14 @@ export interface Panel {
   shirt: Shirt | null;
   geometry: Geometry;
   workData: ArrayWorkData;
+  name: string;
 }
 
 /** Поле рубашка, поля филёнка, в компоненте филёнка. */
 export interface Shirt {
   geometry: Geometry;
   workData: ArrayWorkData;
+  name: string;
 }
 /** Данные компонента профиль */
 export interface ProfileData {

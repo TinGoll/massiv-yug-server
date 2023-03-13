@@ -7,20 +7,22 @@ import { Room } from 'src/modules/order-processing/room-manager/rooms/room';
 import { BookEntity } from 'src/modules/repository/order/entities/book.entity';
 import {
   BaseSystem,
-  Entity,
   Family,
   ImmutableArray,
 } from 'yug-entity-component-system';
 import { PanelComponent } from '../components/panel.component';
 import { WorkComponent } from '../components/work.component';
 import { MYEngine } from '../engine/my-engine';
+import { BookState } from 'src/modules/repository/order/entities/book.state';
+import { GeometryComponent } from '../components/geometry.component';
+import { MYEntity } from '../engine/my-entity';
 
 interface EntityWorks {
-  entity: Entity;
+  entity: MYEntity;
   queue: QueueCollection<WorkElementData>;
 }
 /**
- * Система для создания шрафа заказа.
+ * Система для создания графа заказа.
  */
 export class OrderGraphSystem extends BaseSystem {
   private book: BookEntity;
@@ -37,6 +39,16 @@ export class OrderGraphSystem extends BaseSystem {
     return this.getEngine<MYEngine>();
   }
 
+  /** Код запускается перед обновлением, можно использовать для решения об отключении системы и. т. д. */
+  async beforeUpdate(): Promise<void> {
+    const book = this.getMYEngine().bookEntity;
+    if (book && book.state === BookState.CALCULATION_OF_BLANKS) {
+      this.setProcessing(true);
+    } else {
+      this.setProcessing(false);
+    }
+  }
+
   async startProcessing(): Promise<void> {
     this.book = this.getMYEngine().bookEntity;
     this.room = this.getMYEngine().room;
@@ -46,10 +58,13 @@ export class OrderGraphSystem extends BaseSystem {
   }
 
   protected async processEntities(
-    entities: ImmutableArray<Entity>,
+    entities: ImmutableArray<MYEntity>,
     deltaTime: number,
   ): Promise<void> {
     const entityWorks: EntityWorks[] = [];
+
+    console.log("РАСЧЕТ ГАРАФА");
+    
 
     for (const entity of entities) {
       entityWorks.push({
@@ -58,23 +73,48 @@ export class OrderGraphSystem extends BaseSystem {
       });
     }
 
+    console.log('РАСЧЕТ ГАРАФА набрали коллекцию');
+
     for (const ew of entityWorks) {
+      console.log(ew.entity.elementEntity.name);
+      
+      // Получаем компонент геометрии.
+      const geoCmp =
+        ew.entity.getComponent<GeometryComponent>(GeometryComponent);
       // Получаем компонент работ
       const workCmp = ew.entity.getComponent<WorkComponent>(WorkComponent);
       // Получаем компонент филёнок.
       const panelCmp = ew.entity.getComponent<PanelComponent>(PanelComponent);
       // Получаем работы элементов
-      const entWorkData = workCmp?.data?.workData || [];
+
+      const entWorkData = (workCmp?.data?.workData || []).map((wd) => ({
+        ...wd,
+        geometry: geoCmp.data,
+        name: ew.entity.elementEntity.name,
+      }));
+      // Получаем гемметрию сущности.
+
       // Получаем работы филёнок
       const panelsWorkData =
         panelCmp?.data?.panels?.reduce<ArrayWorkData>((acc, item) => {
-          acc.push(...(item?.workData || []));
+          const workData = (item?.workData || []).map((wd) => ({
+            ...wd,
+            geometry: item.geometry,
+            name: item.type,
+          }));
+          acc.push(...workData);
           return acc;
         }, []) || [];
+
       // получаем работы рубашек.
       const shirtWorkData =
         panelCmp?.data?.panels?.reduce<ArrayWorkData>((acc, item) => {
-          acc.push(...(item?.shirt?.workData || []));
+          const workData = (item?.workData || []).map((wd) => ({
+            ...wd,
+            geometry: item.shirt.geometry,
+            name: 'Рубашка',
+          }));
+          acc.push(...workData);
           return acc;
         }, []) || [];
 
@@ -85,16 +125,53 @@ export class OrderGraphSystem extends BaseSystem {
       entWorkData.forEach((w) => ew.queue.append(w));
     }
 
+    console.log('РАСЧЕТ ГАРАФА сделали очередь');
+
+    // Создаем граф заказа.
     this.book.graph = this.graphProvider.createOrderGraph();
 
-    this.book.graph.queue((node) => {
-      // console.log(JSON.stringify(node, null, 2));
-      
-    })
+    const queue = this.book.graph.queue((node) => {
+      const blank = {
+        name: node.options.name,
+        data: [],
+      };
+      for (const workElementData of node.options.workData) {
+        const sample = this.getWork(workElementData.workId);
+        const blankData = {
+          sample,
+          blankList: [],
+        };
+        console.log('------------ ' + node.id + ' -------------');
+        for (const ew of entityWorks) {
+          if (node.options.takeOne) {
+            const qws = ew.queue.findAndTake((v) => v.workId === sample.id);
+            if (qws) {
+              blankData.blankList.push(qws);
+            }
+          } else {
+            let next_qws = true;
+            while (next_qws) {
+              next_qws = false;
+              const qws = ew.queue.findAndTake((v) => v.workId === sample.id);
+              if (qws) {
+                blankData.blankList.push(qws);
+                next_qws = true;
+              }
+            }
+          }
+        }
+        blank.data.push(blankData);
+      }
+      return blank;
+    });
+    console.log(JSON.stringify(queue, null, 2));
   }
-
   comparator(A: WorkElementData, B: WorkElementData) {
     if (Number(A.workId) === Number(B.workId)) return 0;
     return 1;
+  }
+
+  getWork(workId: number) {
+    return this.book.works.find((w) => w.id === workId) || null;
   }
 }

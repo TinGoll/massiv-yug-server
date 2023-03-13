@@ -101,7 +101,6 @@ export class GraphProvider {
     graph.addEdge(vertex9, vertex10);
     // Вайма => Пятый
     graph.addEdge(vertex10, vertex11);
-
     // Пятый => Шлифовка
     graph.addEdge(vertex11, vertex12);
 

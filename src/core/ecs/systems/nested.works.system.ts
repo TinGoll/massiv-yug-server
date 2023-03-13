@@ -8,6 +8,7 @@ import { SampleWorkEntity } from 'src/modules/repository/work/entities/sample.wo
 import { Entity, Family, IteratingSystem } from 'yug-entity-component-system';
 import { PanelComponent } from '../components/panel.component';
 import { MYEngine } from '../engine/my-engine';
+import { BookState } from 'src/modules/repository/order/entities/book.state';
 
 /***
  * Система для расчета работ филёнок и рубашек.
@@ -27,6 +28,18 @@ export class NestedWorkSystem extends IteratingSystem {
     return super.getEngine<MYEngine>();
   }
 
+  /** Код запускается перед обновлением, можно использовать для решения об отключении системы и. т. д. */
+  async beforeUpdate(): Promise<void> {
+    console.log('beforeUpdate NestedWorkSystem');
+
+    const book = this.getMYEngine().bookEntity;
+    if (book && book.state === BookState.CALCULATION_OF_BLANKS) {
+      this.setProcessing(true);
+    } else {
+      this.setProcessing(false);
+    }
+  }
+
   /** Получаем книгу заказа, комнату и Order Creator, один раз, при создании комнаты. */
   addedToEngine(engine: MYEngine): void {
     super.addedToEngine(engine);
@@ -39,63 +52,65 @@ export class NestedWorkSystem extends IteratingSystem {
     entity: Entity,
     deltaTime: number,
   ): Promise<void> {
-    const toFixed = 4; // Точность
+    try {
+      const toFixed = 4; // Точность
+      const panelCmp = entity.getComponent<PanelComponent>(PanelComponent);
 
-    const panelCmp = entity.getComponent<PanelComponent>(PanelComponent);
+      for (const panel of panelCmp?.data?.panels || []) {
+        const panelWorkData = panel.workData || [];
+        const shirtWorkData = panel.shirt?.workData || [];
+        const panelGeometry = panel.geometry;
+        const shirtGeometry = panel.shirt?.geometry;
 
-    for (const panel of panelCmp.data.panels || []) {
-      const panelWorkData = panel.workData || [];
-      const shirtWorkData = panel.shirt?.workData || [];
-      const panelGeometry = panel.geometry;
-      const shirtGeometry = panel.shirt?.geometry;
-
-      for (const pwd of panelWorkData) {
-        const work = await this.getWork(pwd.workId);
-        if (!work) {
-          pwd.data = null;
-          continue;
-        }
-        if (!pwd.data) {
-          pwd.data = {
-            value: 0,
-            cost: 0,
-          };
-        }
-        const price = pwd.data.price || work.price;
-        const unit = pwd.data.unit || work.unit;
-        pwd.data.value = Number(
-          Common.getWeight(unit, panelGeometry).toFixed(toFixed),
-        );
-        pwd.data.cost = Number(
-          (pwd.data.value * (price || 0)).toFixed(toFixed),
-        );
-      }
-
-      if (panel.shirt) {
-        for (const swd of shirtWorkData) {
-          const work = await this.getWork(swd.workId);
+        for (const pwd of panelWorkData) {
+          const work = await this.getWork(pwd.workId);
           if (!work) {
-            swd.data = null;
+            pwd.data = null;
             continue;
           }
-          if (!swd.data) {
-            swd.data = {
+          if (!pwd.data) {
+            pwd.data = {
               value: 0,
               cost: 0,
             };
           }
-          const price = swd.data.price || work.price;
-          const unit = swd.data.unit || work.unit;
-          swd.data.value = Number(
-            Common.getWeight(unit, shirtGeometry).toFixed(toFixed),
+          const price = pwd.data.price || work.price;
+          const unit = pwd.data.unit || work.unit;
+          pwd.data.value = Number(
+            Common.getWeight(unit, panelGeometry).toFixed(toFixed),
           );
-          swd.data.cost = Number(
-            (swd.data.value * (price || 0)).toFixed(toFixed),
+          pwd.data.cost = Number(
+            (pwd.data.value * (price || 0)).toFixed(toFixed),
           );
         }
+
+        if (panel.shirt) {
+          for (const swd of shirtWorkData) {
+            const work = await this.getWork(swd.workId);
+            if (!work) {
+              swd.data = null;
+              continue;
+            }
+            if (!swd.data) {
+              swd.data = {
+                value: 0,
+                cost: 0,
+              };
+            }
+            const price = swd.data.price || work.price;
+            const unit = swd.data.unit || work.unit;
+            swd.data.value = Number(
+              Common.getWeight(unit, shirtGeometry).toFixed(toFixed),
+            );
+            swd.data.cost = Number(
+              (swd.data.value * (price || 0)).toFixed(toFixed),
+            );
+          }
+        }
       }
+    } catch (error) {
+      console.log('NestedWorkSystem:', error);
     }
-    // console.log(panelCmp.data.panels);
   }
 
   // Приходится дублировать функцию, так как нет возмодности внедрить зависимость.

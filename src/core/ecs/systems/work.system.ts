@@ -54,39 +54,43 @@ export class WorkSystem extends IteratingSystem {
     entity: Entity,
     deltaTime: number,
   ): Promise<void> {
-    const toFixed = 4;
-    const workCmp = entity.getComponent<WorkComponent>(WorkComponent);
-    const gmCmp = entity.getComponent<GeometryComponent>(GeometryComponent);
-    // Получаем массив данных.
+    try {
+      const toFixed = 4;
+      const workCmp = entity.getComponent<WorkComponent>(WorkComponent);
+      const gmCmp = entity.getComponent<GeometryComponent>(GeometryComponent);
+      // Получаем массив данных.
 
-    const workData = workCmp.data.workData || [];
+      const workData = workCmp.data.workData || [];
 
-    // Изменяем Данные.
-    for (const wd of workData) {
-      // Получаем шаблон работы.
-      const work = await this.getWork(wd.workId);
-      // Если шаблона работ нет, значит такая работа удалена или не существует
-      // Пропускаем.
-      if (!work) {
-        wd.data = null;
-        continue;
+      // Изменяем Данные.
+      for (const wd of workData) {
+        // Получаем шаблон работы.
+        const work = await this.getWork(wd.workId);
+        // Если шаблона работ нет, значит такая работа удалена или не существует
+        // Пропускаем.
+        if (!work) {
+          wd.data = null;
+          continue;
+        }
+        // Если данные о работе еще не инициализированы, инициализируем.
+        if (!wd.data) {
+          // Создаем объект работ.
+          const wrkData: WorkData = {
+            cost: 0,
+            value: 0,
+          };
+          wd.data = wrkData;
+        }
+
+        const unit = wd.data.unit || work.unit;
+        const price = wd.data.price || work.price;
+        wd.data.value = Number(
+          Common.getWeight(unit, gmCmp.data).toFixed(toFixed),
+        );
+        wd.data.cost = Number((wd.data.value * (price || 0)).toFixed(toFixed));
       }
-      // Если данные о работе еще не инициализированы, инициализируем.
-      if (!wd.data) {
-        // Создаем объект работ.
-        const wrkData: WorkData = {
-          cost: 0,
-          value: 0,
-        };
-        wd.data = wrkData;
-      }
-
-      const unit = wd.data.unit || work.unit;
-      const price = wd.data.price || work.price;
-      wd.data.value = Number(
-        Common.getWeight(unit, gmCmp.data).toFixed(toFixed),
-      );
-      wd.data.cost = Number((wd.data.value * (price || 0)).toFixed(toFixed));
+    } catch (error) {
+      console.log("WorkSystem:", error);
     }
   }
 

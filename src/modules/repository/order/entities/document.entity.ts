@@ -24,7 +24,6 @@ import { DocumentPatinaEntity } from './document.patina.entity';
 import { DocumentProfileEntity } from './document.profile.entity';
 import { DocumentVarnishEntity } from './document.varnish.entity';
 
-
 @Entity('order_documents')
 export class DocumentEntity {
   @PrimaryGeneratedColumn()

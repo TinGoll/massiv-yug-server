@@ -171,7 +171,9 @@ export class OrderCreator {
   }
 
   /** Обновление элемента в базе даных. */
-  async updateElement(element: ElementEntity): Promise<ElementEntity> {
+  async updateElement(
+    element: Partial<ElementEntity> & { id: number },
+  ): Promise<Partial<ElementEntity>> {
     await this.orderService
       .getDocumentElementRepository()
       .update({ id: element.id }, element);
@@ -196,7 +198,7 @@ export class OrderCreator {
     console.time('add-document');
     const document = await this.orderService.createDocument(options);
     book.documents = [...(book.documents || []), document];
-
+    await this.orderService.saveBook(book);
     await this.orderService.assignColor(
       document,
       defaultData?.color?.sample || null,
@@ -225,7 +227,6 @@ export class OrderCreator {
     );
 
     console.timeEnd('add-document');
-    await this.orderService.saveBook(book);
     return document;
   }
 

@@ -13,9 +13,7 @@ import { MYEngine } from 'src/core/ecs/engine/my-engine';
 import { MYEntity } from 'src/core/ecs/engine/my-entity';
 import { GeometrySystem } from 'src/core/ecs/systems/geometry.system';
 import { NestedWorkSystem } from 'src/core/ecs/systems/nested.works.system';
-import { OrderGraphSystem } from 'src/core/ecs/systems/order.graph.system';
 import { PanelSystem } from 'src/core/ecs/systems/panel.system';
-import { PresentationSystem } from 'src/core/ecs/systems/presentation.system';
 import { ProfileSystem } from 'src/core/ecs/systems/profile.system';
 import { ResultSystem } from 'src/core/ecs/systems/result.system';
 import { WorkSystem } from 'src/core/ecs/systems/work.system';
@@ -37,6 +35,7 @@ import {
 } from '../interfaces';
 import { RoomManager } from '../room-manager';
 import { ElementUpdateInput } from 'src/modules/repository/order/inputs/element.input';
+import { OrderBlankSystem } from 'src/core/ecs/systems/order.blank.system';
 
 interface MultipleEvent {
   [key: string | symbol]: Array<(...args: any[]) => void>;
@@ -113,7 +112,7 @@ export class Room {
     if (!entity) {
       throw new WsException('Сущность не найдена.');
     }
-
+    entity.needToSave = true;
     // Получаем компонент по ключу.
     const cmp = entity.getComponent<Component & IComponent<object>>(
       this.componentMapper.get(componentKey),
@@ -127,6 +126,11 @@ export class Room {
     // Изменяем данные компонента. путем развертывания.
     cmp.data = { ...cmp.data, ...data };
     // await this.orderCreator.changeComponent<T>(elementId, componentKey, data);
+
+    if (entity.needToSave) {
+      this.engine.userData.needToSave = true;
+      this.engine.userData.documentsToSave = [entity.documentEntity];
+    }
   }
 
   /**
@@ -136,6 +140,10 @@ export class Room {
    */
   async act(author: PersonEntity, action: Processing.Action): Promise<void> {
     let document: DocumentEntity | null = null;
+    if (!this.engine.userData) {
+      // Если объекта не существует, создаем пустой.
+      this.engine.userData = {};
+    }
     switch (action.event) {
       // Удаление документа.
       case 'remove-document':
@@ -265,13 +273,14 @@ export class Room {
           action
         );
         document = this.getDocument(actionDocumentMaterial.documentId);
+        // console.log("document", document);
+
         if (document) {
           await this.orderCreator.assignMaterial(
             document,
             actionDocumentMaterial.material,
           );
         }
-
         break;
       // Присвоить профиль документа
       case 'assign-document-profile':
@@ -316,6 +325,7 @@ export class Room {
         break;
       case 'next-book-state':
         await this.orderCreator.nextBookState(this.book);
+        this.engine.userData.documentsToSave = [...(this.book.documents || [])];
         break;
       case 'set-book-state':
         const actionSetBookState = <Processing.SetBookState>action;
@@ -323,6 +333,7 @@ export class Room {
           this.book,
           actionSetBookState.state,
         );
+        this.engine.userData.documentsToSave = [...(this.book.documents || [])];
         break;
       default:
         break;
@@ -338,7 +349,6 @@ export class Room {
       .find((e) => e.id === options.id);
     // Если сущность не найдена, завершаем с ошибкой.
     if (entity) {
-      entity.needToSave = false; // Нужно ли сохранить в базу данных
       // Если изменили комментарий.
       if (options.note) {
         if (
@@ -379,26 +389,49 @@ export class Room {
    * которые помечены на сохранение
    */
   async save(): Promise<void> {
+    if (!this.engine.userData) {
+      this.engine.userData = {};
+    }
+    const entities = this.engine.getEntities();
     const bookNeedToSave = Boolean(this.engine.userData?.needToSave);
     const documents = this.engine.userData?.documentsToSave || [];
-    const entities = this.engine.getEntities();
+    // Сбрасываем массив документов, помеченых на сохранение.
+    this.engine.userData.documentsToSave = [];
+    // Сбрасываем метку о необходимости сохранить книгу.
+    this.engine.userData.needToSave = false;
+
+    // Сохраняем елементы, которые помечены на сохранение.
     for (const entity of entities) {
       if (entity.needToSave) {
+        console.log('СОХРАНЕНИЕ СУЩНОСТИ', entity.id);
         entity.needToSave = false;
-        await this.orderCreator.updateElement(entity.elementEntity);
+        const { id, components, identifier, name, note } = entity.elementEntity;
+        await this.orderCreator.updateElement({
+          components,
+          identifier,
+          name,
+          note,
+          id,
+        });
       }
     }
 
+    // Сохраняем документы
     for (const document of documents) {
+      const { resultData, cost } = document;
+      console.log('СОХРАНЕНИЕ ДОКУМЕНТА', document.id);
       await this.orderCreator
         .getDocumentRepository()
-        .update({ id: document.id }, document);
+        .update({ id: document.id }, { resultData, cost });
     }
 
+    // Сохраняем книгу
     if (bookNeedToSave) {
+      console.log('СОХРАНЕНИЕ КНИГИ');
+      const { resultData, graph, works } = this.book;
       await this.orderCreator
         .getBookRepository()
-        .update({ id: this.book.id }, this.book);
+        .update({ id: this.book.id }, { resultData, graph, works });
     }
   }
 
@@ -450,10 +483,8 @@ export class Room {
     // расчет работ для вложенных элементов.
     this.engine.addSystem(new NestedWorkSystem());
     // Создание графа заказа
-    this.engine.addSystem(new OrderGraphSystem());
-    // Система представления и отправки состояния книги
-    this.engine.addSystem(new PresentationSystem());
-
+    this.engine.addSystem(new OrderBlankSystem());
+    
     // *************************************************
     // Сущности
 
@@ -543,6 +574,14 @@ export class Room {
   async dispose() {
     // Очистка всех событий
     this.multipleEvents = {};
+    this.engine.userData.needToSave = true;
+    this.engine.userData.documentsToSave = [...(this.book.documents || [])];
+    // for (const entity of this.engine.getEntities()) {
+    //   entity.needToSave = true;
+    // }
+    console.time('save');
+    await this.save();
+    console.timeEnd('save');
     console.log('Сохранение заказа и закрытие комнаты.');
   }
 }
