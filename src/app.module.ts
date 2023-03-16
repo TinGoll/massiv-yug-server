@@ -68,7 +68,7 @@ import { StatisticsModule } from './modules/statistics/statistics.module';
     PersonModule,
     AuthModule,
     FinancialModule,
-    TelegramModule,
+    // TelegramModule,
     StatisticsModule,
   ],
   controllers: [],
