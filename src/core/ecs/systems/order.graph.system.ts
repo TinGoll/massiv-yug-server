@@ -16,6 +16,7 @@ import { MYEngine } from '../engine/my-engine';
 import { BookState } from 'src/modules/repository/order/entities/book.state';
 import { GeometryComponent } from '../components/geometry.component';
 import { MYEntity } from '../engine/my-entity';
+import { OrderGraph } from 'src/core/common/graph/order-graph';
 
 interface EntityWorks {
   entity: MYEntity;
@@ -61,117 +62,13 @@ export class OrderGraphSystem extends BaseSystem {
     entities: ImmutableArray<MYEntity>,
     deltaTime: number,
   ): Promise<void> {
-    const entityWorks: EntityWorks[] = [];
-
-    console.log("РАСЧЕТ ГАРАФА");
-    
-
-    for (const entity of entities) {
-      entityWorks.push({
-        entity,
-        queue: new QueueCollection(this.comparator),
-      });
-    }
-
-    console.log('РАСЧЕТ ГАРАФА набрали коллекцию');
-
-    for (const ew of entityWorks) {
-      console.log(ew.entity.elementEntity.name);
-      
-      // Получаем компонент геометрии.
-      const geoCmp =
-        ew.entity.getComponent<GeometryComponent>(GeometryComponent);
-      // Получаем компонент работ
-      const workCmp = ew.entity.getComponent<WorkComponent>(WorkComponent);
-      // Получаем компонент филёнок.
-      const panelCmp = ew.entity.getComponent<PanelComponent>(PanelComponent);
-      // Получаем работы элементов
-
-      const entWorkData = (workCmp?.data?.workData || []).map((wd) => ({
-        ...wd,
-        geometry: geoCmp.data,
-        name: ew.entity.elementEntity.name,
-      }));
-      // Получаем гемметрию сущности.
-
-      // Получаем работы филёнок
-      const panelsWorkData =
-        panelCmp?.data?.panels?.reduce<ArrayWorkData>((acc, item) => {
-          const workData = (item?.workData || []).map((wd) => ({
-            ...wd,
-            geometry: item.geometry,
-            name: item.type,
-          }));
-          acc.push(...workData);
-          return acc;
-        }, []) || [];
-
-      // получаем работы рубашек.
-      const shirtWorkData =
-        panelCmp?.data?.panels?.reduce<ArrayWorkData>((acc, item) => {
-          const workData = (item?.workData || []).map((wd) => ({
-            ...wd,
-            geometry: item.shirt.geometry,
-            name: 'Рубашка',
-          }));
-          acc.push(...workData);
-          return acc;
-        }, []) || [];
-
-      // Распределяем работы в особом порядке, сначала рыботы рубашек, потом филёнок, после элементов
-      // Задумка Даника, посмотрим как это будет работать.
-      shirtWorkData.forEach((w) => ew.queue.append(w));
-      panelsWorkData.forEach((w) => ew.queue.append(w));
-      entWorkData.forEach((w) => ew.queue.append(w));
-    }
-
-    console.log('РАСЧЕТ ГАРАФА сделали очередь');
-
     // Создаем граф заказа.
-    this.book.graph = this.graphProvider.createOrderGraph();
-
-    const queue = this.book.graph.queue((node) => {
-      const blank = {
-        name: node.options.name,
-        data: [],
-      };
-      for (const workElementData of node.options.workData) {
-        const sample = this.getWork(workElementData.workId);
-        const blankData = {
-          sample,
-          blankList: [],
-        };
-        console.log('------------ ' + node.id + ' -------------');
-        for (const ew of entityWorks) {
-          if (node.options.takeOne) {
-            const qws = ew.queue.findAndTake((v) => v.workId === sample.id);
-            if (qws) {
-              blankData.blankList.push(qws);
-            }
-          } else {
-            let next_qws = true;
-            while (next_qws) {
-              next_qws = false;
-              const qws = ew.queue.findAndTake((v) => v.workId === sample.id);
-              if (qws) {
-                blankData.blankList.push(qws);
-                next_qws = true;
-              }
-            }
-          }
-        }
-        blank.data.push(blankData);
-      }
-      return blank;
-    });
-    console.log(JSON.stringify(queue, null, 2));
-  }
-  comparator(A: WorkElementData, B: WorkElementData) {
-    if (Number(A.workId) === Number(B.workId)) return 0;
-    return 1;
-  }
-
-  getWork(workId: number) {
-    return this.book.works.find((w) => w.id === workId) || null;
+    if (this.book.graph && this.book.graph.isBuilt) {
+      this.room.orderGraph = OrderGraph.deSerialization(this.book.graph);
+    } else {
+      const graph = this.graphProvider.createOrderGraph();
+      this.room.orderGraph = graph;
+      this.book.graph = graph.serialization();
+    }
   }
 }

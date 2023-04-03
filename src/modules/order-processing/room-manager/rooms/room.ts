@@ -36,6 +36,8 @@ import {
 import { RoomManager } from '../room-manager';
 import { ElementUpdateInput } from 'src/modules/repository/order/inputs/element.input';
 import { OrderBlankSystem } from 'src/core/ecs/systems/order.blank.system';
+import { OrderGraph } from 'src/core/common/graph/order-graph';
+import { OrderGraphSystem } from 'src/core/ecs/systems/order.graph.system';
 
 interface MultipleEvent {
   [key: string | symbol]: Array<(...args: any[]) => void>;
@@ -51,6 +53,8 @@ export class Room {
   private engine: MYEngine<EngineUserData>;
   private orderCreator: OrderCreator;
   private multipleEvents: MultipleEvent = {};
+
+  public orderGraph: OrderGraph | null = null;
 
   constructor(
     public readonly roomManager: RoomManager,
@@ -483,8 +487,10 @@ export class Room {
     // расчет работ для вложенных элементов.
     this.engine.addSystem(new NestedWorkSystem());
     // Создание графа заказа
+
+    this.engine.addSystem(new OrderGraphSystem());
     this.engine.addSystem(new OrderBlankSystem());
-    
+
     // *************************************************
     // Сущности
 

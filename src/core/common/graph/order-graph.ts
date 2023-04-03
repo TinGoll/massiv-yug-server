@@ -2,6 +2,7 @@ import { WorkComponentData, WorkElementData } from 'src/core/@types/app.types';
 import { Edge } from './edge';
 import { Graph } from './graph';
 import { OrderVertex } from './order-vertex';
+import { DocumentEntity } from 'src/modules/repository/order/entities/document.entity';
 import SerializationOrderGraph from './serialization.graph';
 
 interface Strategy {
@@ -17,10 +18,12 @@ export interface VertexOptions {
   endVertex?: boolean;
   strategy: Strategy[];
   takeOne?: boolean;
+  fields?: Partial<Record<keyof DocumentEntity, boolean>>;
 }
 
 export class OrderGraph extends Graph<string> {
-  private isBuilt: boolean = false;
+  public isBuilt: boolean = false;
+  public blanks;
   constructor(vertex: OrderVertex[] = []) {
     super(vertex);
   }
@@ -220,7 +223,9 @@ export class OrderGraph extends Graph<string> {
     });
   }
 
-  serialization() {}
+  serialization(): SerializationOrderGraph.Graph {
+    return <SerializationOrderGraph.Graph>JSON.parse(JSON.stringify(this));
+  }
 
   /**
    * Создание графа из json объекта базы данных.
@@ -235,6 +240,7 @@ export class OrderGraph extends Graph<string> {
     );
     const graph = new OrderGraph(vertices);
     graph.isBuilt = object.isBuilt;
+    graph.blanks = object.blanks;
     return graph;
   }
 }

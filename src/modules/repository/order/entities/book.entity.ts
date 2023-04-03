@@ -3,7 +3,7 @@ import {
   BookResultData,
   WorkData,
 } from 'src/core/@types/app.types';
-import { OrderGraph } from 'src/core/common/graph/order-graph';
+
 import {
   Entity,
   Column,
@@ -21,6 +21,11 @@ import { DocumentEntity } from './document.entity';
 import { PersonEntity } from 'src/modules/person/entities/person.entity';
 import { HistoryEntity } from 'src/modules/order-processing/entities/history.entity';
 import { BookState } from './book.state';
+import SerializationOrderGraph from 'src/core/common/graph/serialization.graph';
+
+
+
+
 
 export const BOOK_BARCODE_PREFIX: number = 22;
 
@@ -63,7 +68,7 @@ export class BookEntity {
 
   /** Результативные данные */
   @Column({ type: 'jsonb', default: null, nullable: true })
-  graph?: OrderGraph;
+  graph?: SerializationOrderGraph.Graph;
 
   @Column({ type: 'float', default: 0 })
   cost: number;

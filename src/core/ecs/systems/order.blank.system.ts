@@ -1,6 +1,5 @@
 import {
   BaseSystem,
-  Entity,
   Family,
   ImmutableArray,
 } from 'yug-entity-component-system';
@@ -10,35 +9,20 @@ import { GeometryComponent } from '../components/geometry.component';
 import { MYEngine } from '../engine/my-engine';
 import { BookState } from 'src/modules/repository/order/entities/book.state';
 import { BookEntity } from 'src/modules/repository/order/entities/book.entity';
-import { WorkData, WorkElementData } from 'src/core/@types/app.types';
-import { GraphProvider } from 'src/modules/order-processing/providers/graph-provider';
 import { OrderCreator } from 'src/modules/order-processing/providers/order-creator';
 import { RoomManager } from 'src/modules/order-processing/room-manager/room-manager';
 import { Room } from 'src/modules/order-processing/room-manager/rooms/room';
 import { QueueCollection } from 'src/core/common/queue-collection/QueueCollection';
-import { SampleElementEntity } from 'src/modules/repository/order/entities/element.entity';
 import { PanelComponent } from '../components/panel.component';
-import { Geometry } from 'src/core/common/models/geometry';
+import SerializationOrderGraph from 'src/core/common/graph/serialization.graph';
 
-interface QueueWork {
-  name: string;
-  type: string;
-  geometry: Geometry;
-  data: WorkData & { id: number };
-}
-
-interface EntityQueues {
-  entity: MYEntity;
-  sample: SampleElementEntity;
-  queue: QueueCollection<QueueWork>;
-}
 
 export class OrderBlankSystem extends BaseSystem {
   private book: BookEntity;
   private room: Room;
   private orderCreator: OrderCreator;
   private roomManager: RoomManager;
-  private graphProvider: GraphProvider;
+
   constructor() {
     super(OrderBlankSystem, Family.all(GeometryComponent, WorkComponent).get());
   }
@@ -48,14 +32,11 @@ export class OrderBlankSystem extends BaseSystem {
     this.room = this.getEngine<MYEngine>().room;
     this.roomManager = this.room.roomManager;
     this.orderCreator = this.roomManager.orderCreator;
-    this.graphProvider = this.roomManager.graphProvider;
   }
 
   // Код запускается перед обновлением, можно использовать для решения об отключении системы и. т. д. */
   async beforeUpdate(): Promise<void> {
     const book = this.getEngine<MYEngine>().bookEntity;
-    console.log('book.state', book.state);
-
     if (book && book.state === BookState.CALCULATION_OF_BLANKS) {
       this.setProcessing(true);
     } else {
@@ -68,7 +49,13 @@ export class OrderBlankSystem extends BaseSystem {
     deltaTime: number,
   ): Promise<void> {
     try {
-      const entityQueues: EntityQueues[] = [];
+      const entityQueues: SerializationOrderGraph.EntityQueues[] = [];
+
+      if (!this.room.orderGraph || !this.room.orderGraph.isBuilt) {
+        return;
+      }
+      const graph = this.room.orderGraph;
+
       // Собираем массив, включающий в себя элемент, его шаблон и коллекцию очереди.
       for (const entity of entities) {
         const element = entity.elementEntity;
@@ -97,15 +84,15 @@ export class OrderBlankSystem extends BaseSystem {
           entity.getComponent<PanelComponent>(PanelComponent)?.data?.panels;
 
         // Получаем работы элементов
-        const elementWorks: QueueWork[] = []; // Работы элемента.
-        const panelWorks: QueueWork[] = []; //  Работы вложенных деталей (Филёнка)
-        const shirtWorks: QueueWork[] = []; //  Работы вложенных деталей (Рубашка филёнки)
-        const profileWorks: QueueWork[] = []; // Работы вложенных деталей (Профиль)
+        const elementWorks: SerializationOrderGraph.QueueWork[] = []; // Работы элемента.
+        const panelWorks: SerializationOrderGraph.QueueWork[] = []; //  Работы вложенных деталей (Филёнка)
+        const shirtWorks: SerializationOrderGraph.QueueWork[] = []; //  Работы вложенных деталей (Рубашка филёнки)
+        const profileWorks: SerializationOrderGraph.QueueWork[] = []; // Работы вложенных деталей (Профиль)
         // Заполняем массив работ элемента.
         elementWorks.push(
           ...(works.workData || []).map((item) => {
             const work = this.getWork(item.workId) || {};
-            const workItem: QueueWork = {
+            const workItem: SerializationOrderGraph.QueueWork = {
               name: element.name,
               type: sample.name,
               geometry: geometry,
@@ -120,10 +107,10 @@ export class OrderBlankSystem extends BaseSystem {
         );
         // Запоолняем массив работ для филёнок.
         panelWorks.push(
-          ...(panels || []).reduce<QueueWork[]>((acc, panel) => {
+          ...(panels || []).reduce<SerializationOrderGraph.QueueWork[]>((acc, panel) => {
             const temp = (panel?.workData || []).map((item) => {
               const work = this.getWork(item.workId) || {};
-              const workItem: QueueWork = {
+              const workItem: SerializationOrderGraph.QueueWork = {
                 name: panel.name,
                 type: panel.type,
                 geometry: panel.geometry,
@@ -142,14 +129,14 @@ export class OrderBlankSystem extends BaseSystem {
 
         // Запоолняем массив работ для рубашек филёнок.
         shirtWorks.push(
-          ...(panels || []).reduce<QueueWork[]>((acc, panel) => {
+          ...(panels || []).reduce<SerializationOrderGraph.QueueWork[]>((acc, panel) => {
             const shirt = panel.shirt;
             if (!shirt) {
               return acc;
             }
             const temp = (shirt?.workData || []).map((item) => {
               const work = this.getWork(item.workId) || {};
-              const workItem: QueueWork = {
+              const workItem: SerializationOrderGraph.QueueWork = {
                 name: shirt?.name,
                 type: 'Рубашка',
                 geometry: shirt?.geometry,
@@ -173,25 +160,84 @@ export class OrderBlankSystem extends BaseSystem {
         elementWorks.forEach((w) => entityQueue.queue.append(w));
       }
 
-      // Создаем граф заказа. Метод возвращает собранный граф.
-    const graph = this.graphProvider.createOrderGraph();
-    this.book.graph = graph;
+      const blanks = graph.queue((node) => {
+        const blank: SerializationOrderGraph.QueueBlank = {
+          name: node.options.name,
+          nodeId: node.id,
+          sectorId: node.options.sectorid,
+          fields: node.options.fields,
+          queueDocuments: [],
+        };
+        blank.queueDocuments =
+          this.book.documents?.map((document) => {
+            const {
+              book,
+              cost,
+              createdAt,
+              deleted,
+              elements,
+              resultData,
+              updatedAt,
+              ...opt
+            } = document;
+            let queueDocument: SerializationOrderGraph.QueueDocument = {
+              id: document.id,
+              queueList: [],
+            };
+            if (!blank.fields) {
+              queueDocument = { ...queueDocument, ...opt };
+            } else {
+              for (const key in opt) {
+                if (opt[key]) {
+                  queueDocument[key] = opt[key];
+                }
+              }
+            }
+            return queueDocument;
+          }) || [];
+        for (const { workId } of node.options.workData) {
+          for (const entityQueue of entityQueues) {
+            const documentEntityId = entityQueue.entity.documentEntity.id;
+            const queueDocument = blank.queueDocuments.find(
+              (d) => d.id === documentEntityId,
+            );
+            if (node.options.takeOne) {
+              const qws = entityQueue.queue.findAndTake(
+                (value) => value.data.id === workId,
+              );
+              if (qws) {
+                queueDocument.queueList.push(qws);
+              }
+            } else {
+              let next_qws = true;
+              while (next_qws) {
+                next_qws = false;
+                const qws = entityQueue.queue.findAndTake(
+                  (value) => value.data.id === workId,
+                );
+                if (qws) {
+                  queueDocument.queueList.push(qws);
+                  next_qws = true;
+                }
+              }
+            }
+          }
+        }
 
-    const blanks = graph.queue(( node ) => {
-      const blank = {
-        documentId: 0,
-        sectorId: 0,
-        
-      }
+        return blank;
+      });
 
-    }) 
+      graph.blanks = blanks;
 
+      
+      this.book.graph = graph.serialization();
     } catch (error) {
       console.log('OrderBlankSystem:', error);
     }
   }
 
-  comparator(A: QueueWork, B: QueueWork) {
+  
+  comparator(A: SerializationOrderGraph.QueueWork, B: SerializationOrderGraph.QueueWork) {
     if (Number(A.data.id) === Number(B.data.id)) return 0;
     return 1;
   }
