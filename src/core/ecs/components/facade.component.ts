@@ -37,6 +37,7 @@ declare module FacadeComponentTypes {
     name: string;
     type: OverlayType;
     geometry?: Geometry;
+    material?: string;
     index?: number;
   }
   /** Тип филёнки (имееться ввиду тип панели, может быть решёткой, филёнкой или стеклом.) */

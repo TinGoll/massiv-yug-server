@@ -39,6 +39,7 @@ import { OrderBlankSystem } from 'src/core/ecs/systems/order.blank.system';
 import { OrderGraph } from 'src/core/common/graph/order-graph';
 import { OrderGraphSystem } from 'src/core/ecs/systems/order.graph.system';
 import { FacadeSystem } from 'src/core/ecs/systems/facade.system';
+import { CombinedFacadeSystem } from 'src/core/ecs/systems/combined-facade.system';
 
 interface MultipleEvent {
   [key: string | symbol]: Array<(...args: any[]) => void>;
@@ -478,6 +479,7 @@ export class Room {
     // Система расчета геометрии
     this.engine.addSystem(new GeometrySystem());
     this.engine.addSystem(new FacadeSystem());
+    this.engine.addSystem(new CombinedFacadeSystem());
 
     // // Система расчета профиля.
     // this.engine.addSystem(new ProfileSystem());

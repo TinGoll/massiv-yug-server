@@ -165,7 +165,7 @@ export class PanelSystem extends IteratingSystem {
       if (panel.shirt) {
         // TODO Расчет может быть не точным, уточнить формулу
         const ShirtdepthOverlay = Number(samplePanel.shirt.depthOverlay);
-        const figoreaSize = Number(samplePanel.figoreaSize);
+        const figoreaSize = Number(samplePanel.shirt.figoreaSize);
         const Shirtindent = Number(samplePanel.shirt.indent);
 
         panel.shirt.geometry.height = panel.geometry.height - figoreaSize * 2;

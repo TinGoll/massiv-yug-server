@@ -1,36 +1,26 @@
+import { Entity, Family, IteratingSystem } from 'yug-entity-component-system';
+import { MYEntity } from '../engine/my-entity';
 import { OrderCreator } from 'src/modules/order-processing/providers/order-creator';
 import { RoomManager } from 'src/modules/order-processing/room-manager/room-manager';
 import { Room } from 'src/modules/order-processing/room-manager/rooms/room';
 import { BookEntity } from 'src/modules/repository/order/entities/book.entity';
-import { Family, IteratingSystem } from 'yug-entity-component-system';
 import { MYEngine } from '../engine/my-engine';
-import { MYEntity } from '../engine/my-entity';
 import { BookState } from 'src/modules/repository/order/entities/book.state';
-import FacadeComponentTypes, {
-  FacadeComponent,
-  getResetProfile,
-} from '../components/facade.component';
+import { CombinedFacadeComponent } from '../components/combined.facade.component';
 import { GeometryComponent } from '../components/geometry.component';
+import { getResetProfile } from '../components/facade.component';
 import { Geometry } from 'src/core/common/models/geometry';
 
-/**
- * Система расчета компонента «фасад».
- * Компонент «фасад» содержит поля характерные для фасада, такие как
- * Панель – Филенка, витрина или решётка.
- * Рубашка – Накладка на панель, характера только для филёнки.
- * Накладной элемент – обычно это решётка. Характерен для витрины.
- * Массив профилей.
- *
- * Author Roma 14.04.2023
- */
-export class FacadeSystem extends IteratingSystem {
+export class CombinedFacadeSystem extends IteratingSystem {
   private book: BookEntity;
   private room: Room;
   private orderCreator: OrderCreator;
   private roomManager: RoomManager;
-
   constructor() {
-    super(FacadeSystem, Family.all(FacadeComponent, GeometryComponent).get());
+    super(
+      CombinedFacadeSystem,
+      Family.all(CombinedFacadeComponent, GeometryComponent).get(),
+    );
   }
 
   // перед обновлением, получаем набор необходимых объектов.
@@ -56,62 +46,24 @@ export class FacadeSystem extends IteratingSystem {
     deltaTime: number,
   ): Promise<void> {
     try {
+      const facadeData = entity.getComponent<CombinedFacadeComponent>(
+        CombinedFacadeComponent,
+      ).data;
+      const geometryData =
+        entity.getComponent<GeometryComponent>(GeometryComponent).data;
+
       const document = entity.documentEntity;
       if (!document.errors) {
         document.errors = {};
       }
-
-      const facadeData =
-        entity.getComponent<FacadeComponent>(FacadeComponent).data;
-      const geometryData =
-        entity.getComponent<GeometryComponent>(GeometryComponent).data;
-
-      const shirtMinSize = 10; //Минимальный размер рубашки
-
-      const materialName = document.material.name || '';
+      // Обработка комбинированного фасада.
+      /****************************************************** */
       // Для фасадов, поле "материал" являеться обязательным.
       if (!document.material) {
         document.errors.material = 'Не указан материал.';
       } else {
         document.errors.material = undefined;
-        facadeData.material = document.material.name;
       }
-
-      // Если объект - панель не определена, определяем.
-      if (!facadeData.panel) {
-        facadeData.panel = {
-          type: 'Филёнка',
-        };
-      }
-      // Если тип панели не определен, значит это филенка
-      if (!facadeData.panel.type) {
-        facadeData.panel.type = 'Филёнка';
-      }
-      // Если тип Филёнка, то название будем брать из шапки.
-      if (facadeData.panel.type === 'Филёнка') {
-        facadeData.panel.name = '';
-        if (document.panel?.sample) {
-          //Если модель филенки выбрана в шапке, присваиваем название.
-          facadeData.panel.name = document.panel.sample.name;
-          // Проверяем, не выбран ли для филенки другой материал.
-          // Если не выбран, присваимваем общий материал.
-          facadeData.panel.material =
-            document.panel.material?.name || document.material.name || null;
-          // Очищаем ошибку, если она была ранее.
-          document.errors.panel = undefined;
-        } else {
-          // Создаем ошибку, если модель филенки не указана
-          document.errors.panel = 'Не указана модель филёнки.';
-        }
-      }
-
-      if (facadeData.panel.type === 'Витрина') {
-        facadeData.panel.material = 'Стекло';
-      }
-      // Обнуляем геометрию панели
-      facadeData.panel.geometry = Geometry.zeroing({
-        amount: Number(geometryData.amount),
-      });
 
       // Данные профиля.
       if (!document.profile || !document.profile?.sample) {
@@ -119,6 +71,9 @@ export class FacadeSystem extends IteratingSystem {
       } else {
         document.errors.profile = undefined;
       }
+
+      const shirtMinSize = 10; //Минимальный размер рубашки
+      const materialName = document.material.name || ''; // Сохраняем название материала документа.
 
       const sampleProfile = document.profile.sample; // Шаблон профиля
 
@@ -133,7 +88,6 @@ export class FacadeSystem extends IteratingSystem {
       const tenonSize = sampleProfile?.tenonSize || 0; // размер шипа
       const transverseInside = sampleProfile?.transverseInside || null; // Тип угла
       const profileDepth = Number(sampleProfile.depth || 0); // Толщина профиля
-
       const profileName = sampleProfile?.name || '';
 
       facadeData.splicingAngle = splicingAngle;
@@ -200,6 +154,20 @@ export class FacadeSystem extends IteratingSystem {
         }
 
         const points = profileWidths.length; // Определяем количество точек ширин профиля.
+
+        let widthTransverseProfiles: number[] = []; // Ширина/Ширины поперечного профиля (для комбо-фасадов)
+
+        if (points > 4) {
+          widthTransverseProfiles.push(
+            ...profileWidths.slice(4).map((w) => Number(w)),
+          );
+        } else {
+          if (points === 1)
+            widthTransverseProfiles.push(Number(profileWidths[0]));
+          if (points >= 2)
+            widthTransverseProfiles.push(Number(profileWidths[1]));
+        }
+
         // В зависимости от указанных в массиве ширин профиля, присваиваем соотвествующие данные.
         if (points === 1) {
           facadeData.profiles[0].geometry.width = Number(profileWidths[0]);
@@ -225,6 +193,7 @@ export class FacadeSystem extends IteratingSystem {
           facadeData.profiles[2].geometry.width = Number(profileWidths[2]);
           facadeData.profiles[3].geometry.width = Number(profileWidths[3]);
         }
+
         facadeData.profiles[0].geometry = Geometry.calculate(
           facadeData.profiles[0].geometry,
         );
@@ -237,102 +206,9 @@ export class FacadeSystem extends IteratingSystem {
         facadeData.profiles[3].geometry = Geometry.calculate(
           facadeData.profiles[3].geometry,
         );
-
-        //Расчет панели
-
-        facadeData.panel.geometry.height =
-          geometryData.height -
-          (facadeData.profiles[1].geometry.width +
-            facadeData.profiles[3].geometry.width) +
-          grooveDepth * 2;
-        facadeData.panel.geometry.width =
-          geometryData.width -
-          (facadeData.profiles[0].geometry.width +
-            facadeData.profiles[2].geometry.width) +
-          grooveDepth * 2;
-
-        if (
-          facadeData.panel.geometry.height < grooveDepth * 2 ||
-          facadeData.panel.geometry.width < grooveDepth * 2
-        ) {
-          facadeData.panel = null;
-          facadeData.shirt = null;
-        } else {
-          // Просчитываем все поля геометрии панели
-          facadeData.panel.geometry = Geometry.calculate(
-            facadeData.panel.geometry,
-          );
-
-          if (
-            facadeData.panel.type === 'Филёнка' &&
-            document.panel.sample.shirt
-          ) {
-            facadeData.shirt = {
-              name: document.panel.sample.shirt.name,
-              type: 'Рубашка',
-              index: 0,
-              material: facadeData.panel.material,
-              geometry: Geometry.zeroing({
-                amount: Number(geometryData.amount),
-              }),
-            };
-
-            facadeData.shirt.geometry.height =
-              facadeData.panel.geometry.height -
-              (document.panel.sample.shirt?.figoreaSize || 0) * 2;
-            facadeData.shirt.geometry.width =
-              facadeData.panel.geometry.width -
-              (document.panel.sample.shirt?.figoreaSize || 0) * 2;
-            facadeData.shirt.geometry.depth = Number(
-              document.panel.sample.shirt?.depthOverlay || 0,
-            );
-
-            facadeData.shirt.geometry = Geometry.calculate(
-              facadeData.shirt.geometry,
-            );
-
-            if (
-              facadeData.shirt.geometry.height < shirtMinSize ||
-              facadeData.shirt.geometry.width < shirtMinSize
-            ) {
-              facadeData.shirt = null;
-            }
-          } else {
-            facadeData.shirt = null;
-          }
-        }
-
-        if (facadeData?.overlayElement && facadeData.panel) {
-          facadeData.overlayElement.geometry = Geometry.zeroing({
-            amount: geometryData.amount,
-          });
-
-          facadeData.overlayElement.material = materialName;
-
-          facadeData.overlayElement.geometry.height =
-            facadeData.panel.geometry.height + grooveDepth * 2;
-
-          facadeData.overlayElement.geometry.width =
-            facadeData.panel.geometry.width + grooveDepth * 2;
-
-          facadeData.overlayElement.geometry = Geometry.calculate(
-            facadeData.overlayElement.geometry,
-          );
-
-          if (!facadeData.overlayElement.name) {
-            facadeData.overlayElement.name = 'Накладной элемент';
-          }
-        } else {
-          if (facadeData?.overlayElement) {
-            facadeData.overlayElement = {
-              type: facadeData.overlayElement.type,
-              name: facadeData.overlayElement.name,
-            };
-          } else {
-            facadeData.overlayElement = null;
-          }
-        }
       }
+
+      /****************************************************** */
     } catch (error) {
       console.log(error);
     }

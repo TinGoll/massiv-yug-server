@@ -34,10 +34,6 @@ export class SamplePanelEntity {
   @Column({ type: 'varchar', length: 560, nullable: true })
   drawing: string;
 
-  /** Отступ для рубашки */
-  @Column({ type: 'float', nullable: true })
-  figoreaSize: number;
-
   @ManyToOne((shirt) => SampleShirtEntity, {
     eager: true,
     onDelete: 'SET NULL',

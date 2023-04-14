@@ -5,22 +5,47 @@ import WorkComponentTypes from './works.component';
 import { Geometry } from 'src/core/common/models/geometry';
 
 declare module CombinedFacadeComponentTypes {
+  //Тип расчета. До верхней границы профиля, до нижней границы и до середины.
+  type CalculationType =
+    | 'from top border'
+    | 'from bottom border'
+    | 'from middle';
+
+  // Расстояние до профиля.
+  interface TransverseProfileProps {
+    profileDistance?: number;
+  }
+
+  /** Балюстрада */
   interface Baluster {
     geometry: Geometry;
     name: string;
+    material?: string;
     type: 'Балюстрада';
   }
 
   interface CombinedFacadeData {
+    splicingAngle?: '45°' | '90°' | null;
+
+    material?: string;
+
+    calculationType: CalculationType;
+
     panels?: Array<FacadeComponentTypes.Panel | Baluster>;
+
     profiles?: [
       FacadeComponentTypes.Profile,
       FacadeComponentTypes.Profile,
       FacadeComponentTypes.Profile,
       FacadeComponentTypes.Profile,
     ];
-    transverseProfile?: Array<FacadeComponentTypes.Profile>;
+
+    transverseProfile?: Array<
+      FacadeComponentTypes.Profile & TransverseProfileProps
+    >;
+
     overlayElements?: Array<FacadeComponentTypes.OverlayElement | null>;
+
     works?: WorkComponentTypes.Work[];
     /** Тип элемента */
     type: 'Комбинированный фасад';
@@ -35,6 +60,8 @@ export class CombinedFacadeComponent
 {
   data: CombinedFacadeComponentTypes.CombinedFacadeData = {
     type: 'Комбинированный фасад',
+    calculationType: 'from top border',
+    panels: [],
   };
   constructor(data: Partial<CombinedFacadeComponentTypes.CombinedFacadeData>) {
     super(CombinedFacadeComponent);
