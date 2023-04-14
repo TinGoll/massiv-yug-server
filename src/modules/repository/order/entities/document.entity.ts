@@ -3,6 +3,7 @@ import {
   DocumentExtraData,
   DocumentGlossiness,
   DocumentResultData,
+  Fields,
 } from 'src/core/@types/app.types';
 import {
   Column,
@@ -23,6 +24,10 @@ import { DocumentPanelEntity } from './document.panel.entity';
 import { DocumentPatinaEntity } from './document.patina.entity';
 import { DocumentProfileEntity } from './document.profile.entity';
 import { DocumentVarnishEntity } from './document.varnish.entity';
+
+type DocumentErrors<T> = {
+  [K in keyof T]?: T[K] extends object ? DocumentErrors<T[K]> : string;
+};
 
 @Entity('order_documents')
 export class DocumentEntity {
@@ -126,6 +131,8 @@ export class DocumentEntity {
     name: 'bookId',
   })
   book: Promise<BookEntity>;
+
+  errors?: Fields<DocumentEntity, string>;
 
   /** Документы книги */
   @OneToMany(() => ElementEntity, (element) => element.document, {

@@ -23,6 +23,7 @@ export class FinancialAccount {
   /** Владелец счета */
   @OneToOne(() => PersonEntity, (person) => person.clientAccount, {
     lazy: true,
+    onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'personId' })
   person: Promise<PersonEntity> | PersonEntity;

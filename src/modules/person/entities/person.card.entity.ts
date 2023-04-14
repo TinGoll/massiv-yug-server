@@ -10,17 +10,18 @@ import { PersonEntity } from './person.entity';
 /** Аккаунт клиента. */
 @Entity('person_cards')
 export class PersonCard {
-  
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column('varchar')
+  @Column('varchar', { nullable: true })
   number: string;
 
-  
+  @Column('varchar', { nullable: true })
+  cardHolder: string;
+
   @ManyToOne(() => PersonEntity, {
     onDelete: 'CASCADE',
-    lazy: true
+    lazy: true,
   })
   @JoinColumn({
     name: 'personId',

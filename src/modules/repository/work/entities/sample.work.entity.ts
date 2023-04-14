@@ -11,7 +11,7 @@ import {
 } from 'typeorm';
 
 @Entity('sample_works')
-export class SampleWorkEntity {
+export class SampleWorkEntity<T extends string = string> {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -22,7 +22,7 @@ export class SampleWorkEntity {
   updatedAt: Date;
 
   @Column({ type: 'varchar', length: 256 })
-  name: string;
+  name: T;
 
   @Column({ type: 'decimal', precision: 5, scale: 2, default: 0 })
   price: number;

@@ -122,6 +122,10 @@ export class UserService {
     );
   }
 
+  hashPassword(password: string) {
+    return this.authService.hashPassword(password);
+  }
+
   private findByLogin(login: string): Observable<PersonEntity | null> {
     return from(this.personService.findByLogin(login));
   }
@@ -134,7 +138,7 @@ export class UserService {
   }
 
   /** Существует ли логин */
-  private loginExists(login: string): Observable<boolean> {
+  loginExists(login: string): Observable<boolean> {
     return from(this.personService.findIdByLogin(login)).pipe(
       map((id: number) => {
         return Boolean(id);

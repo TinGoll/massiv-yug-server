@@ -34,6 +34,7 @@ import { ClientController } from './controllers/client.controller';
     AuthModule,
   ],
   providers: [PersonService, UserService],
+  exports: [PersonService, UserService],
   controllers: [PersonController, UserController, ClientController],
 })
 export class PersonModule {}

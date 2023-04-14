@@ -23,11 +23,11 @@ import { HistoryEntity } from 'src/modules/order-processing/entities/history.ent
 import { BookState } from './book.state';
 import SerializationOrderGraph from 'src/core/common/graph/serialization.graph';
 
-
-
-
-
 export const BOOK_BARCODE_PREFIX: number = 22;
+
+type BookErrors<T> = {
+  [K in keyof T]?: T[K] extends object ? BookErrors<T[K]> : string;
+};
 
 @Entity('order_books')
 export class BookEntity {
@@ -77,6 +77,10 @@ export class BookEntity {
   /** В заказ копируется все работы. */
   works: SampleWorkEntity[];
 
+  /** Указатель, был ли заказ перенесен в старую БД. Временное поле, убрать посел полного перехода на новую базу. */
+  @Column({ type: 'boolean', default: false })
+  synchronizedITM: boolean;
+
   @Column({
     type: 'enum',
     enum: BookState,
@@ -84,6 +88,8 @@ export class BookEntity {
     nullable: true,
   })
   state: BookState;
+
+  errors?: BookErrors<BookEntity>;
 
   @ManyToOne(() => PersonEntity, { eager: true, onDelete: 'SET NULL' })
   @JoinColumn({ name: 'clientId' })

@@ -1,5 +1,15 @@
 import { Injectable } from '@nestjs/common';
-import { firstValueFrom, map } from 'rxjs';
+import {
+  catchError,
+  concatMap,
+  firstValueFrom,
+  forkJoin,
+  from,
+  map,
+  of,
+  switchMap,
+  tap,
+} from 'rxjs';
 import { BookDocumentType } from 'src/core/@types/app.types';
 import { OrderCreator } from 'src/modules/order-processing/providers/order-creator';
 import { ColorService } from 'src/modules/repository/color/color.service';
@@ -23,6 +33,11 @@ import { newStatuses } from '../migration-data/status';
 import { createdMigrateVarnishes } from '../migration-data/varnishes';
 import { works } from '../migration-data/work';
 import { ItmHttpService } from '../services/itm-http.service';
+import { PersonRole } from 'src/modules/person/enums/person-role.enum';
+import { UserRole } from 'src/modules/person/enums/user-role.enum';
+import { UserService } from 'src/modules/person/services/user.service';
+import { PersonService } from 'src/modules/person/services/person.service';
+import client from 'telegraf/typings/core/network/client';
 
 @Injectable()
 export class MigrationProvider {
@@ -38,6 +53,8 @@ export class MigrationProvider {
     private readonly workService: WorkService,
     private readonly profileService: ProfileService,
     private readonly orderCreator: OrderCreator,
+    private readonly userService: UserService,
+    private readonly personService: PersonService,
   ) {
     this.migrateColor(false)
       .then(() => {
@@ -48,6 +65,9 @@ export class MigrationProvider {
       })
       .then(() => {
         return this.migrationMaterial(false);
+      })
+      .then(() => {
+        return this.migrationShirts(false);
       })
       .then(() => {
         return this.migrationPanel(false);
@@ -66,12 +86,13 @@ export class MigrationProvider {
       })
       .then(() => {
         return this.migrationNomenclature(false);
-      })
-      .then(() => {
-        return this.migrationShirts(false);
       });
 
-    // this.migrateOrder(24621);
+    //this.migrateOrder(24621);
+
+    // this.migrateClients();
+
+    // this.migrateUsers();
   }
 
   /** Миграция Цвета */
@@ -149,12 +170,14 @@ export class MigrationProvider {
     const objects = migrationSectors;
     for (const obj of objects) {
       const candidate = await this.sectorService.findToName(obj.name);
+
       if (candidate) {
         const { updatedAt, createdAt, ...updateData } = candidate;
         await this.sectorService.update({ ...updateData, ...obj });
         console.log('Обновление', candidate);
         continue;
       }
+
       const newObj = await this.sectorService.create(obj);
       console.log('Добавление', newObj);
     }
@@ -239,32 +262,26 @@ export class MigrationProvider {
     console.log('\x1b[36m%s\x1b[0m', 'Start Panels Migration');
     const objects = migrationPanels;
     for (const obj of objects) {
-      const { shirtId, works, ...obj2 } = obj;
+      const { shirt: shirtName, ...obj2 } = obj;
       const candidate = await this.panelService.findToName(obj.name);
+
+      const shirt = await this.panelService.findShirtToName(shirtName);
+
       if (candidate) {
         const { updatedAt, createdAt, ...updateData } = candidate;
 
-        const shirt = await this.panelService.findShirtToId(obj.shirtId);
-
-        const workArr = [];
-        for (const w of works) {
-          const work = await this.workService.findToId(w);
-          if (work) {
-            workArr.push(work);
-          }
-        }
-        candidate.works = workArr;
         await this.panelService.getRepository().save(candidate);
 
         await this.panelService.update({
           ...updateData,
           ...obj2,
-          shirt: obj.shirtId ? shirt : null,
+          shirt: shirt ? shirt : null,
         });
         console.log('Обновление', candidate);
         continue;
       }
-      const newObj = await this.panelService.create(obj2);
+
+      const newObj = await this.panelService.create({ ...obj2, shirtName });
       console.log('Добавление', newObj);
     }
   }
@@ -302,10 +319,288 @@ export class MigrationProvider {
     }
   }
 
+  async migrateClients() {
+    const clients$ = this.itmHttpService
+      .get<ItmPerson.Client[]>(`person/clients`)
+      .pipe(map((response) => response.data));
+
+    const clients = await firstValueFrom<
+      ItmPerson.Client[],
+      ItmPerson.Client[]
+    >(clients$, {
+      defaultValue: null,
+    });
+
+    for (const client of clients) {
+      const candidate$ = this.userService.loginExists(client.firstName);
+
+      const candidate = await firstValueFrom<boolean, boolean>(candidate$, {
+        defaultValue: false,
+      });
+
+      if (candidate) {
+        console.log(`Пользователь ${client.firstName}, уже существует`);
+        continue;
+      }
+
+      let password: string;
+      if (client.password) {
+        const password$ = this.userService.hashPassword(client.password);
+        password = await firstValueFrom<string, string>(password$, {
+          defaultValue: null,
+        });
+      }
+      try {
+        const person = await this.personService.create({
+          firstName: client.firstName,
+          gender: client.gender,
+          lastName: client.lastName,
+          middleName: client.middleName,
+          login: client.firstName,
+          password,
+          settings: {
+            itmLogin: client.login || null,
+            itmPassword: password || null,
+          } as { itmLogin: string; itmPassword: string },
+        });
+
+        for (const number of client.phones) {
+          await this.personService.addPhone(person, {
+            number,
+          });
+        }
+
+        for (const email of client.emails) {
+          await this.personService.addEmail(person, {
+            email,
+          });
+        }
+
+        await this.personService.addAddress(person, {
+          city: client.city,
+        });
+
+        if (client.card?.number) {
+          await this.personService.addCard(person, {
+            number: client.card.number,
+            cardHolder: client.card.cardHolder,
+          });
+        }
+
+        await this.personService.addBank(person, {
+          bank: client.bank,
+          bik: client.bik,
+          checkingAccount: client.checkingAccount,
+          companyName: client.companyName,
+          correspondentAccount: client.correspondentAccount,
+          inn: client.inn,
+          legalAddress: client.legalAddress,
+        });
+
+        await this.personService.createClientAccount(person, {
+          alternativeName: client.firstName,
+          companyName: client.companyName,
+          payType: client.payType as any,
+          extraData: {
+            ...client.extraData,
+          },
+          comment: `Клиент перенесен из базы ITM. Id - ${client.id}`,
+        });
+
+        console.log(client.firstName, person);
+      } catch (error) {
+        console.log(error);
+      }
+      // break;
+    }
+  }
+
+  async migrateUsers() {
+    const users$ = this.itmHttpService
+      .get<ItmPerson.Client[]>(`person/users`)
+      .pipe(map((response) => response.data));
+
+    const users = await firstValueFrom<ItmPerson.Client[], ItmPerson.Client[]>(
+      users$,
+      {
+        defaultValue: null,
+      },
+    );
+
+    for (const user of users) {
+      const candidate$ = this.userService.loginExists(user.login);
+      const candidate = await firstValueFrom<boolean, boolean>(candidate$, {
+        defaultValue: false,
+      });
+
+      if (candidate) {
+        console.log(`Пользователь ${user.firstName}, уже существует`);
+        continue;
+      }
+      let password: string;
+      if (!user.password) {
+        user.password = String(user.id);
+      }
+      const password$ = this.userService.hashPassword(user.password);
+
+      password = await firstValueFrom<string, string>(password$, {
+        defaultValue: null,
+      });
+
+      try {
+        const person = await this.personService.create({
+          firstName: user.firstName,
+          lastName: user.lastName,
+          middleName: user.middleName,
+          gender: user.gender,
+          login: user.login,
+          password,
+        });
+
+        for (const number of user.phones) {
+          await this.personService.addPhone(person, {
+            number,
+          });
+        }
+
+        for (const email of user.emails) {
+          await this.personService.addEmail(person, {
+            email,
+          });
+        }
+
+        await this.personService.addAddress(person, {
+          city: user.city,
+        });
+
+        if (user.card?.number) {
+          await this.personService.addCard(person, {
+            number: user.card.number,
+            cardHolder: user.card.cardHolder,
+          });
+        }
+
+        await this.personService.addBank(person, {
+          bank: user.bank,
+          bik: user.bik,
+          checkingAccount: user.checkingAccount,
+          companyName: user.companyName,
+          correspondentAccount: user.correspondentAccount,
+          inn: user.inn,
+          legalAddress: user.legalAddress,
+        });
+
+        console.log('person', person);
+      } catch (error) {
+        console.log(error);
+      }
+    }
+  }
+
+  migrateUsers1() {
+    const users$ = this.itmHttpService
+      .get<ItmPerson.Client[]>(`person/users`)
+      .pipe(map((response) => response.data))
+      .pipe(concatMap((users) => from(users)))
+      .pipe(
+        concatMap((user) => {
+          return this.userService
+            .loginExists(user.login)
+            .pipe(
+              switchMap((isExists) => {
+                console.log('user.firstName', user.firstName);
+
+                if (isExists) {
+                  console.log(`Пользователь ${user.firstName}, уже существует`);
+                  return of(null);
+                }
+                let password: string;
+                if (!user.password) {
+                  user.password = String(user.id);
+                }
+                return this.userService.hashPassword(user.password).pipe(
+                  switchMap((hashedPassword) => {
+                    password = hashedPassword;
+                    return this.personService.create({
+                      firstName: user.firstName,
+                      lastName: user.lastName,
+                      middleName: user.middleName,
+                      gender: user.gender,
+                      login: user.login,
+                      password,
+                    });
+                  }),
+                );
+              }),
+            )
+            .pipe(
+              concatMap((person) => {
+                if (!person) {
+                  return of(null);
+                }
+                console.log('phones: >>>>>>>>>>>>>', user.phones);
+
+                return from(user.phones).pipe(
+                  concatMap((number) =>
+                    this.personService.addPhone(person, {
+                      number,
+                    }),
+                  ),
+
+                  concatMap((_) => {
+                    console.log('emails: >>>>>>>', user.emails);
+
+                    return from(user.emails).pipe(
+                      concatMap((email) =>
+                        this.personService.addEmail(person, {
+                          email,
+                        }),
+                      ),
+                    );
+                  }),
+
+                  concatMap((_) => {
+                    console.log('card: >>>>>>>', user.card);
+                    return of(user.card).pipe(
+                      concatMap((card) => {
+                        console.log('CARD >>>>>>>>>', card);
+                        if (!card) return of(null);
+                        const { number, cardHolder } = card;
+                        return this.personService.addCard(person, {
+                          number,
+                          cardHolder,
+                        });
+                      }),
+                    );
+                  }),
+                  concatMap((_) => {
+                    console.log('phones, emails, card: done');
+                    return of(null);
+                  }),
+                );
+              }),
+            );
+        }),
+      );
+
+    users$.subscribe({
+      error(err) {
+        console.log(err);
+      },
+      complete() {
+        console.log('Процесс окончен.');
+      },
+      next(value) {
+        console.log(value);
+      },
+    });
+  }
+
   async migrateOrder(id: number) {
     const itmOrder$ = this.itmHttpService
       .get<ItmOrder>(`order/${id}`)
-      .pipe(map((responce) => responce.data));
+      .pipe(map((response) => response.data));
+
     const itmOrder = await firstValueFrom<ItmOrder, ItmOrder>(itmOrder$, {
       defaultValue: null,
     });
@@ -322,8 +617,8 @@ export class MigrationProvider {
     });
 
     const document = await this.orderCreator.addDocument(book, {
-      documentType: (itmOrder.orderType as unknown) as BookDocumentType,
-      note: itmOrder.note
+      documentType: itmOrder.orderType as unknown as BookDocumentType,
+      note: itmOrder.note,
     });
 
     // Переделать!!!
@@ -395,5 +690,46 @@ export class MigrationProvider {
     book = await this.orderService.findBookToId(book.id);
 
     console.log(book);
+  }
+}
+
+declare module ItmPerson {
+  interface PersonType {
+    id: number;
+    firstName: string;
+    lastName: string;
+    middleName: string;
+    personRoles: PersonRole[];
+    userRoles: UserRole[];
+    login: string;
+    password?: string;
+    gender: 'Male' | 'Female';
+    phones: string[];
+    emails: string[];
+    city: string;
+    card: {
+      number: string;
+      cardHolder: string;
+    };
+  }
+
+  interface User extends PersonType {
+    sector: string;
+    status: 'fired' | 'active' | 'banned';
+  }
+
+  interface Client extends PersonType {
+    companyName?: string;
+    inn?: string;
+    legalAddress?: string;
+    correspondentAccount?: string;
+    checkingAccount?: string;
+    bank?: string;
+    bik?: string;
+    payType?: 'Карта' | 'Счет' | 'Наличные';
+    extraData: {
+      profiler?: boolean;
+      prepaid?: boolean;
+    };
   }
 }

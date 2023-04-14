@@ -1033,4 +1033,15 @@ export const migrationProfiles: ProfileCreateInput[] = [
     bottomShelfThickness: 4,
     depth: 21,
   },
+  {
+    name: 'Париж',
+    widths: [80],
+    angle: '45°',
+    grooveThickness: 6.2,
+    grooveDepth: 11,
+    chamferSize: 12,
+    tenonSize: 17,
+    bottomShelfThickness: 4,
+    depth: 21,
+  },
 ];

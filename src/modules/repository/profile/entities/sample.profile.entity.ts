@@ -22,6 +22,10 @@ export class SampleProfileEntity {
   name: string;
   @Column('enum', { enum: ['90°', '45°'] as SplicingAngle[], nullable: true })
   angle: SplicingAngle;
+
+  @Column({ type: 'smallint', nullable: true })
+  transverseInside: number;
+
   /** Толщина профиля */
   @Column({ type: 'numeric' })
   depth: number;
@@ -53,7 +57,7 @@ export class SampleProfileEntity {
   @Column('boolean', { default: false })
   deleted: boolean;
 
-  @ManyToMany(() => SampleWorkEntity, {eager: true})
+  @ManyToMany(() => SampleWorkEntity, { eager: true })
   @JoinTable()
   works: SampleWorkEntity[];
 }

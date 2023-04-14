@@ -1,5 +1,3 @@
-
-
 /**
  * id: number;
 
@@ -16,9 +14,10 @@
   data?: any;
  */
 
-import { WorkCreateInput } from "src/modules/repository/work/inputs/work.input";
 
-export const works: Array<WorkCreateInput> = [
+import { WorkCreateInput, WorkKey } from 'src/modules/repository/work/inputs/work.input';
+
+export const works: Array<WorkCreateInput<WorkKey>> = [
   {
     name: 'Раскрой',
     price: 6,
@@ -38,14 +37,6 @@ export const works: Array<WorkCreateInput> = [
   {
     name: 'Раскрой шпона',
     price: 100,
-    norm: 0,
-    unit: 'м²',
-    salaryUnit: 'м²',
-    data: {},
-  },
-  {
-    name: '',
-    price: 0,
     norm: 0,
     unit: 'м²',
     salaryUnit: 'м²',

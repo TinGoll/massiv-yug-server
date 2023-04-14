@@ -1,4 +1,10 @@
 /******************************************************* */
+
+/** Золотой тип */
+export type Fields<T, R extends unknown = boolean> = {
+  [K in keyof T]?: (T[K] extends object ? Fields<T[K]> : R) | R;
+};
+
 // Цвет.
 
 import {
@@ -83,8 +89,8 @@ export interface PanelData {
 export interface Panel {
   index: number;
   type: PanelType;
-  shirt: Shirt | null;
   geometry: Geometry;
+  shirt: Shirt | null;
   workData: ArrayWorkData;
   name: string;
 }

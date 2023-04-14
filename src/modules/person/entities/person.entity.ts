@@ -21,6 +21,11 @@ import { PersonPhone } from './person.phone.entity';
 
 import { FinancialAccount } from './personal.account.entity';
 
+interface PersonSetting {
+  itmLogin: string;
+  itmPassword: string;
+}
+
 @Entity('persons')
 export class PersonEntity {
   /** id человека */
@@ -69,7 +74,7 @@ export class PersonEntity {
 
   // Пароль доступа, хранится в зашифрованном виде.
   // По умолчанию, пароль не попадает в выборку.
-  @Column({ select: false })
+  @Column({ select: false, nullable: true })
   password?: string;
 
   @Column({ nullable: true })
@@ -84,7 +89,7 @@ export class PersonEntity {
   status: UserStatus;
 
   @Column({ type: 'jsonb', default: {}, nullable: true })
-  settings: object;
+  settings: PersonSetting;
 
   // Подключаемые таблицы
   @OneToMany(() => PersonAddress, (bankAccount) => bankAccount.person, {

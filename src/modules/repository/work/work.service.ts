@@ -44,11 +44,15 @@ export class WorkService {
     return await this.workRepository.findOne({ where: { id } });
   }
 
-  async findToName(name: string): Promise<SampleWorkEntity | null> {
-    return await this.workRepository
-      .createQueryBuilder()
-      .where('LOWER(name) = LOWER(:name) and deleted = false', { name })
-      .getOne();
+  async findToName<T extends string>(
+    name: T,
+  ): Promise<SampleWorkEntity<T> | null> {
+    return <SampleWorkEntity<T>>(
+      await this.workRepository
+        .createQueryBuilder()
+        .where('LOWER(name) = LOWER(:name) and deleted = false', { name })
+        .getOne()
+    );
   }
 
   async findAll(): Promise<SampleWorkEntity[]> {

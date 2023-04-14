@@ -33,10 +33,10 @@ export class GeometrySystem extends IteratingSystem {
     try {
       const toFixed = 4;
       const gmCmp = entity.getComponent<GeometryComponent>(GeometryComponent);
-      const height = gmCmp.data.height || 0;
-      const width = gmCmp.data.width || 0;
-      const depth = gmCmp.data.depth || 0;
-      const amount = gmCmp.data.amount || 0;
+      const height = Number(gmCmp.data.height || 0);
+      const width = Number(gmCmp.data.width || 0);
+      const depth = Number(gmCmp.data.depth || 0);
+      const amount = Number(gmCmp.data.amount || 0);
       const mm = gmCmp.mm;
 
       gmCmp.data.square = Number(
@@ -51,9 +51,22 @@ export class GeometrySystem extends IteratingSystem {
       gmCmp.data.linearMeters = Number(
         ((height / mm) * amount).toFixed(toFixed),
       );
+
+      if (gmCmp.data.height !== null) {
+        gmCmp.data.height = height;
+      }
+      if (gmCmp.data.width !== null) {
+        gmCmp.data.width = width;
+      }
+      if (gmCmp.data.depth !== null) {
+        gmCmp.data.depth = depth;
+      }
+      if (gmCmp.data.amount !== null) {
+        gmCmp.data.amount = amount;
+      }
       // console.log(JSON.stringify(gmCmp, null, 2));
     } catch (error) {
-      console.log("GeometrySystem", error);
+      console.log('GeometrySystem', error);
     }
   }
 }

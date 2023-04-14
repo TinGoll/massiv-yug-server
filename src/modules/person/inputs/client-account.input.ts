@@ -2,6 +2,7 @@ import { ClientExtraData, PayType } from "../entities/person.client.account.enti
 
 export class ClientAccountCreateInput {
   alternativeName: string;
+  companyName?: string;
   comment?: string;
   managerId?: number;
   payType?: PayType;
@@ -12,6 +13,7 @@ export class ClientAccountCreateInput {
 export class ClientAccountUpdateInput {
   id: number;
   alternativeName?: string;
+  companyName?: string;
   comment?: string;
   managerId?: number;
   payType?: PayType;

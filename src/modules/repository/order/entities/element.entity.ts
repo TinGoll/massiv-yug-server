@@ -11,14 +11,29 @@ const componentKeys = [
   'component_works',
   'component_panel',
   'component_profile',
+  'component_facade',
+  'component_combined_facade',
+  'component_product_profile',
+  'component_shield',
+  'component_column',
+  'component_koromyslo',
+  'component_cornice',
+  'component_light_bar',
+  'component_plinth',
+  'component_carved_decor',
+  'component_trim_panel',
+  'component_pillar',
+  'component_CMZ',
+  'component_work',
+  'component_price',
 ] as const;
 export type ComponentKey = typeof componentKeys[number];
 
-export interface ComponentDefaultData {
+export interface ComponentDefaultData<T extends object = object> {
   /** Название компонента */
   componentName: ComponentKey;
   /** Обеъект с полями компонента. */
-  data: object | null;
+  data: Partial<T> | null;
 }
 
 export interface ElementSampleBody {

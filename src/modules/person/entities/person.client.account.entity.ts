@@ -27,6 +27,9 @@ export class ClientAccount {
   @Column({ type: 'varchar', length: 128 })
   alternativeName: string;
 
+  @Column({ type: 'varchar', length: 128 })
+  companyName: string;
+
   @Column({ type: 'varchar', length: 256, nullable: true })
   comment?: string;
 
@@ -47,7 +50,10 @@ export class ClientAccount {
   @Column({ type: 'jsonb', default: {} })
   extraData: ClientExtraData;
 
-  @OneToOne(() => PersonEntity, (person) => person.clientAccount, {lazy: true})
+  @OneToOne(() => PersonEntity, (person) => person.clientAccount, {
+    lazy: true,
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'personId' })
   person: Promise<PersonEntity> | PersonEntity;
 }

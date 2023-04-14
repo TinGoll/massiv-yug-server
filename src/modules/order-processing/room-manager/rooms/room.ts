@@ -38,6 +38,7 @@ import { ElementUpdateInput } from 'src/modules/repository/order/inputs/element.
 import { OrderBlankSystem } from 'src/core/ecs/systems/order.blank.system';
 import { OrderGraph } from 'src/core/common/graph/order-graph';
 import { OrderGraphSystem } from 'src/core/ecs/systems/order.graph.system';
+import { FacadeSystem } from 'src/core/ecs/systems/facade.system';
 
 interface MultipleEvent {
   [key: string | symbol]: Array<(...args: any[]) => void>;
@@ -476,20 +477,24 @@ export class Room {
     // Системы
     // Система расчета геометрии
     this.engine.addSystem(new GeometrySystem());
-    // Система расчета профиля.
-    this.engine.addSystem(new ProfileSystem());
-    // Система расчета филёнок.
-    this.engine.addSystem(new PanelSystem());
-    // Результаты.
-    this.engine.addSystem(new ResultSystem());
-    // Расчет работ для элементов заказа.
-    this.engine.addSystem(new WorkSystem());
-    // расчет работ для вложенных элементов.
-    this.engine.addSystem(new NestedWorkSystem());
-    // Создание графа заказа
+    this.engine.addSystem(new FacadeSystem());
 
-    this.engine.addSystem(new OrderGraphSystem());
-    this.engine.addSystem(new OrderBlankSystem());
+    // // Система расчета профиля.
+    // this.engine.addSystem(new ProfileSystem());
+    // // Система расчета филёнок.
+    // this.engine.addSystem(new PanelSystem());
+
+    // // Результаты.
+    // this.engine.addSystem(new ResultSystem());
+    // // Расчет работ для элементов заказа.
+    // this.engine.addSystem(new WorkSystem());
+
+    // // расчет работ для вложенных элементов.
+    // this.engine.addSystem(new NestedWorkSystem());
+    // // Создание графа заказа
+
+    // this.engine.addSystem(new OrderGraphSystem());
+    // this.engine.addSystem(new OrderBlankSystem());
 
     // *************************************************
     // Сущности

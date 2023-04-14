@@ -1,8 +1,12 @@
-import { ProfileData, WorkData } from 'src/core/@types/app.types';
+import CombinedFacadeComponentTypes from 'src/core/ecs/components/combined.facade.component';
+import FacadeComponentTypes from 'src/core/ecs/components/facade.component';
+import PriceComponentTypes from 'src/core/ecs/components/price.component';
+import WorkComponentTypes from 'src/core/ecs/components/works.component';
 import {
   ComponentDefaultData,
   ComponentKey,
 } from 'src/modules/repository/order/entities/element.entity';
+import { WorkKey } from 'src/modules/repository/work/inputs/work.input';
 
 export const migrationNomenclature: NomenclatureMigration[] = [
   {
@@ -27,30 +31,11 @@ export const migrationNomenclature: NomenclatureMigration[] = [
     name: 'Фасад',
     components: [
       'component_geometry',
+      'component_facade',
+      'component_price',
       'component_works',
-      'component_panel',
-      'component_profile',
     ],
     default: [
-      {
-        // 8 Подбор профиля
-        // 9 Запил
-        // 10 Мастер Джон
-        // 11 Пятый
-        // 12 Вайма
-        // 6 Шлифовка плоских изделий
-        componentName: 'component_works',
-        data: {
-          workData: [
-            { workId: 8 },
-            { workId: 9 },
-            { workId: 10 },
-            { workId: 11 },
-            { workId: 12 },
-            { workId: 6 },
-          ],
-        },
-      },
       {
         componentName: 'component_geometry',
         data: {
@@ -61,25 +46,76 @@ export const migrationNomenclature: NomenclatureMigration[] = [
         },
       },
       {
-        componentName: 'component_profile',
+        componentName: 'component_price',
+        data: { price: 8000, unit: 'м²' },
+      } as ComponentDefaultData<PriceComponentTypes.PriceComponentData>,
+      {
+        componentName: 'component_facade',
         data: {
-          profiles: [
-            { name: 'Левый' },
-            { name: 'Верхний' },
-            { name: 'Правый' },
-            { name: 'Нижний' },
+          type: 'Фасад',
+          panelWorks: [
+            { name: 'Склейка на мембранном прессе' },
+            { name: 'Шлифовка плоских изделий' },
+            { name: 'Шлифовка на шлифовальных центрах' },
+          ] as WorkComponentTypes.Work<WorkKey>[],
+          shirtWorks: [
+            { name: 'Склейка на мембранном прессе' },
+            { name: 'Шлифовка плоских изделий' },
+            { name: 'Шлифовка на шлифовальных центрах' },
+          ] as WorkComponentTypes.Work<WorkKey>[],
+          profileWorks: [
+            { name: 'Подбор профиля' },
+          ] as WorkComponentTypes.Work<WorkKey>[],
+        },
+      } as ComponentDefaultData<FacadeComponentTypes.ComponentData>,
+      {
+        componentName: 'component_works',
+        data: {
+          works: [
+            { name: 'Запил' },
+            { name: 'Вайма' },
+            { name: 'Мастер Джон' },
+            { name: 'Пятый' },
+            { name: 'Шлифовка плоских изделий' },
+            { name: 'Шлифовка на шлифовальных центрах' },
           ],
-        } as ProfileData,
-      },
+        },
+      } as ComponentDefaultData<WorkComponentTypes.WorkComponentData<WorkKey>>,
     ],
     body: [
       {
         identifier: 'Фасад витрина',
-        componentData: [{ componentName: 'component_panel', data: null }],
+        componentData: [
+          {
+            componentName: 'component_facade',
+            data: {
+              type: 'Фасад',
+              panel: {
+                name: 'Витрина',
+                type: 'Витрина',
+              },
+            },
+          } as ComponentDefaultData<FacadeComponentTypes.ComponentData>,
+        ],
       },
       {
         identifier: 'Фасад витрина с накладной решеткой',
-        componentData: [{ componentName: 'component_panel', data: null }],
+        componentData: [
+          {
+            componentName: 'component_facade',
+            data: {
+              type: 'Фасад',
+              panel: {
+                name: 'Витрина',
+                type: 'Витрина',
+              },
+              overlayElement: {
+                type: 'Накладной элемент',
+                name: 'накладная решетка',
+              },
+            },
+          } as ComponentDefaultData<FacadeComponentTypes.ComponentData>,
+        ],
       },
       {
         identifier: 'Фасад глухой',
@@ -87,7 +123,18 @@ export const migrationNomenclature: NomenclatureMigration[] = [
       },
       {
         identifier: 'Фасад глухой с накладной X решеткой',
-        componentData: [],
+        componentData: [
+          {
+            componentName: 'component_facade',
+            data: {
+              type: 'Фасад',
+              overlayElement: {
+                type: 'Накладной элемент',
+                name: 'накладная X решетка',
+              },
+            },
+          } as ComponentDefaultData<FacadeComponentTypes.ComponentData>,
+        ],
       },
       {
         identifier: 'Фасад образец',
@@ -103,33 +150,103 @@ export const migrationNomenclature: NomenclatureMigration[] = [
       },
       {
         identifier: 'Фасад с диагональной решеткой',
-        componentData: [],
+        componentData: [
+          {
+            componentName: 'component_facade',
+            data: {
+              type: 'Фасад',
+              panel: {
+                type: 'Решётка',
+                name: 'Решётка диагональная',
+              },
+            },
+          } as ComponentDefaultData<FacadeComponentTypes.ComponentData>,
+        ],
       },
       {
         identifier: 'Фасад с решеткой ДЕКОР',
-        componentData: [],
+        componentData: [
+          {
+            componentName: 'component_facade',
+            data: {
+              type: 'Фасад',
+              panel: {
+                type: 'Решётка',
+                name: 'решетка декор',
+              },
+            },
+          } as ComponentDefaultData<FacadeComponentTypes.ComponentData>,
+        ],
       },
       {
         identifier: 'Фасад с решеткой ЖАЛЮЗИ',
-        componentData: [],
+        componentData: [
+          {
+            componentName: 'component_facade',
+            data: {
+              type: 'Фасад',
+              panel: {
+                type: 'Решётка',
+                name: 'решетка жалюзи',
+              },
+            },
+          } as ComponentDefaultData<FacadeComponentTypes.ComponentData>,
+        ],
       },
       {
         identifier: 'Фасад с решеткой КВАДРО',
-        componentData: [],
+        componentData: [
+          {
+            componentName: 'component_facade',
+            data: {
+              type: 'Фасад',
+              panel: {
+                type: 'Решётка',
+                name: 'решетка квадро',
+              },
+            },
+          } as ComponentDefaultData<FacadeComponentTypes.ComponentData>,
+        ],
       },
       {
         identifier: 'Фасад с решеткой РЕЗНОЙ',
-        componentData: [],
+        componentData: [
+          {
+            componentName: 'component_facade',
+            data: {
+              type: 'Фасад',
+              panel: {
+                type: 'Решётка',
+                name: 'решетка резная',
+              },
+            },
+          } as ComponentDefaultData<FacadeComponentTypes.ComponentData>,
+        ],
       },
       {
         identifier: 'Фасад с решеткой РОМБ',
-        componentData: [],
+        componentData: [
+          {
+            componentName: 'component_facade',
+            data: {
+              type: 'Фасад',
+              panel: {
+                type: 'Решётка',
+                name: 'решетка ромб',
+              },
+            },
+          } as ComponentDefaultData<FacadeComponentTypes.ComponentData>,
+        ],
       },
     ],
   },
   {
     name: 'Профиль',
-    components: ['component_geometry'],
+    components: [
+      'component_geometry',
+      'component_product_profile',
+      'component_works',
+    ],
     default: [
       {
         componentName: 'component_geometry',
@@ -140,12 +257,21 @@ export const migrationNomenclature: NomenclatureMigration[] = [
           amount: 0,
         },
       },
+      {
+        componentName: 'component_price',
+        data: { price: 500, unit: 'м.п' },
+      } as ComponentDefaultData<PriceComponentTypes.PriceComponentData>,
     ],
-    body: [{ identifier: 'Профиль', componentData: [] }],
+    body: [],
   },
   {
     name: 'Щит МДФ',
-    components: ['component_geometry'],
+    components: [
+      'component_geometry',
+      'component_shield',
+      'component_price',
+      'component_works',
+    ],
     default: [
       {
         componentName: 'component_geometry',
@@ -156,6 +282,10 @@ export const migrationNomenclature: NomenclatureMigration[] = [
           amount: 0,
         },
       },
+      {
+        componentName: 'component_price',
+        data: { price: 4000, unit: 'м²' },
+      } as ComponentDefaultData<PriceComponentTypes.PriceComponentData>,
     ],
     body: [
       {
@@ -282,7 +412,12 @@ export const migrationNomenclature: NomenclatureMigration[] = [
   },
   {
     name: 'Щит массив',
-    components: ['component_geometry'],
+    components: [
+      'component_geometry',
+      'component_shield',
+      'component_price',
+      'component_works',
+    ],
     default: [
       {
         componentName: 'component_geometry',
@@ -293,6 +428,10 @@ export const migrationNomenclature: NomenclatureMigration[] = [
           amount: 0,
         },
       },
+      {
+        componentName: 'component_price',
+        data: { price: 6000, unit: 'м²' },
+      } as ComponentDefaultData<PriceComponentTypes.PriceComponentData>,
     ],
     body: [
       {
@@ -353,7 +492,12 @@ export const migrationNomenclature: NomenclatureMigration[] = [
   },
   {
     name: 'Колонна',
-    components: ['component_geometry'],
+    components: [
+      'component_geometry',
+      'component_column',
+      'component_price',
+      'component_works',
+    ],
     default: [
       {
         componentName: 'component_geometry',
@@ -364,6 +508,10 @@ export const migrationNomenclature: NomenclatureMigration[] = [
           amount: 0,
         },
       },
+      {
+        componentName: 'component_price',
+        data: { price: 5000, unit: 'шт.' },
+      } as ComponentDefaultData<PriceComponentTypes.PriceComponentData>,
     ],
     body: [
       {
@@ -446,7 +594,12 @@ export const migrationNomenclature: NomenclatureMigration[] = [
   },
   {
     name: 'Фасад комбинированный',
-    components: ['component_geometry'],
+    components: [
+      'component_geometry',
+      'component_combined_facade',
+      'component_price',
+      'component_works',
+    ],
     default: [
       {
         componentName: 'component_geometry',
@@ -457,79 +610,386 @@ export const migrationNomenclature: NomenclatureMigration[] = [
           amount: 0,
         },
       },
+      {
+        componentName: 'component_price',
+        data: { price: 10000, unit: 'м²' },
+      } as ComponentDefaultData<PriceComponentTypes.PriceComponentData>,
     ],
     body: [
       {
         identifier: 'Фасад комб. 2 рамки',
-        componentData: [],
+        componentData: [
+          {
+            componentName: 'component_combined_facade',
+            data: {
+              type: 'Комбинированный фасад',
+              panels: [
+                {
+                  name: 'Витрина',
+                  type: 'Витрина',
+                },
+                {
+                  name: 'Витрина',
+                  type: 'Витрина',
+                },
+              ],
+            },
+          } as ComponentDefaultData<CombinedFacadeComponentTypes.CombinedFacadeData>,
+        ],
       },
       {
         identifier: 'Фасад комб. 2 филенки',
-        componentData: [],
+        componentData: [
+          {
+            componentName: 'component_combined_facade',
+            data: {
+              type: 'Комбинированный фасад',
+              panels: [
+                {
+                  type: 'Филёнка',
+                },
+                {
+                  type: 'Филёнка',
+                },
+              ],
+            },
+          } as ComponentDefaultData<CombinedFacadeComponentTypes.CombinedFacadeData>,
+        ],
       },
       {
         identifier: 'Фасад комб. 3 филенки',
-        componentData: [],
+        componentData: [
+          {
+            componentName: 'component_combined_facade',
+            data: {
+              type: 'Комбинированный фасад',
+              panels: [
+                {
+                  type: 'Филёнка',
+                },
+                {
+                  type: 'Филёнка',
+                },
+                {
+                  type: 'Филёнка',
+                },
+              ],
+            },
+          } as ComponentDefaultData<CombinedFacadeComponentTypes.CombinedFacadeData>,
+        ],
       },
       {
         identifier: 'Фасад комб. глухой + рамка внизу',
-        componentData: [],
+        componentData: [
+          {
+            componentName: 'component_combined_facade',
+            data: {
+              type: 'Комбинированный фасад',
+              panels: [
+                {
+                  type: 'Витрина',
+                  name: 'Витрина',
+                },
+                {
+                  type: 'Филёнка',
+                },
+              ],
+            },
+          } as ComponentDefaultData<CombinedFacadeComponentTypes.CombinedFacadeData>,
+        ],
       },
       {
         identifier: 'Фасад комб. глухой + рамка с раскл. внизу',
-        componentData: [],
+        componentData: [
+          {
+            componentName: 'component_combined_facade',
+            data: {
+              type: 'Комбинированный фасад',
+              panels: [
+                {
+                  type: 'Витрина',
+                  name: 'Витрина',
+                },
+                {
+                  type: 'Филёнка',
+                },
+              ],
+            },
+          } as ComponentDefaultData<CombinedFacadeComponentTypes.CombinedFacadeData>,
+        ],
       },
       {
         identifier: 'Фасад комб. глухой с балясинами',
-        componentData: [],
+        componentData: [
+          {
+            componentName: 'component_combined_facade',
+            data: {
+              type: 'Комбинированный фасад',
+              panels: [
+                {
+                  type: 'Балюстрада',
+                },
+                {
+                  type: 'Филёнка',
+                },
+              ],
+            },
+          } as ComponentDefaultData<CombinedFacadeComponentTypes.CombinedFacadeData>,
+        ],
       },
       {
         identifier: 'Фасад комб. Глухой+ реш. КВАДРО',
-        componentData: [],
+        componentData: [
+          {
+            componentName: 'component_combined_facade',
+            data: {
+              type: 'Комбинированный фасад',
+              panels: [
+                {
+                  type: 'Решётка',
+                  name: 'Квадро',
+                },
+                {
+                  type: 'Филёнка',
+                },
+              ],
+            },
+          } as ComponentDefaultData<CombinedFacadeComponentTypes.CombinedFacadeData>,
+        ],
       },
       {
         identifier: 'Фасад комб. глухой+реш.ДЕКОР внизу',
-        componentData: [],
+        componentData: [
+          {
+            componentName: 'component_combined_facade',
+            data: {
+              type: 'Комбинированный фасад',
+              panels: [
+                {
+                  type: 'Решётка',
+                  name: 'Декор',
+                },
+                {
+                  type: 'Филёнка',
+                },
+              ],
+            },
+          } as ComponentDefaultData<CombinedFacadeComponentTypes.CombinedFacadeData>,
+        ],
       },
       {
         identifier: 'Фасад комб. глухой+реш.ДИАГ. вверху',
-        componentData: [],
+        componentData: [
+          {
+            componentName: 'component_combined_facade',
+            data: {
+              type: 'Комбинированный фасад',
+              panels: [
+                {
+                  type: 'Филёнка',
+                },
+                {
+                  type: 'Решётка',
+                  name: 'Решётка диагональная',
+                },
+              ],
+            },
+          } as ComponentDefaultData<CombinedFacadeComponentTypes.CombinedFacadeData>,
+        ],
       },
       {
         identifier: 'Фасад комб. глухой+реш.ДИАГ. внизу',
-        componentData: [],
+        componentData: [
+          {
+            componentName: 'component_combined_facade',
+            data: {
+              type: 'Комбинированный фасад',
+              panels: [
+                {
+                  type: 'Решётка',
+                  name: 'Решётка диагональная',
+                },
+                {
+                  type: 'Филёнка',
+                },
+              ],
+            },
+          } as ComponentDefaultData<CombinedFacadeComponentTypes.CombinedFacadeData>,
+        ],
       },
       {
         identifier: 'Фасад комб. рам+рам с накладной Х решеткой',
-        componentData: [],
+        componentData: [
+          {
+            componentName: 'component_combined_facade',
+            data: {
+              type: 'Комбинированный фасад',
+              panels: [
+                {
+                  type: 'Витрина',
+                  name: 'Витрина',
+                },
+                {
+                  type: 'Витрина',
+                  name: 'Витрина',
+                },
+              ],
+              overlayElements: [
+                {
+                  type: 'Накладной элемент',
+                  name: 'Накладная Х решетка',
+                },
+                null,
+              ],
+            },
+          } as ComponentDefaultData<CombinedFacadeComponentTypes.CombinedFacadeData>,
+        ],
       },
       {
         identifier: 'Фасад комб. рамка с балясинами',
-        componentData: [],
+        componentData: [
+          {
+            componentName: 'component_combined_facade',
+            data: {
+              type: 'Комбинированный фасад',
+              panels: [
+                {
+                  type: 'Балюстрада',
+                  name: 'Балюстрада',
+                },
+                {
+                  type: 'Витрина',
+                  name: 'Витрина',
+                },
+              ],
+            },
+          } as ComponentDefaultData<CombinedFacadeComponentTypes.CombinedFacadeData>,
+        ],
       },
       {
         identifier: 'Фасад комб. Рамка с раскл.+глухой',
-        componentData: [],
+        componentData: [
+          {
+            componentName: 'component_combined_facade',
+            data: {
+              type: 'Комбинированный фасад',
+              panels: [
+                {
+                  type: 'Витрина',
+                  name: 'Витрина',
+                },
+                {
+                  type: 'Филёнка',
+                },
+              ],
+              overlayElements: [
+                null,
+                {
+                  type: 'Накладной элемент',
+                  name: 'раскл.',
+                },
+              ],
+            },
+          } as ComponentDefaultData<CombinedFacadeComponentTypes.CombinedFacadeData>,
+        ],
       },
       {
         identifier: 'Фасад комб. рамка+глухой',
-        componentData: [],
+        componentData: [
+          {
+            componentName: 'component_combined_facade',
+            data: {
+              panels: [
+                {
+                  type: 'Филёнка',
+                },
+                {
+                  type: 'Витрина',
+                  name: 'Витрина',
+                },
+              ],
+            },
+          } as ComponentDefaultData<CombinedFacadeComponentTypes.CombinedFacadeData>,
+        ],
       },
       {
         identifier: 'Фасад комб. рамка+реш.ДИАГ.внизу',
-        componentData: [],
+        componentData: [
+          {
+            componentName: 'component_combined_facade',
+            data: {
+              panels: [
+                {
+                  type: 'Решётка',
+                  name: 'Решётка диагональная',
+                },
+                {
+                  type: 'Филёнка',
+                },
+              ],
+            },
+          } as ComponentDefaultData<CombinedFacadeComponentTypes.CombinedFacadeData>,
+        ],
       },
       {
         identifier: 'Фасад комб. реш.ДЕКОР с балясинами',
-        componentData: [],
+        componentData: [
+          {
+            componentName: 'component_combined_facade',
+            data: {
+              panels: [
+                {
+                  type: 'Балюстрада',
+                  name: 'Балюстрада',
+                },
+                {
+                  type: 'Решётка',
+                  name: 'Решётка Декор',
+                },
+              ],
+            },
+          } as ComponentDefaultData<CombinedFacadeComponentTypes.CombinedFacadeData>,
+        ],
       },
       {
         identifier: 'Фасад комб. реш.диаг. с балясинами',
-        componentData: [],
+        componentData: [
+          {
+            componentName: 'component_combined_facade',
+            data: {
+              panels: [
+                {
+                  type: 'Балюстрада',
+                  name: 'Балюстрада',
+                },
+                {
+                  type: 'Решётка',
+                  name: 'Решётка диагональная',
+                },
+              ],
+            },
+          } as ComponentDefaultData<CombinedFacadeComponentTypes.CombinedFacadeData>,
+        ],
       },
       {
         identifier: 'Фасад комб. реш.КВАДРО с балясинами',
-        componentData: [],
+        componentData: [
+          {
+            componentName: 'component_combined_facade',
+            data: {
+              panels: [
+                {
+                  type: 'Балюстрада',
+                  name: 'Балюстрада',
+                },
+                {
+                  type: 'Решётка',
+                  name: 'Квадро',
+                },
+              ],
+            },
+          } as ComponentDefaultData<CombinedFacadeComponentTypes.CombinedFacadeData>,
+        ],
       },
       {
         identifier: 'Фасад комбинированный нестандарт',
@@ -539,7 +999,7 @@ export const migrationNomenclature: NomenclatureMigration[] = [
   },
   {
     name: 'Коромысло',
-    components: ['component_geometry'],
+    components: ['component_geometry', 'component_koromyslo'],
     default: [
       {
         componentName: 'component_geometry',
@@ -550,6 +1010,10 @@ export const migrationNomenclature: NomenclatureMigration[] = [
           amount: 0,
         },
       },
+      {
+        componentName: 'component_price',
+        data: { price: 1500, unit: 'шт.' },
+      } as ComponentDefaultData<PriceComponentTypes.PriceComponentData>,
     ],
     body: [
       {
@@ -596,7 +1060,7 @@ export const migrationNomenclature: NomenclatureMigration[] = [
   },
   {
     name: 'Карниз',
-    components: ['component_geometry'],
+    components: ['component_geometry', 'component_cornice', 'component_price'],
     default: [
       {
         componentName: 'component_geometry',
@@ -607,6 +1071,10 @@ export const migrationNomenclature: NomenclatureMigration[] = [
           amount: 0,
         },
       },
+      {
+        componentName: 'component_price',
+        data: { price: 1200, unit: 'м.п' },
+      } as ComponentDefaultData<PriceComponentTypes.PriceComponentData>,
     ],
     body: [
       {
@@ -708,7 +1176,11 @@ export const migrationNomenclature: NomenclatureMigration[] = [
   },
   {
     name: 'Световая планка',
-    components: ['component_geometry'],
+    components: [
+      'component_geometry',
+      'component_light_bar',
+      'component_price',
+    ],
     default: [
       {
         componentName: 'component_geometry',
@@ -767,7 +1239,7 @@ export const migrationNomenclature: NomenclatureMigration[] = [
   },
   {
     name: 'Цоколь',
-    components: ['component_geometry'],
+    components: ['component_geometry', 'component_plinth'],
     default: [
       {
         componentName: 'component_geometry',
@@ -918,7 +1390,7 @@ export const migrationNomenclature: NomenclatureMigration[] = [
   },
   {
     name: 'Декор резной',
-    components: ['component_geometry'],
+    components: ['component_geometry', 'component_carved_decor'],
     default: [
       {
         componentName: 'component_geometry',
@@ -975,7 +1447,7 @@ export const migrationNomenclature: NomenclatureMigration[] = [
   },
   {
     name: 'Фальш-панель',
-    components: ['component_geometry'],
+    components: ['component_geometry', 'component_trim_panel'],
     default: [
       {
         componentName: 'component_geometry',
@@ -1025,7 +1497,7 @@ export const migrationNomenclature: NomenclatureMigration[] = [
   },
   {
     name: 'Столб',
-    components: ['component_geometry'],
+    components: ['component_geometry', 'component_pillar'],
     default: [
       {
         componentName: 'component_geometry',
@@ -1058,7 +1530,7 @@ export const migrationNomenclature: NomenclatureMigration[] = [
   },
   {
     name: 'ЧМЗ',
-    components: ['component_geometry'],
+    components: ['component_geometry', 'component_CMZ'],
     default: [
       {
         componentName: 'component_geometry',

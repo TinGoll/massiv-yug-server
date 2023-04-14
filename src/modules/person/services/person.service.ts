@@ -52,6 +52,7 @@ export class PersonService {
     if (!input) {
       throw new HttpException('Некорректные данные', HttpStatus.BAD_REQUEST);
     }
+
     const { phone, clientAccountInput, bankInput, ...data } = input;
     const person = this.personRepository.create({ ...data });
 
@@ -189,6 +190,11 @@ export class PersonService {
     const address = this.addressRepository.create({ ...input });
     address.person = person;
     await this.addressRepository.save({ ...input });
+    if (Array.isArray(person.addresses)) {
+      person.addresses.push(address);
+    } else {
+      person.addresses = [address];
+    }
     return address;
   }
 
@@ -205,6 +211,11 @@ export class PersonService {
   ): Promise<PersonBankAccount> {
     const bank = this.bankRepository.create({ ...input });
     bank.person = person;
+    if (Array.isArray(person.bankAccounts)) {
+      person.bankAccounts.push(bank);
+    } else {
+      person.bankAccounts = [bank];
+    }
     await this.bankRepository.save(bank);
     return bank;
   }
@@ -221,7 +232,15 @@ export class PersonService {
   ): Promise<PersonCard> {
     const card = this.cardRepository.create({ ...input });
     card.person = person;
+    console.log("card", card);
+    
     await this.cardRepository.save(card);
+
+    if (Array.isArray(person.cards)) {
+      person.cards.push(card);
+    } else {
+      person.cards = [card];
+    }
     return card;
   }
   /** Удалить банковскую карту */
@@ -238,6 +257,13 @@ export class PersonService {
     const email = this.emailRepository.create({ ...input });
     email.person = person;
     await this.emailRepository.save(email);
+
+    if (Array.isArray(person.emails)) {
+      person.emails.push(email);
+    } else {
+      person.emails = [email];
+    }
+
     return email;
   }
   /** удалить email */
@@ -254,6 +280,11 @@ export class PersonService {
     const phone = this.phoneRepository.create({ ...input });
     phone.person = person;
     await this.phoneRepository.save(phone);
+    if (Array.isArray(person.phones)) {
+      person.phones.push(phone);
+    } else {
+      person.phones = [phone];
+    }
     return phone;
   }
   /** Удалить телефон. */
@@ -269,7 +300,20 @@ export class PersonService {
   ): Promise<ClientAccount> {
     const account = this.clientRepository.create({ ...input });
     account.person = person;
+    if (!Array.isArray(person.personRoles)) {
+      person.personRoles = [];
+    }
+    const exists = person.personRoles.find((r) => r === PersonRole.CLIENT);
+    if (!exists) {
+      person.personRoles.push(PersonRole.CLIENT);
+
+      await this.personRepository.update(
+        { id: person.id },
+        { personRoles: person.personRoles },
+      );
+    }
     await this.clientRepository.save(account);
+    person.clientAccount = account;
     return account;
   }
 
