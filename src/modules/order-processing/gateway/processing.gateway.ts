@@ -8,7 +8,7 @@ import {
   WebSocketServer,
   WsResponse,
 } from '@nestjs/websockets';
-import { map, Observable, of, tap, switchMap, iif } from 'rxjs';
+import { map, Observable, of, tap, switchMap, iif, from } from 'rxjs';
 import { Namespace, Socket } from 'socket.io';
 import { JwtAuthGuard } from 'src/modules/auth/guards/jwt-auth.guard';
 import { AuthService } from 'src/modules/auth/services/auth.service';
@@ -145,6 +145,11 @@ export class ProcessingGateway
               event,
               data,
             })),
+            // tap(() => {
+            //   // Сохранение книги, после отправки данных.
+            //   const [_, roomKey] = args;
+            //   from(this.roomManager.get(roomKey)?.save());
+            // }),
           );
         }),
       );

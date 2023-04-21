@@ -22,6 +22,7 @@ declare module CombinedFacadeComponentTypes {
     name: string;
     material?: string;
     type: 'Балюстрада';
+    index?: number;
   }
 
   interface CombinedFacadeData {
@@ -32,6 +33,7 @@ declare module CombinedFacadeComponentTypes {
     calculationType: CalculationType;
 
     panels?: Array<FacadeComponentTypes.Panel | Baluster>;
+    shirts?: Array<FacadeComponentTypes.Shirt | null>;
 
     profiles?: [
       FacadeComponentTypes.Profile,
@@ -44,11 +46,15 @@ declare module CombinedFacadeComponentTypes {
       FacadeComponentTypes.Profile & TransverseProfileProps
     >;
 
+    distances?: number[];
+
     overlayElements?: Array<FacadeComponentTypes.OverlayElement | null>;
 
     works?: WorkComponentTypes.Work[];
     /** Тип элемента */
     type: 'Комбинированный фасад';
+
+    balusterSize?: number;
   }
 }
 
@@ -62,6 +68,8 @@ export class CombinedFacadeComponent
     type: 'Комбинированный фасад',
     calculationType: 'from top border',
     panels: [],
+    distances: Array(20).fill(null),
+    balusterSize: 113,
   };
   constructor(data: Partial<CombinedFacadeComponentTypes.CombinedFacadeData>) {
     super(CombinedFacadeComponent);

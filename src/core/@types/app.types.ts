@@ -160,6 +160,7 @@ export interface DocumentOptions {
 }
 export interface ElementOptions {
   name?: string;
+  note?: string;
   components?: ComponentData[];
 }
 

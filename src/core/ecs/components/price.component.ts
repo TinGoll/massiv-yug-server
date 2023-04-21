@@ -6,7 +6,9 @@ declare module PriceComponentTypes {
   interface PriceComponentData {
     price: number;
     unit?: Unit;
+    value?: number;
     cost?: number;
+    modifer?: string;
   }
 }
 

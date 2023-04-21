@@ -183,7 +183,7 @@ export class RoomManager {
     return from(room.act(author, act)).pipe(
       concatMap((data) => {
         // После обнолвения комнаты и отправки состояния на клиенты, сохраняем книгу заказа
-        return from(room.update(0)).pipe(concatMap(() => from(room.save())));
+        return from(room.update(0)).pipe(concatMap(() => room.save()));
       }),
     );
   }

@@ -1,4 +1,4 @@
-import { ArrayWorkData, WorkElementData } from 'src/core/@types/app.types';
+import { WorkElementData } from 'src/core/@types/app.types';
 import { QueueCollection } from 'src/core/common/queue-collection/QueueCollection';
 import { GraphProvider } from 'src/modules/order-processing/providers/graph-provider';
 import { OrderCreator } from 'src/modules/order-processing/providers/order-creator';
@@ -14,7 +14,7 @@ import { PanelComponent } from '../components/panel.component';
 import { WorkComponent } from '../components/work.component';
 import { MYEngine } from '../engine/my-engine';
 import { BookState } from 'src/modules/repository/order/entities/book.state';
-import { GeometryComponent } from '../components/geometry.component';
+
 import { MYEntity } from '../engine/my-entity';
 import { OrderGraph } from 'src/core/common/graph/order-graph';
 

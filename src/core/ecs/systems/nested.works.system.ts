@@ -30,8 +30,7 @@ export class NestedWorkSystem extends IteratingSystem {
 
   /** Код запускается перед обновлением, можно использовать для решения об отключении системы и. т. д. */
   async beforeUpdate(): Promise<void> {
-    console.log('beforeUpdate NestedWorkSystem');
-
+ 
     const book = this.getMYEngine().bookEntity;
     if (book && book.state === BookState.CALCULATION_OF_BLANKS) {
       this.setProcessing(true);

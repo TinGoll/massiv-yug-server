@@ -12,6 +12,7 @@ import FacadeComponentTypes, {
 } from '../components/facade.component';
 import { GeometryComponent } from '../components/geometry.component';
 import { Geometry } from 'src/core/common/models/geometry';
+import cloneObject from 'src/core/common/structured-clone/structured-clone';
 
 /**
  * Система расчета компонента «фасад».
@@ -68,6 +69,8 @@ export class FacadeSystem extends IteratingSystem {
 
       const shirtMinSize = 10; //Минимальный размер рубашки
 
+      const sampleEntity = await entity.elementEntity.sample;
+
       const materialName = document.material.name || '';
       // Для фасадов, поле "материал" являеться обязательным.
       if (!document.material) {
@@ -77,11 +80,27 @@ export class FacadeSystem extends IteratingSystem {
         facadeData.material = document.material.name;
       }
 
+      const defaultfacadeData =
+        cloneObject<Partial<FacadeComponentTypes.ComponentData>>({
+          ...(sampleEntity?.default?.find(
+            (d) => d.componentName === 'component_facade',
+          )?.data as FacadeComponentTypes.ComponentData),
+          ...(entity.elementEntity.identifier?.componentData?.find(
+            (d) => d.componentName === 'component_facade',
+          )?.data as FacadeComponentTypes.ComponentData),
+        });
+
       // Если объект - панель не определена, определяем.
       if (!facadeData.panel) {
-        facadeData.panel = {
-          type: 'Филёнка',
-        };
+        if (defaultfacadeData?.panel) {
+          facadeData.panel = {
+            ...defaultfacadeData.panel,
+          };
+        } else {
+          facadeData.panel = {
+            type: 'Филёнка',
+          };
+        }
       }
       // Если тип панели не определен, значит это филенка
       if (!facadeData.panel.type) {

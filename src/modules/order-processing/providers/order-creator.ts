@@ -274,9 +274,6 @@ export class OrderCreator {
     elementId: number,
   ): Promise<void> {
     const result = await this.orderService.removeElement(elementId);
-
-    console.log('Delete Result', result);
-
     document.elements = (document.elements || []).filter(
       (el) => el.id !== elementId,
     );
@@ -373,6 +370,7 @@ export class OrderCreator {
     // Получаем передаваемые компоненты из опций. Это едиственный метод изменения компонентов, при добавлении элемента
     // Переданные данные не заменяют компонент, а изменяют данные.
     const { components: optionComponents = [], ...opt } = options;
+  
     // Получаем необходимые объекты, для создания компонента.
     const elementTuple = await this.createElementStarter(
       identifier, // Наззвание

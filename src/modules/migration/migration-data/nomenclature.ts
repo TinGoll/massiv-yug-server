@@ -614,6 +614,12 @@ export const migrationNomenclature: NomenclatureMigration[] = [
         componentName: 'component_price',
         data: { price: 10000, unit: 'м²' },
       } as ComponentDefaultData<PriceComponentTypes.PriceComponentData>,
+      {
+        componentName: 'component_combined_facade',
+        data: {
+          balusterSize: 113,
+        },
+      } as ComponentDefaultData<CombinedFacadeComponentTypes.CombinedFacadeData>,
     ],
     body: [
       {

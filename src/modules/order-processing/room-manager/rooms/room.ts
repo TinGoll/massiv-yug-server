@@ -40,6 +40,7 @@ import { OrderGraph } from 'src/core/common/graph/order-graph';
 import { OrderGraphSystem } from 'src/core/ecs/systems/order.graph.system';
 import { FacadeSystem } from 'src/core/ecs/systems/facade.system';
 import { CombinedFacadeSystem } from 'src/core/ecs/systems/combined-facade.system';
+import { PriceSystem } from 'src/core/ecs/systems/price.system';
 
 interface MultipleEvent {
   [key: string | symbol]: Array<(...args: any[]) => void>;
@@ -332,6 +333,10 @@ export class Room {
       case 'next-book-state':
         await this.orderCreator.nextBookState(this.book);
         this.engine.userData.documentsToSave = [...(this.book.documents || [])];
+        for (const entity of this.engine.getEntities()) {
+          entity.needToSave = true;
+        }
+
         break;
       case 'set-book-state':
         const actionSetBookState = <Processing.SetBookState>action;
@@ -340,6 +345,9 @@ export class Room {
           actionSetBookState.state,
         );
         this.engine.userData.documentsToSave = [...(this.book.documents || [])];
+        for (const entity of this.engine.getEntities()) {
+          entity.needToSave = true;
+        }
         break;
       default:
         break;
@@ -400,6 +408,7 @@ export class Room {
     }
     const entities = this.engine.getEntities();
     const bookNeedToSave = Boolean(this.engine.userData?.needToSave);
+
     const documents = this.engine.userData?.documentsToSave || [];
     // Сбрасываем массив документов, помеченых на сохранение.
     this.engine.userData.documentsToSave = [];
@@ -412,6 +421,7 @@ export class Room {
         console.log('СОХРАНЕНИЕ СУЩНОСТИ', entity.id);
         entity.needToSave = false;
         const { id, components, identifier, name, note } = entity.elementEntity;
+
         await this.orderCreator.updateElement({
           components,
           identifier,
@@ -433,7 +443,7 @@ export class Room {
 
     // Сохраняем книгу
     if (bookNeedToSave) {
-      console.log('СОХРАНЕНИЕ КНИГИ');
+      console.log('СОХРАНЕНИЕ КНИГИ', this.book.id);
       const { resultData, graph, works } = this.book;
       await this.orderCreator
         .getBookRepository()
@@ -478,8 +488,12 @@ export class Room {
     // Системы
     // Система расчета геометрии
     this.engine.addSystem(new GeometrySystem());
+    // Система расчета стандартного фасада
     this.engine.addSystem(new FacadeSystem());
+    // Система расчета комбинированного фасада
     this.engine.addSystem(new CombinedFacadeSystem());
+    // Система расчета стоимости для клиента.
+    this.engine.addSystem(new PriceSystem());
 
     // // Система расчета профиля.
     // this.engine.addSystem(new ProfileSystem());
@@ -589,9 +603,9 @@ export class Room {
     this.multipleEvents = {};
     this.engine.userData.needToSave = true;
     this.engine.userData.documentsToSave = [...(this.book.documents || [])];
-    // for (const entity of this.engine.getEntities()) {
-    //   entity.needToSave = true;
-    // }
+    for (const entity of this.engine.getEntities()) {
+      entity.needToSave = true;
+    }
     console.time('save');
     await this.save();
     console.timeEnd('save');
