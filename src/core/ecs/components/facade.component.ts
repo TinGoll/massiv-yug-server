@@ -12,6 +12,7 @@ declare module FacadeComponentTypes {
     material?: string;
     geometry?: Geometry;
     index?: number;
+    works?: WorkComponentTypes.Work[];
   }
 
   /** Профиль фасада */
@@ -23,6 +24,7 @@ declare module FacadeComponentTypes {
     index?: number;
     parallel?: 0 | 1;
     location?: 'left' | 'top' | 'right' | 'bot';
+    works?: WorkComponentTypes.Work[];
   }
   /** Рубашка фасада */
   interface Shirt {
@@ -31,6 +33,7 @@ declare module FacadeComponentTypes {
     material?: string;
     geometry?: Geometry;
     index?: number;
+    works?: WorkComponentTypes.Work[];
   }
   /** Накладка фасада */
   interface OverlayElement {
@@ -39,6 +42,7 @@ declare module FacadeComponentTypes {
     geometry?: Geometry;
     material?: string;
     index?: number;
+    works?: WorkComponentTypes.Work[];
   }
   /** Тип филёнки (имееться ввиду тип панели, может быть решёткой, филёнкой или стеклом.) */
   type PanelType = 'Филёнка' | 'Решётка' | 'Витрина';

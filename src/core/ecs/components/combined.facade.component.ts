@@ -23,6 +23,7 @@ declare module CombinedFacadeComponentTypes {
     material?: string;
     type: 'Балюстрада';
     index?: number;
+    works?: WorkComponentTypes.Work[];
   }
 
   interface CombinedFacadeData {
@@ -55,6 +56,11 @@ declare module CombinedFacadeComponentTypes {
     type: 'Комбинированный фасад';
 
     balusterSize?: number;
+
+    /** Массив с работами. */
+    panelWorks?: WorkComponentTypes.Work[];
+    shirtWorks?: WorkComponentTypes.Work[];
+    profileWorks?: WorkComponentTypes.Work[];
   }
 }
 

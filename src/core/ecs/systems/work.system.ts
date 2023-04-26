@@ -1,117 +1,129 @@
-import { Unit, WorkData } from 'src/core/@types/app.types';
-import { Common } from 'src/core/common/common-function/common';
 import { OrderCreator } from 'src/modules/order-processing/providers/order-creator';
+import { RoomManager } from 'src/modules/order-processing/room-manager/room-manager';
 import { Room } from 'src/modules/order-processing/room-manager/rooms/room';
 import { BookEntity } from 'src/modules/repository/order/entities/book.entity';
-import { SampleWorkEntity } from 'src/modules/repository/work/entities/sample.work.entity';
-import { Entity, Family, IteratingSystem } from 'yug-entity-component-system';
-import { GeometryComponent } from '../components/geometry.component';
-import { WorkComponent } from '../components/work.component';
-import { MYEngine } from '../engine/my-engine';
 import { BookState } from 'src/modules/repository/order/entities/book.state';
+import { IteratingSystem, Family, Entity } from 'yug-entity-component-system';
+import { CombinedFacadeComponent } from '../components/combined.facade.component';
+import { FacadeComponent } from '../components/facade.component';
+import WorkComponentTypes, {
+  WorksComponent,
+} from '../components/works.component';
+import { MYEngine } from '../engine/my-engine';
+import { GeometryComponent } from '../components/geometry.component';
+import { MYEntity } from '../engine/my-entity';
+import cloneObject from 'src/core/common/structured-clone/structured-clone';
+import { Unit } from 'src/core/@types/app.types';
+import { Geometry } from 'src/core/common/models/geometry';
+import { SampleWorkEntity } from 'src/modules/repository/work/entities/sample.work.entity';
 
-/**
- * Система для просчета работ.
- */
 export class WorkSystem extends IteratingSystem {
   private book: BookEntity;
   private room: Room;
   private orderCreator: OrderCreator;
-
-  private isWorkRefrash = false;
+  private roomManager: RoomManager;
   constructor() {
-    super(WorkSystem, Family.all(WorkComponent, GeometryComponent).get());
+    super(
+      WorkSystem,
+      Family.all(WorksComponent, GeometryComponent)
+        .exclude(CombinedFacadeComponent, FacadeComponent)
+        .get(),
+    );
   }
 
-  /** Переопределяем движок, на расширенный */
-  getMYEngine(): MYEngine {
-    return super.getEngine<MYEngine>();
+  // перед обновлением, получаем набор необходимых объектов.
+  async startProcessing(): Promise<void> {
+    this.book = this.getEngine<MYEngine>().bookEntity;
+    this.room = this.getEngine<MYEngine>().room;
+    this.roomManager = this.room.roomManager;
+    this.orderCreator = this.roomManager.orderCreator;
+    if (!this.book.works || !this.book.works.length) {
+      await this.orderCreator.assignWorksBook(this.book);
+    }
   }
 
-  /** Код запускается перед обновлением, можно использовать для решения об отключении системы и. т. д. */
+  // Код запускается перед обновлением, можно использовать для решения об отключении системы и. т. д.
   async beforeUpdate(): Promise<void> {
-    const book = this.getMYEngine().bookEntity;
-    if (book && book.state === BookState.CALCULATION_OF_BLANKS) {
+    const book = this.getEngine<MYEngine>().bookEntity;
+    if (book && book.state === BookState.EDITING) {
       this.setProcessing(true);
     } else {
       this.setProcessing(false);
     }
   }
 
-  /** Получаем книгу заказа, комнату и Order Creator, один раз, при создании комнаты. */
-  addedToEngine(engine: MYEngine): void {
-    super.addedToEngine(engine);
-    this.book = engine.bookEntity;
-    this.room = engine.room;
-    this.orderCreator = this.room.roomManager.getOrderCreator();
-  }
-
-  async startProcessing(): Promise<void> {}
-
-  async endProcessing(): Promise<void> {}
-
   protected async processEntity(
-    entity: Entity,
+    entity: MYEntity,
     deltaTime: number,
   ): Promise<void> {
-    try {
-      const toFixed = 4;
-      const workCmp = entity.getComponent<WorkComponent>(WorkComponent);
-      const gmCmp = entity.getComponent<GeometryComponent>(GeometryComponent);
-      // Получаем массив данных.
+    const workData = entity.getComponent<WorksComponent>(WorksComponent)?.data;
+    const geometryData =
+      entity.getComponent<GeometryComponent>(GeometryComponent)?.data;
 
-      const workData = workCmp.data.workData || [];
+    const sampleEntity = await entity.elementEntity.sample;
 
-      // Изменяем Данные.
-      for (const wd of workData) {
-        // Получаем шаблон работы.
-        const work = await this.getWork(wd.workId);
-        // Если шаблона работ нет, значит такая работа удалена или не существует
-        // Пропускаем.
-        if (!work) {
-          wd.data = null;
-          continue;
-        }
-        // Если данные о работе еще не инициализированы, инициализируем.
-        if (!wd.data) {
-          // Создаем объект работ.
-          const wrkData: WorkData = {
-            cost: 0,
-            value: 0,
-          };
-          wd.data = wrkData;
-        }
+    // Данные компонента работа, по умолчанию.
+    const defaultWorkData = cloneObject<
+      Partial<WorkComponentTypes.WorkComponentData>
+    >({
+      ...sampleEntity?.default?.find(
+        (d) => d.componentName === 'component_works',
+      )?.data,
+      ...entity.elementEntity.identifier?.componentData?.find(
+        (d) => d.componentName === 'component_works',
+      )?.data,
+    });
 
-        const unit = wd.data.unit || work.unit;
-        const price = wd.data.price || work.price;
-        wd.data.value = Number(
-          Common.getWeight(unit, gmCmp.data).toFixed(toFixed),
-        );
-        wd.data.cost = Number((wd.data.value * (price || 0)).toFixed(toFixed));
+    if (!workData?.works) {
+      workData.works = defaultWorkData.works;
+    }
+
+    // Расчет работ фасада
+    for (const work of workData?.works || []) {
+      if (work) {
+        work.cost = 0;
+        work.price = 0;
+        const bookWork = this.getWork(work.name);
+        this.assignWork(work, bookWork, geometryData);
       }
-    } catch (error) {
-      console.log("WorkSystem:", error);
     }
   }
 
-  /** Получить работу из книги */
-  async getWork(id: number): Promise<SampleWorkEntity | null> {
-    let work = (this.book.works || []).find((w) => w.id === id);
-    // Если работа не найдена в книге, делаем запрос на все работы и загружаем их в книгу.
-    // Загрузка выполняется один раз, поэтому проверяем, не было ли загрузки ранее.
-    if (!work && !this.isWorkRefrash) {
-      const works = await this.orderCreator.getWorks();
-      for (const wr of works) {
-        const candidate = this.book.works.find((w) => w.id === wr.id);
-        if (!candidate) {
-          this.book.works.push({ ...wr });
-        }
-      }
-      work = (this.book.works || []).find((w) => w.id === id);
-      // Устанавливаем флаг о загрузке работ.
-      this.isWorkRefrash = true;
+  private assignWork(
+    work: WorkComponentTypes.Work,
+    bookWork: SampleWorkEntity<string>,
+    geometry: Geometry,
+  ): void {
+    if (!bookWork) {
+      return;
     }
-    // Возвращаем работу или null
-    return work || null;
+    work.workId = bookWork.id;
+    work.salaryUnit = bookWork.salaryUnit;
+    work.unit = bookWork.unit;
+    work.price = Number(bookWork.price);
+    work.value = this.getWeight(work.unit, geometry);
+    work.cost = work.price * work.value; // Расчет цены работы
+  }
+
+  private getWork(name: string) {
+    return this.book?.works?.find((w) => w.name === name) || null;
+  }
+
+  // Приватная функция получения веса по еденице измерения
+  private getWeight(unit: Unit, geometry: Geometry): number {
+    switch (unit) {
+      case 'м²':
+        return Number(geometry?.square || 0);
+      case 'м. куб.':
+        return Number(geometry?.cubature || 0);
+      case 'м.п':
+        return Number(geometry?.linearMeters || 0);
+      case 'п.м.п':
+        return Number(geometry?.perimeter || 0);
+      case 'шт.':
+        return Number(geometry?.amount || 0);
+      default:
+        return 0;
+    }
   }
 }

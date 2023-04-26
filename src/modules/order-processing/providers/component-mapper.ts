@@ -43,7 +43,7 @@ export class ComponentMapper {
   private readonly map = new Map<ComponentKey, ComponentClass>();
   constructor() {
     this.map.set('component_geometry', GeometryComponent);
-    this.map.set('component_works', WorkComponent);
+    this.map.set('component_works', WorksComponent);
     this.map.set('component_panel', PanelComponent);
     this.map.set('component_profile', ProfileComponent);
 

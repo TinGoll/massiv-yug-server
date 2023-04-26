@@ -1,6 +1,7 @@
 import { Component } from 'yug-entity-component-system';
 import { IComponent } from './component-interface';
 import { Unit } from 'src/core/@types/app.types';
+import { ComponentKey } from 'src/modules/repository/order/entities/element.entity';
 
 declare module WorkComponentTypes {
   interface Work<T extends string = string> {
@@ -33,4 +34,6 @@ export class WorksComponent
   getData() {
     return this.data;
   }
+
+  key: ComponentKey = 'component_works';
 }

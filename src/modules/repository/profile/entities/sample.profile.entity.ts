@@ -52,6 +52,9 @@ export class SampleProfileEntity {
   /** Ссылка на схему. */
   @Column({ type: 'varchar', length: 560, nullable: true })
   drawing: string;
+  
+  @Column({ type: 'varchar', length: 128, nullable: true })
+  group: string;
 
   /** Отметка об удалении */
   @Column('boolean', { default: false })

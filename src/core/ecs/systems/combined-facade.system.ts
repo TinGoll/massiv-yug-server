@@ -63,6 +63,7 @@ export class CombinedFacadeSystem extends IteratingSystem {
       }
 
       const sampleEntity = await entity.elementEntity.sample;
+      
       const defaultFacadeData = cloneObject<
         Partial<CombinedFacadeComponentTypes.CombinedFacadeData>
       >({
@@ -288,11 +289,22 @@ export class CombinedFacadeSystem extends IteratingSystem {
           profile.geometry.amount = geometryData.amount;
           profile.geometry.width = Number(widthTransverseProfiles[0]);
 
+          /**
+           * geometryData.width -
+                facadeData.profiles[1].geometry.width * 2 +
+                chamferSize * 2 +
+                tenonSize * 2,
+           */
+
           profile.geometry.height =
             geometryData.width -
-            facadeData.profiles[0].geometry.width +
-            facadeData.profiles[2].geometry.width;
+            (facadeData.profiles[0].geometry.width +
+              facadeData.profiles[2].geometry.width) +
+            chamferSize * 2 +
+            tenonSize * 2;
+
           profile.geometry = Geometry.calculate(profile.geometry);
+
           facadeData.transverseProfile.push(profile as any);
         }
       }
@@ -337,7 +349,6 @@ export class CombinedFacadeSystem extends IteratingSystem {
             profile.profileDistance = facadeData.distances[i];
             continue;
           }
-
 
           // Находим значение модификатора, в зависимости от выбранной точки отсчета.
           modifer = 0;

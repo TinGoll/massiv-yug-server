@@ -143,6 +143,27 @@ export class OrderCreator {
     return await this.orderService.saveBook(book);
   }
 
+  /** Присвоить все работы книге заказов */
+  async assignWorksBook(book: BookEntity): Promise<void> {
+    const works = await this.workService.findAll();
+    if (!book.works) {
+      book.works = works;
+    } else {
+      for (const work of works) {
+        if (
+          !Boolean(
+            book.works.find(
+              (w) => w.name.toUpperCase() === work.name.toUpperCase(),
+            ),
+          )
+        ) {
+          book.works.push(work);
+        }
+      }
+    }
+    await this.orderService.saveBook(book);
+  }
+
   async updateBook(
     book: BookEntity,
     input: BookUpdateInput,
@@ -370,7 +391,7 @@ export class OrderCreator {
     // Получаем передаваемые компоненты из опций. Это едиственный метод изменения компонентов, при добавлении элемента
     // Переданные данные не заменяют компонент, а изменяют данные.
     const { components: optionComponents = [], ...opt } = options;
-  
+
     // Получаем необходимые объекты, для создания компонента.
     const elementTuple = await this.createElementStarter(
       identifier, // Наззвание

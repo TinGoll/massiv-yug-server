@@ -9,6 +9,7 @@ declare module PriceComponentTypes {
     value?: number;
     cost?: number;
     modifer?: string;
+    priceElement?: string;
   }
 }
 

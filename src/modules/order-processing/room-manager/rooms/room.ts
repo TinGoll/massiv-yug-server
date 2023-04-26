@@ -12,11 +12,7 @@ import { IComponent } from 'src/core/ecs/components/component-interface';
 import { MYEngine } from 'src/core/ecs/engine/my-engine';
 import { MYEntity } from 'src/core/ecs/engine/my-entity';
 import { GeometrySystem } from 'src/core/ecs/systems/geometry.system';
-import { NestedWorkSystem } from 'src/core/ecs/systems/nested.works.system';
-import { PanelSystem } from 'src/core/ecs/systems/panel.system';
-import { ProfileSystem } from 'src/core/ecs/systems/profile.system';
-import { ResultSystem } from 'src/core/ecs/systems/result.system';
-import { WorkSystem } from 'src/core/ecs/systems/work.system';
+import { FacadeWorkSystem } from 'src/core/ecs/systems/facade.work.system';
 import { PersonEntity } from 'src/modules/person/entities/person.entity';
 import { BookEntity } from 'src/modules/repository/order/entities/book.entity';
 import { ElementEntity } from 'src/modules/repository/order/entities/document.element.entity';
@@ -41,6 +37,7 @@ import { OrderGraphSystem } from 'src/core/ecs/systems/order.graph.system';
 import { FacadeSystem } from 'src/core/ecs/systems/facade.system';
 import { CombinedFacadeSystem } from 'src/core/ecs/systems/combined-facade.system';
 import { PriceSystem } from 'src/core/ecs/systems/price.system';
+import { WorkSystem } from 'src/core/ecs/systems/work.system';
 
 interface MultipleEvent {
   [key: string | symbol]: Array<(...args: any[]) => void>;
@@ -492,6 +489,9 @@ export class Room {
     this.engine.addSystem(new FacadeSystem());
     // Система расчета комбинированного фасада
     this.engine.addSystem(new CombinedFacadeSystem());
+    // Система, для расчета работ.
+    this.engine.addSystem(new FacadeWorkSystem()); // Только для фасадов
+    this.engine.addSystem(new WorkSystem()); // Для остальных элементов.
     // Система расчета стоимости для клиента.
     this.engine.addSystem(new PriceSystem());
 

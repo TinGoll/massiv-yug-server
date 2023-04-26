@@ -80,15 +80,16 @@ export class FacadeSystem extends IteratingSystem {
         facadeData.material = document.material.name;
       }
 
-      const defaultfacadeData =
-        cloneObject<Partial<FacadeComponentTypes.ComponentData>>({
-          ...(sampleEntity?.default?.find(
-            (d) => d.componentName === 'component_facade',
-          )?.data as FacadeComponentTypes.ComponentData),
-          ...(entity.elementEntity.identifier?.componentData?.find(
-            (d) => d.componentName === 'component_facade',
-          )?.data as FacadeComponentTypes.ComponentData),
-        });
+      const defaultfacadeData = cloneObject<
+        Partial<FacadeComponentTypes.ComponentData>
+      >({
+        ...(sampleEntity?.default?.find(
+          (d) => d.componentName === 'component_facade',
+        )?.data as FacadeComponentTypes.ComponentData),
+        ...(entity.elementEntity.identifier?.componentData?.find(
+          (d) => d.componentName === 'component_facade',
+        )?.data as FacadeComponentTypes.ComponentData),
+      });
 
       // Если объект - панель не определена, определяем.
       if (!facadeData.panel) {
@@ -179,7 +180,8 @@ export class FacadeSystem extends IteratingSystem {
             // Если тип угла не стандартный, например "Портафино"
             facadeData.profiles[0].geometry.height = Number(
               geometryData.height -
-                facadeData.profiles[0].geometry.width * 2 +
+                (facadeData.profiles[1].geometry.width +
+                  facadeData.profiles[3].geometry.width) +
                 chamferSize * 2 +
                 tenonSize * 2,
             );
@@ -188,7 +190,8 @@ export class FacadeSystem extends IteratingSystem {
             );
             facadeData.profiles[2].geometry.height = Number(
               geometryData.height -
-                facadeData.profiles[2].geometry.width * 2 +
+                (facadeData.profiles[1].geometry.width +
+                  facadeData.profiles[3].geometry.width) +
                 chamferSize * 2 +
                 tenonSize * 2,
             );
@@ -200,9 +203,11 @@ export class FacadeSystem extends IteratingSystem {
             facadeData.profiles[0].geometry.height = Number(
               geometryData.height,
             );
+
             facadeData.profiles[1].geometry.height = Number(
               geometryData.width -
-                facadeData.profiles[1].geometry.width * 2 +
+                (facadeData.profiles[0].geometry.width +
+                  facadeData.profiles[2].geometry.width) +
                 chamferSize * 2 +
                 tenonSize * 2,
             );
@@ -211,7 +216,8 @@ export class FacadeSystem extends IteratingSystem {
             );
             facadeData.profiles[3].geometry.height = Number(
               geometryData.width -
-                facadeData.profiles[3].geometry.width * 2 +
+                (facadeData.profiles[0].geometry.width +
+                  facadeData.profiles[2].geometry.width) +
                 chamferSize * 2 +
                 tenonSize * 2,
             );
