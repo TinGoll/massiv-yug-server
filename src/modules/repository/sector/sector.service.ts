@@ -66,7 +66,11 @@ export class SectorService {
   }
 
   async findAll(): Promise<SectorEntity[]> {
-    return await this.sectorRepository.find();
+    return await this.sectorRepository.find({
+      relations: {
+        works: true,
+      },
+    });
   }
 
   /** Репозиторий профиля */

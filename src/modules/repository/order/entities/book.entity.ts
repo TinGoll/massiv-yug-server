@@ -90,6 +90,7 @@ export class BookEntity {
   state: BookState;
 
   errors?: BookErrors<BookEntity>;
+  blanks: any[];
 
   @ManyToOne(() => PersonEntity, { eager: true, onDelete: 'SET NULL' })
   @JoinColumn({ name: 'clientId' })

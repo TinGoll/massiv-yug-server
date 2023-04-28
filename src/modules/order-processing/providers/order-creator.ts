@@ -120,6 +120,11 @@ export class OrderCreator {
     }
   }
 
+  /** Получить все учатски */
+  async getSectors() {
+    return await this.sectorService.findAll();
+  }
+
   async addBook(
     author: PersonEntity,
     options: BookOptions = {},

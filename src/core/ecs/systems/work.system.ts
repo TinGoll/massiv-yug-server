@@ -60,6 +60,7 @@ export class WorkSystem extends IteratingSystem {
     const geometryData =
       entity.getComponent<GeometryComponent>(GeometryComponent)?.data;
 
+
     const sampleEntity = await entity.elementEntity.sample;
 
     // Данные компонента работа, по умолчанию.
@@ -78,11 +79,11 @@ export class WorkSystem extends IteratingSystem {
       workData.works = defaultWorkData.works;
     }
 
-    // Расчет работ фасада
     for (const work of workData?.works || []) {
       if (work) {
         work.cost = 0;
         work.price = 0;
+
         const bookWork = this.getWork(work.name);
         this.assignWork(work, bookWork, geometryData);
       }
@@ -97,12 +98,18 @@ export class WorkSystem extends IteratingSystem {
     if (!bookWork) {
       return;
     }
+
+    if (!work.salaryUnit) {
+      work.salaryUnit = bookWork.salaryUnit;
+    }
+    if (!work.unit) {
+      work.unit = bookWork.unit;
+    }
+
     work.workId = bookWork.id;
-    work.salaryUnit = bookWork.salaryUnit;
-    work.unit = bookWork.unit;
     work.price = Number(bookWork.price);
     work.value = this.getWeight(work.unit, geometry);
-    work.cost = work.price * work.value; // Расчет цены работы
+    work.cost = Number((work.price * work.value).toFixed(2)); // Расчет цены работы
   }
 
   private getWork(name: string) {

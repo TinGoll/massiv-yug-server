@@ -1,4 +1,4 @@
-import { Entity, Family, IteratingSystem } from 'yug-entity-component-system';
+import { Family, IteratingSystem } from 'yug-entity-component-system';
 import { MYEntity } from '../engine/my-entity';
 import { OrderCreator } from 'src/modules/order-processing/providers/order-creator';
 import { RoomManager } from 'src/modules/order-processing/room-manager/room-manager';
@@ -63,7 +63,7 @@ export class CombinedFacadeSystem extends IteratingSystem {
       }
 
       const sampleEntity = await entity.elementEntity.sample;
-      
+
       const defaultFacadeData = cloneObject<
         Partial<CombinedFacadeComponentTypes.CombinedFacadeData>
       >({
@@ -467,16 +467,20 @@ export class CombinedFacadeSystem extends IteratingSystem {
           shirt.geometry.height =
             panel.geometry.height -
             (document.panel.sample.shirt?.figoreaSize || 0) * 2;
+
           shirt.geometry.width =
             panel.geometry.width -
             (document.panel.sample.shirt?.figoreaSize || 0) * 2;
+
           shirt.geometry.depth = Number(
             document.panel.sample.shirt?.depthOverlay || 0,
           );
+
           shirt.geometry = Geometry.calculate(shirt.geometry);
+
           if (
-            shirt.geometry.height < shirtMinSize ||
-            shirt.geometry.width < shirtMinSize
+            shirt.geometry.height > shirtMinSize &&
+            shirt.geometry.width > shirtMinSize
           ) {
             facadeData.shirts[i] = shirt;
           }

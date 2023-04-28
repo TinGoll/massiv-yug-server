@@ -235,7 +235,7 @@ export class FacadeWorkSystem extends IteratingSystem {
     work.unit = bookWork.unit;
     work.price = Number(bookWork.price);
     work.value = this.getWeight(work.unit, geometry);
-    work.cost = work.price * work.value; // Расчет цены работы
+    work.cost = Number((work.price * work.value).toFixed(2)); // Расчет цены работы
   }
 
   private getWork(name: string) {

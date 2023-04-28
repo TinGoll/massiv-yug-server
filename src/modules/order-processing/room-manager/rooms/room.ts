@@ -31,13 +31,12 @@ import {
 } from '../interfaces';
 import { RoomManager } from '../room-manager';
 import { ElementUpdateInput } from 'src/modules/repository/order/inputs/element.input';
-import { OrderBlankSystem } from 'src/core/ecs/systems/order.blank.system';
 import { OrderGraph } from 'src/core/common/graph/order-graph';
-import { OrderGraphSystem } from 'src/core/ecs/systems/order.graph.system';
 import { FacadeSystem } from 'src/core/ecs/systems/facade.system';
 import { CombinedFacadeSystem } from 'src/core/ecs/systems/combined-facade.system';
 import { PriceSystem } from 'src/core/ecs/systems/price.system';
 import { WorkSystem } from 'src/core/ecs/systems/work.system';
+import { WorkBlanksSystem } from 'src/core/ecs/systems/blank.system';
 
 interface MultipleEvent {
   [key: string | symbol]: Array<(...args: any[]) => void>;
@@ -495,22 +494,8 @@ export class Room {
     // Система расчета стоимости для клиента.
     this.engine.addSystem(new PriceSystem());
 
-    // // Система расчета профиля.
-    // this.engine.addSystem(new ProfileSystem());
-    // // Система расчета филёнок.
-    // this.engine.addSystem(new PanelSystem());
-
-    // // Результаты.
-    // this.engine.addSystem(new ResultSystem());
-    // // Расчет работ для элементов заказа.
-    // this.engine.addSystem(new WorkSystem());
-
-    // // расчет работ для вложенных элементов.
-    // this.engine.addSystem(new NestedWorkSystem());
-    // // Создание графа заказа
-
-    // this.engine.addSystem(new OrderGraphSystem());
-    // this.engine.addSystem(new OrderBlankSystem());
+    // Система расчета бланков.
+    this.engine.addSystem(new WorkBlanksSystem());
 
     // *************************************************
     // Сущности
