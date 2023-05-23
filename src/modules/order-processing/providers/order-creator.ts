@@ -222,9 +222,12 @@ export class OrderCreator {
     defaultData?: Partial<DocumentEntity>,
   ): Promise<DocumentEntity> {
     console.time('add-document');
+
     const document = await this.orderService.createDocument(options);
     book.documents = [...(book.documents || []), document];
+
     await this.orderService.saveBook(book);
+
     await this.orderService.assignColor(
       document,
       defaultData?.color?.sample || null,
@@ -251,6 +254,10 @@ export class OrderCreator {
       defaultData?.profile?.sample || null,
       defaultData?.profile || {},
     );
+
+    if (book.documents.length > 1) {
+      book.documents.sort((a, b) => a.id - b.id);
+    }
 
     console.timeEnd('add-document');
     return document;
@@ -409,6 +416,7 @@ export class OrderCreator {
     // Если данные существуют, деструктуризируем кортеж.
     // Первый элемент, шаблон элемента
     const [sample, identifierElement, elementComponents] = elementTuple;
+
     // Создаем сущность элемента и присваиваем полученые знчения.
     const element = this.orderService.newElement({
       name: identifierElement.identifier,
@@ -416,6 +424,7 @@ export class OrderCreator {
       ...opt,
     });
     element.identifier = identifierElement;
+    element.identifier.group = sample.name;
     element.sample = sample;
     // Сохраняем сущность в БД.
     await this.orderService.saveElement(element);

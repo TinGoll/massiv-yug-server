@@ -48,6 +48,9 @@ export interface ElementSampleBody {
    * то к нему будет применен набор свойств по умолчанию.
    */
   componentData: Array<ComponentDefaultData>;
+
+  /** Название группы */
+  group?: string;
 }
 
 /** Шаблон для сущности */
