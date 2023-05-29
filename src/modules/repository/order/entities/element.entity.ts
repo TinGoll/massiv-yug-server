@@ -51,6 +51,8 @@ export interface ElementSampleBody {
 
   /** Название группы */
   group?: string;
+
+  index?: number;
 }
 
 /** Шаблон для сущности */

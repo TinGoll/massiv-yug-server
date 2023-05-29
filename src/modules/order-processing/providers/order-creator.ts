@@ -425,6 +425,8 @@ export class OrderCreator {
     });
     element.identifier = identifierElement;
     element.identifier.group = sample.name;
+    element.identifier.index = sample.index;
+
     element.sample = sample;
     // Сохраняем сущность в БД.
     await this.orderService.saveElement(element);
