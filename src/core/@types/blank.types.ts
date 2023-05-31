@@ -23,6 +23,7 @@ declare module BlankTypes {
   }
 
   interface N1 {
+    id: string | number;
     name: string;
     type: string;
     geometry: Geometry;

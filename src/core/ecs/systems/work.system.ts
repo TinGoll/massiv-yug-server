@@ -3,7 +3,7 @@ import { RoomManager } from 'src/modules/order-processing/room-manager/room-mana
 import { Room } from 'src/modules/order-processing/room-manager/rooms/room';
 import { BookEntity } from 'src/modules/repository/order/entities/book.entity';
 import { BookState } from 'src/modules/repository/order/entities/book.state';
-import { IteratingSystem, Family, Entity } from 'yug-entity-component-system';
+import { IteratingSystem, Family } from 'yug-entity-component-system';
 import { CombinedFacadeComponent } from '../components/combined.facade.component';
 import { FacadeComponent } from '../components/facade.component';
 import WorkComponentTypes, {

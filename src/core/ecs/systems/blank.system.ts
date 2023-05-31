@@ -16,6 +16,7 @@ import { WorksComponent } from '../components/works.component';
 import { FacadeComponent } from '../components/facade.component';
 import { CombinedFacadeComponent } from '../components/combined.facade.component';
 import BlankTypes from 'src/core/@types/blank.types';
+import nanoid from 'src/core/common/nanoid';
 
 export class WorkBlanksSystem extends BaseSystem {
   private book: BookEntity;
@@ -105,6 +106,7 @@ export class WorkBlanksSystem extends BaseSystem {
                     );
                     if (shW) {
                       const item: BlankTypes.N1 = {
+                        id: nanoid(),
                         name: facadeData.shirt.name,
                         type: facadeData.shirt.type,
                         geometry: facadeData.shirt.geometry,
@@ -121,6 +123,7 @@ export class WorkBlanksSystem extends BaseSystem {
                     );
                     if (shW) {
                       return {
+                        id: nanoid(),
                         name: shirt.name,
                         type: shirt.type,
                         geometry: shirt.geometry,
@@ -141,6 +144,7 @@ export class WorkBlanksSystem extends BaseSystem {
                     );
                     if (shW) {
                       const item = {
+                        id: nanoid(),
                         name: facadeData.panel.name,
                         type: facadeData.panel.type,
                         geometry: facadeData.panel.geometry,
@@ -157,6 +161,7 @@ export class WorkBlanksSystem extends BaseSystem {
                     );
                     if (shW) {
                       return {
+                        id: nanoid(),
                         name: panel.name,
                         type: panel.type,
                         geometry: panel.geometry,
@@ -175,6 +180,7 @@ export class WorkBlanksSystem extends BaseSystem {
                 );
                 if (shW) {
                   const item = {
+                    id: nanoid(),
                     name: element.name,
                     type: sample.name,
                     geometry: { ...geometryData },

@@ -31,7 +31,7 @@ export class GeometrySystem extends IteratingSystem {
     deltaTime: number,
   ): Promise<void> {
     try {
-      const toFixed = 4;
+      const toFixed = 3;
       const gmCmp = entity.getComponent<GeometryComponent>(GeometryComponent);
       const height = Number(gmCmp.data.height || 0);
       const width = Number(gmCmp.data.width || 0);
